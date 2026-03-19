@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jujutsu Kaisen — Sistema del Hechicero</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#06080e;--bg-card:#0c0f1a;--bg-el:#111522;--bg-hov:#161c2e;
+  --bdr:#1a2035;--bdr-g:#253060;
+  --em:#3b7cf4;--emb:#6ba3ff;--emglow:rgba(59,124,244,.2);
+  --red:#e03030;--warn:#f0a020;--ok:#3ec86a;--gold:#f0c030;--purple:#a070f0;
+  --g4:#7a8ea0;--g3:#a0bccc;--g2:#50c0f0;--g1:#a070f0;--gse:#f08030;--gsp:#f8d020;
+  --tp:#e0e8f8;--ts:#6a7898;--tm:#343c58;
+  --fd:'Cinzel',serif;--fb:'Rajdhani',sans-serif;--fm:'Share Tech Mono',monospace;
+  --r:8px;--rl:14px;--tr:all .15s ease;
+  /* status colors */
+  --poison:#8b4be8;--burn:#ff6030;--paralyze:#f0d020;--freeze:#50d0ff;--bleed:#cc2040;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:100vh;overflow-x:hidden;font-size:15px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg-deep)}::-webkit-scrollbar-thumb{background:var(--bdr-g);border-radius:2px}
+
+/* ── LAYOUT ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:215px;min-width:215px;background:var(--bg-card);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;z-index:10}
+.main{flex:1;overflow-y:auto;background:var(--bg-deep)}
+.page{display:none;padding:24px 28px}.page.active{display:block}
+
+/* ── SIDEBAR ── */
+.sb-logo{padding:18px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sb-logo .lt{font-family:var(--fd);font-size:10px;letter-spacing:.25em;color:var(--emb);text-transform:uppercase}
+.sb-logo .ls{font-size:10px;color:var(--tm);font-family:var(--fm)}
+.em-mini{margin:10px 12px;background:var(--bg-el);border-radius:var(--r);padding:9px 11px;border:1px solid var(--bdr)}
+.em-mini label{font-size:9px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;font-family:var(--fm)}
+.em-mini .emv{font-size:17px;font-weight:700;color:var(--emb);font-family:var(--fm);line-height:1;margin-top:2px}
+.em-mini .emt{height:3px;background:var(--bdr);border-radius:2px;margin-top:5px;overflow:hidden}
+.em-mini .emf{height:100%;background:linear-gradient(90deg,var(--em),var(--emb));border-radius:2px;transition:width .4s;box-shadow:0 0 8px var(--emglow)}
+.nav-sec{padding:5px 0;border-bottom:1px solid var(--bdr)}
+.nav-sec-lbl{font-size:9px;letter-spacing:.2em;color:var(--tm);text-transform:uppercase;padding:4px 14px 3px;font-family:var(--fm)}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--ts);font-size:13px;font-weight:500;transition:var(--tr);position:relative}
+.ni:hover{background:var(--bg-hov);color:var(--tp)}
+.ni.active{background:rgba(59,124,244,.08);color:var(--emb)}
+.ni.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--em);box-shadow:0 0 8px var(--em)}
+.ni .ico{font-size:14px;width:16px;text-align:center}
+.ni-sub{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 36px;cursor:pointer;color:var(--tm);font-size:12px;transition:var(--tr)}
+.ni-sub:hover{color:var(--ts);background:var(--bg-hov)}.ni-sub.active{color:var(--emb)}
+.sb-foot{margin-top:auto;padding:10px 12px;border-top:1px solid var(--bdr)}
+.pm{display:flex;align-items:center;gap:8px;cursor:pointer}
+.pm-av{width:28px;height:28px;border-radius:50%;background:var(--bg-el);border:2px solid var(--em);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.pm-av img{width:100%;height:100%;object-fit:cover}
+.pm-info .pn{font-size:12px;font-weight:600;color:var(--tp)}
+.pm-info .pg{font-size:10px;color:var(--tm);font-family:var(--fm)}
+
+/* ── CARDS ── */
+.card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px;transition:var(--tr)}
+.card:hover{border-color:var(--bdr-g)}
+.ct{font-family:var(--fd);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--tm);margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 13px;border-radius:var(--r);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:var(--tr);border:none}
+.btn-p{background:var(--em);color:#fff}.btn-p:hover{background:var(--emb);transform:translateY(-1px)}
+.btn-d{background:var(--red);color:#fff}.btn-d:hover{background:#ff4444}
+.btn-g{background:transparent;color:var(--ts);border:1px solid var(--bdr)}.btn-g:hover{background:var(--bg-el);color:var(--tp)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d09010);color:var(--bg-deep);font-weight:700}.btn-gold:hover{filter:brightness(1.1)}
+.btn-pur{background:var(--purple);color:#fff}.btn-pur:hover{filter:brightness(1.15)}
+.btn-sm{padding:4px 8px;font-size:11px}.btn-lg{padding:10px 20px;font-size:14px}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--fm)}
+.b-alta{background:rgba(224,48,48,.15);color:var(--red);border:1px solid rgba(224,48,48,.3)}
+.b-media{background:rgba(240,160,32,.15);color:var(--warn);border:1px solid rgba(240,160,32,.3)}
+.b-baja{background:rgba(62,200,106,.15);color:var(--ok);border:1px solid rgba(62,200,106,.3)}
+.b-facil{background:rgba(62,200,106,.1);color:var(--ok);border:1px solid rgba(62,200,106,.2)}
+.b-normal{background:rgba(59,124,244,.1);color:var(--em);border:1px solid rgba(59,124,244,.2)}
+.b-dificil{background:rgba(160,112,240,.1);color:var(--purple);border:1px solid rgba(160,112,240,.2)}
+
+/* ── PROGRESS ── */
+.pw{background:var(--bdr);border-radius:4px;overflow:hidden;height:5px}
+.pf{height:100%;border-radius:4px;transition:width .5s}
+.p-em{background:linear-gradient(90deg,var(--em),var(--emb));box-shadow:0 0 6px var(--emglow)}
+.p-xp{background:linear-gradient(90deg,#6030b0,#9060e0)}
+.p-hp{background:linear-gradient(90deg,var(--red),#ff6050)}
+.p-perf{background:linear-gradient(90deg,var(--gold),#ffdd60)}
+.p-mastery{background:linear-gradient(90deg,var(--purple),#d090ff)}
+
+/* ── INPUTS ── */
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:4px;font-family:var(--fm)}
+.fi,.fs,.fta{width:100%;background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:8px 10px;color:var(--tp);font-family:var(--fb);font-size:13px;outline:none;transition:var(--tr)}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--em);box-shadow:0 0 0 2px var(--emglow)}
+.fs option{background:var(--bg-card)}.fta{resize:vertical;min-height:65px}
+
+/* ── MODAL ── */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.md{background:var(--bg-card);border:1px solid var(--bdr-g);border-radius:var(--rl);width:480px;max-width:95vw;max-height:88vh;overflow-y:auto;padding:24px;animation:mIn .18s ease}
+.md.wide{width:620px}.md.xl{width:740px}
+@keyframes mIn{from{transform:scale(.95) translateY(8px);opacity:0}to{transform:scale(1);opacity:1}}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.mt-{font-family:var(--fd);font-size:15px;letter-spacing:.07em}
+.mc{width:25px;height:25px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tm);font-size:12px}
+.mc:hover{color:var(--tp)}
+
+/* ── TOAST ── */
+.tc{position:fixed;top:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:6px}
+.toast{background:var(--bg-card);border:1px solid var(--bdr-g);border-radius:var(--r);padding:10px 13px;font-size:12px;min-width:240px;animation:tIn .2s ease;position:relative;overflow:hidden}
+.toast::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.t-success::before{background:var(--ok)}.t-error::before{background:var(--red)}.t-em::before{background:var(--em)}.t-gold::before{background:var(--gold)}.t-domain::before{background:var(--purple)}
+@keyframes tIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── DASH ── */
+.dash-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.dem{background:linear-gradient(135deg,#0a1424,#07101e);border:1px solid rgba(59,124,244,.3);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden}
+.dem::before{content:'';position:absolute;top:-30px;right:-30px;width:90px;height:90px;background:radial-gradient(circle,rgba(59,124,244,.12),transparent 70%)}
+.dem .el{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--em);text-transform:uppercase}
+.dem .eb{font-family:var(--fm);font-size:30px;font-weight:700;color:var(--emb);line-height:1.1;margin:4px 0}
+.sc{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:14px}
+.sc .sl{font-size:9px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;font-family:var(--fm)}
+.sc .sv{font-size:22px;font-weight:700;margin:3px 0 1px;font-family:var(--fm)}
+.sc .sd{font-size:11px;color:var(--tm)}
+
+/* ── MISSION BOARD ── */
+.mission-board{display:flex;flex-direction:column;gap:12px}
+.mboard-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px 18px;transition:var(--tr);position:relative;overflow:hidden}
+.mboard-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.mboard-card.diff-facil::before{background:var(--ok)}
+.mboard-card.diff-normal::before{background:var(--em)}
+.mboard-card.diff-dificil::before{background:var(--warn)}
+.mboard-card.diff-extreme::before{background:var(--red)}
+.mboard-card:hover{border-color:var(--bdr-g);transform:translateX(2px)}
+.mboard-card.accepted{border-color:rgba(59,124,244,.4);background:rgba(59,124,244,.04)}
+.mboard-card.completed{opacity:.5}
+.mb-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.mb-title{font-size:14px;font-weight:700}
+.mb-desc{font-size:12px;color:var(--ts);line-height:1.5;margin-bottom:10px}
+.mb-rewards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.mb-rew{font-size:11px;font-family:var(--fm);padding:2px 7px;border-radius:4px;background:var(--bg-el);border:1px solid var(--bdr)}
+.mb-progress{margin-bottom:8px}
+.mb-prog-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--tm);font-family:var(--fm);margin-bottom:3px}
+.mb-diff-tag{font-size:10px;font-family:var(--fm);padding:2px 8px;border-radius:3px;font-weight:700}
+.diff-facil .mb-diff-tag{background:rgba(62,200,106,.15);color:var(--ok)}
+.diff-normal .mb-diff-tag{background:rgba(59,124,244,.15);color:var(--emb)}
+.diff-dificil .mb-diff-tag{background:rgba(240,160,32,.15);color:var(--warn)}
+.diff-extreme .mb-diff-tag{background:rgba(224,48,48,.15);color:var(--red)}
+
+/* ── TASK CARD ── */
+.tcard{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;transition:var(--tr);margin-bottom:8px}
+.tcard:hover{border-color:var(--bdr-g)}
+.tcard.overdue{border-color:rgba(224,48,48,.3);background:rgba(224,48,48,.04)}
+.tcard.done-t{opacity:.5}.tcard.done-t .tn{text-decoration:line-through}
+.tck{width:19px;height:19px;border-radius:4px;border:2px solid var(--bdr);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:transparent;font-size:11px;flex-shrink:0}
+.tck:hover{border-color:var(--ok)}.tck.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.tb{flex:1;min-width:0}
+.tn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-{display:flex;gap:6px;margin-top:3px;align-items:center;flex-wrap:wrap}
+.td-{font-size:10px;color:var(--tm);font-family:var(--fm)}.td-.ov{color:var(--red)}
+.ter{font-size:10px;color:var(--emb);font-family:var(--fm)}
+.ta-{display:flex;gap:4px}
+.tab-{width:25px;height:25px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tm);font-size:11px;transition:var(--tr)}
+.tab-:hover{color:var(--tp)}.tab-.del:hover{color:var(--red);border-color:rgba(224,48,48,.4)}
+
+/* ── MAP ── */
+.map-c{position:relative;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;height:500px;margin-bottom:16px}
+.map-bg{width:100%;height:100%;position:relative;background:linear-gradient(180deg,#07090f 0%,#090d18 100%)}
+.mgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,124,244,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,124,244,.03) 1px,transparent 1px);background-size:34px 34px}
+/* Japan outline suggestion */
+.japan-label{position:absolute;font-family:var(--fd);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;pointer-events:none}
+.zone-n{position:absolute;transform:translate(-50%,-50%);cursor:pointer;text-align:center;transition:var(--tr)}
+.zone-n.locked{opacity:.3;cursor:not-allowed}
+.zp{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;margin:0 auto;position:relative;border:2px solid transparent;transition:var(--tr)}
+.zone-n:not(.locked):hover .zp{transform:scale(1.14)}
+.zp.danger{background:rgba(224,48,48,.15);border-color:rgba(224,48,48,.5)}
+.zp.active{background:rgba(59,124,244,.15);border-color:rgba(59,124,244,.5)}
+.zp.safe{background:rgba(62,200,106,.1);border-color:rgba(62,200,106,.3)}
+.zp.lk{background:rgba(60,60,80,.1);border-color:rgba(60,60,80,.3)}
+.zp.event-boss{box-shadow:0 0 12px rgba(224,48,48,.5)}
+.zp::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid;border-color:inherit;opacity:.4;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.3);opacity:0}}
+.zn{font-size:9px;margin-top:3px;font-family:var(--fm);color:var(--ts);white-space:nowrap}
+.zs{font-size:8px;color:var(--tm)}
+.mleg{position:absolute;bottom:10px;right:10px;background:rgba(6,8,14,.9);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 11px;font-size:10px;font-family:var(--fm)}
+.mli{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.mld{width:7px;height:7px;border-radius:50%}
+
+/* ── DYNAMIC EVENT TICKER ── */
+.event-ticker{background:rgba(224,48,48,.08);border:1px solid rgba(224,48,48,.25);border-radius:var(--r);padding:8px 14px;margin-bottom:14px;font-size:12px;font-family:var(--fm);display:flex;align-items:center;gap:10px;overflow:hidden}
+.et-dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);flex-shrink:0;animation:blink 1s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── BATTLE ── */
+.battle-wrap{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+.battle-arena{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;position:relative}
+.ba-topbar{background:var(--red);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;font-family:var(--fm);font-size:11px;font-weight:700}
+.ba-enemy-side{padding:14px 18px 0;position:relative;min-height:110px}
+.ba-enemy-panel{background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 12px;width:200px}
+.ba-ep-name{font-size:13px;font-weight:700;margin-bottom:3px}
+.ba-ep-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.type-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--fm);font-weight:700}
+.ba-hp-lbl{font-family:var(--fm);font-size:10px;color:var(--tm);display:flex;justify-content:flex-end;gap:4px;margin-bottom:2px}
+.ba-hp-bar{height:7px;background:var(--bdr);border-radius:3px;overflow:hidden}
+.ba-hp-fill{height:100%;border-radius:3px;transition:width .5s;background:var(--ok)}
+.ba-hp-fill.low{background:var(--warn)}.ba-hp-fill.crit{background:var(--red)}
+.ba-enemy-sprite{position:absolute;right:24px;top:14px;width:85px;height:85px;display:flex;align-items:center;justify-content:center;font-size:48px;image-rendering:pixelated}
+.ba-enemy-sprite img{width:100%;height:100%;object-fit:contain}
+.ba-enemy-sprite.shaking{animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.ba-player-side{padding:0 18px 14px;position:relative;min-height:100px;display:flex;align-items:flex-end;justify-content:flex-end}
+.ba-player-sprite{position:absolute;left:24px;bottom:8px;width:75px;height:75px;display:flex;align-items:center;justify-content:center;font-size:42px}
+.ba-player-sprite img{width:100%;height:100%;object-fit:contain}
+.ba-player-sprite.atk{animation:atkAni .5s ease}
+@keyframes atkAni{0%,100%{transform:translateX(0)}40%{transform:translateX(26px)}}
+.ba-player-sprite.hurt{animation:shake .4s ease}
+.ba-player-panel{background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 12px;width:200px;z-index:1}
+.ba-pp-em{font-family:var(--fm);font-size:10px;color:var(--emb);margin-top:4px}
+/* Status effects row */
+.status-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.status-pip{font-size:10px;padding:1px 5px;border-radius:3px;font-family:var(--fm);font-weight:700}
+.sp-poison{background:rgba(139,75,232,.2);color:var(--poison);border:1px solid rgba(139,75,232,.4)}
+.sp-burn{background:rgba(255,96,48,.2);color:var(--burn);border:1px solid rgba(255,96,48,.4)}
+.sp-paralyze{background:rgba(240,208,32,.2);color:var(--paralyze);border:1px solid rgba(240,208,32,.4)}
+.sp-freeze{background:rgba(80,208,255,.2);color:var(--freeze);border:1px solid rgba(80,208,255,.4)}
+.sp-bleed{background:rgba(204,32,64,.2);color:var(--bleed);border:1px solid rgba(204,32,64,.4)}
+.sp-boost{background:rgba(59,124,244,.2);color:var(--emb);border:1px solid rgba(59,124,244,.4)}
+.sp-barrier{background:rgba(62,200,106,.2);color:var(--ok);border:1px solid rgba(62,200,106,.4)}
+
+.ba-actions{border-top:2px solid var(--bdr);padding:12px 14px;background:var(--bg-el)}
+.ba-act-prompt{font-family:var(--fm);font-size:12px;color:var(--ts);margin-bottom:8px}
+.ba-act-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ba-btn{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:var(--tr);font-family:var(--fb);text-align:left}
+.ba-btn:hover:not(:disabled){border-color:var(--em);background:rgba(59,124,244,.07)}
+.ba-btn:disabled{opacity:.3;cursor:not-allowed}
+.ba-btn .bbn{font-size:13px;font-weight:700;color:var(--tp)}
+.ba-btn .bbc{font-size:10px;font-family:var(--fm);color:var(--emb)}
+.ba-btn .bbt{font-size:10px;color:var(--tm)}
+.ba-btn.flee:hover:not(:disabled){border-color:var(--warn)}
+.ba-btn.basic:hover:not(:disabled){border-color:var(--ok)}
+.ba-btn.domain-btn{border-color:rgba(160,112,240,.4);background:rgba(160,112,240,.06)}
+.ba-btn.domain-btn:hover:not(:disabled){border-color:var(--purple);background:rgba(160,112,240,.12)}
+.ba-timer{height:4px;background:var(--bdr);position:relative;overflow:hidden}
+.ba-timer-fill{position:absolute;left:0;top:0;bottom:0;background:var(--warn);transition:width .1s linear}
+.ba-timer-fill.urg{background:var(--red);animation:urgP .4s ease infinite}
+@keyframes urgP{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* DOMAIN OVERLAY */
+.domain-overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;animation:domainIn .5s ease forwards}
+@keyframes domainIn{from{opacity:0}to{opacity:1}}
+.domain-bg{position:absolute;inset:0;background:rgba(60,0,80,.85);animation:domainBg 3s ease infinite}
+@keyframes domainBg{0%,100%{background:rgba(60,0,80,.85)}50%{background:rgba(20,0,40,.95)}}
+.domain-content{position:relative;text-align:center;z-index:1}
+.domain-name-big{font-family:var(--fd);font-size:36px;font-weight:900;letter-spacing:.1em;color:var(--gold);text-shadow:0 0 40px rgba(240,192,48,.7);animation:nameGlow 1s ease infinite}
+@keyframes nameGlow{0%,100%{text-shadow:0 0 40px rgba(240,192,48,.7)}50%{text-shadow:0 0 80px rgba(240,192,48,1)}}
+.domain-sub{font-size:14px;color:rgba(255,255,255,.7);margin-top:8px;font-family:var(--fm);letter-spacing:.2em}
+.domain-circles{position:absolute;inset:0;pointer-events:none}
+.domain-circle{position:absolute;border-radius:50%;border:1px solid rgba(160,112,240,.3);animation:circleExpand 3s ease infinite}
+@keyframes circleExpand{0%{transform:translate(-50%,-50%) scale(.5);opacity:.8}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0}}
+
+/* COMBAT LOG */
+.clog{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column;height:100%}
+.clog-hdr{padding:10px 14px;border-bottom:1px solid var(--bdr);font-family:var(--fm);font-size:10px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.clog-body{flex:1;overflow-y:auto;padding:8px 12px;font-family:var(--fm);font-size:11px;line-height:1.8;max-height:360px}
+.cl-hit{color:var(--ok)}.cl-dmg{color:var(--red)}.cl-info{color:var(--emb)}.cl-special{color:var(--gold)}.cl-def{color:var(--warn)}.cl-log{color:var(--ts)}.cl-domain{color:var(--purple)}.cl-status{color:var(--poison)}
+
+/* DAMAGE FLOAT */
+.dmgf{position:absolute;font-family:var(--fd);font-size:18px;font-weight:900;pointer-events:none;animation:floatUp .9s ease forwards;z-index:100}
+.dmgf.ed{color:var(--ok);right:22%}.dmgf.pd{color:var(--red);left:18%}.dmgf.ms{color:var(--tm);font-size:13px;left:18%}.dmgf.status{color:var(--poison);font-size:13px;right:22%}
+@keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-50px);opacity:0}}
+
+/* BATTLE RESULT */
+.bres{position:absolute;inset:0;background:rgba(4,6,10,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:50;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.bres-title{font-family:var(--fd);font-size:26px;letter-spacing:.1em}
+.bres-title.win{color:var(--gold);text-shadow:0 0 28px rgba(240,192,48,.5)}
+.bres-title.lose{color:var(--red);text-shadow:0 0 28px rgba(224,48,48,.5)}
+.bres-rwds{background:var(--bg-card);border:1px solid var(--bdr-g);border-radius:var(--r);padding:10px 16px;display:flex;gap:18px;font-family:var(--fm);font-size:12px}
+.rw-val{font-size:16px;font-weight:700}
+
+/* ZONE PROGRESS */
+.zone-prog-bar{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:14px 18px;margin-bottom:14px}
+.zp-name{font-family:var(--fd);font-size:14px;margin-bottom:6px}
+.zp-bar-wrap{background:var(--bdr);border-radius:4px;height:7px;overflow:hidden;margin:6px 0}
+.zp-fill{height:100%;background:linear-gradient(90deg,var(--red),#ff7050);border-radius:4px;transition:width .5s}
+.zp-stats{display:flex;justify-content:space-between;font-family:var(--fm);font-size:10px;color:var(--tm)}
+
+/* ── PLAYER PROFILE ── */
+.profile-layout{display:grid;grid-template-columns:240px 1fr;gap:16px}
+.profile-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;position:relative}
+.profile-portrait{width:100%;aspect-ratio:3/4;background:var(--bg-el);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}
+.profile-portrait img{width:100%;height:100%;object-fit:cover}
+.profile-portrait .pp-over{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;flex-direction:column;gap:5px;font-size:12px;color:#fff}
+.profile-portrait:hover .pp-over{display:flex}
+.profile-info{padding:14px}
+.profile-name{font-family:var(--fd);font-size:19px;font-weight:600;letter-spacing:.06em}
+.profile-grade-b{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:14px;font-size:11px;font-weight:700;font-family:var(--fm);margin-top:4px}
+.profile-tech{margin-top:7px;font-size:12px;color:var(--ts)}
+.profile-tech strong{color:var(--emb)}
+.profile-xp{margin-top:9px}
+.pxp-row{display:flex;justify-content:space-between;font-family:var(--fm);font-size:10px;color:var(--tm);margin-bottom:3px}
+.profile-level-badge{position:absolute;top:10px;left:10px;background:rgba(6,8,14,.88);border:1px solid var(--gold);border-radius:5px;padding:3px 8px;font-family:var(--fm);font-size:11px;font-weight:700;color:var(--gold)}
+
+/* STATS */
+.stats-al{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.sal{background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:9px;text-align:center}
+.sal .sn{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);font-family:var(--fm)}
+.sal .sv{font-size:18px;font-weight:700;font-family:var(--fm);color:var(--emb);margin:2px 0}
+.sal .sb{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.sal .sf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--em),var(--emb))}
+.sal .sbtns{display:flex;gap:2px;justify-content:center}
+.sal .sabt{width:20px;height:20px;border-radius:4px;background:var(--bg-card);border:1px solid var(--bdr);color:var(--ts);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
+.sal .sabt:hover{background:var(--em);color:#fff;border-color:var(--em)}.sal .sabt:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── SKILL TREE ── */
+.skill-tree{padding:16px}
+.stree-row{display:flex;gap:12px;justify-content:center;margin-bottom:28px;position:relative}
+.stree-row:not(:last-child)::after{content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);width:2px;height:16px;background:var(--bdr)}
+.sk-node{width:100px;flex-shrink:0;text-align:center;position:relative}
+.sk-node::before{content:'';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);width:1px;height:18px;background:var(--bdr);transition:var(--tr)}
+.sk-node.unlocked::before{background:var(--em)}
+.sk-node:last-child::before{display:none}
+.sk-inner{background:var(--bg-el);border:2px solid var(--bdr);border-radius:var(--r);padding:9px 5px;cursor:pointer;transition:var(--tr);position:relative}
+.sk-inner.unlocked{border-color:var(--em);background:rgba(59,124,244,.07)}
+.sk-inner.unlocked:hover{border-color:var(--emb);transform:translateY(-2px);box-shadow:0 4px 14px var(--emglow)}
+.sk-inner.locked{opacity:.4;cursor:not-allowed}
+.sk-inner.mastered{border-color:var(--gold);background:rgba(240,192,48,.07)}
+.sk-inner.mastered::after{content:'⭐';position:absolute;top:3px;right:3px;font-size:9px}
+.sk-icon{font-size:22px;margin-bottom:3px}
+.sk-name{font-size:10px;font-weight:600;line-height:1.3;color:var(--tp)}
+.sk-lvl{font-size:9px;color:var(--tm);font-family:var(--fm);margin-top:2px}
+/* mastery bar */
+.sk-mastery-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:4px;overflow:hidden}
+.sk-mastery-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--purple),#d090ff);transition:width .4s}
+.sk-mastery-lbl{font-size:8px;color:var(--tm);font-family:var(--fm);margin-top:2px}
+
+/* ── UNLOCKABLE TECHNIQUES ── */
+.tech-unlock-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tech-unlock-card{background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--rl);padding:14px;position:relative;overflow:hidden;transition:var(--tr)}
+.tech-unlock-card.available{border-color:rgba(160,112,240,.4);cursor:pointer}
+.tech-unlock-card.available:hover{border-color:var(--purple);transform:translateY(-2px)}
+.tech-unlock-card.locked{opacity:.5}
+.tech-unlock-card.owned{border-color:rgba(240,192,48,.4);background:rgba(240,192,48,.04)}
+.tuc-name{font-size:13px;font-weight:700;margin:6px 0 3px}
+.tuc-rarity{font-size:10px;font-family:var(--fm)}
+.tuc-req{font-size:11px;color:var(--tm);margin-top:6px}
+.tuc-req span{color:var(--emb)}
+
+/* ── EVALUACIONES ── */
+.eval-tabs{display:flex;gap:3px;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:3px;width:fit-content;margin-bottom:16px}
+.eval-tab{padding:5px 14px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--tm);transition:var(--tr)}
+.eval-tab.active{background:var(--bg-el);color:var(--tp)}
+.perf-grade{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg-el);border-radius:var(--r);margin-bottom:14px}
+.pg-letter{font-family:var(--fd);font-size:46px;font-weight:900;line-height:1;min-width:52px;text-align:center}
+.pg-s{color:var(--gsp)}.pg-a{color:var(--ok)}.pg-b{color:var(--emb)}.pg-c{color:var(--warn)}.pg-d{color:var(--red)}
+.metric-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.metric-row:last-child{border:none}
+.mr-label{font-size:12px;font-weight:500;flex:1}.mr-bar{flex:2;background:var(--bdr);border-radius:3px;height:5px;overflow:hidden}
+.mr-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.mr-val{font-family:var(--fm);font-size:11px;width:36px;text-align:right;color:var(--emb)}
+
+/* ── RAIDS ── */
+.raid-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.raid-c{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden;transition:var(--tr)}
+.raid-c:not(.lk):hover{border-color:var(--bdr-g);transform:translateY(-1px)}
+.raid-c.lk{opacity:.45}
+.rn{font-family:var(--fd);font-size:13px;letter-spacing:.05em;margin-bottom:4px}
+.rd{font-size:12px;color:var(--ts);line-height:1.5;margin-bottom:10px}
+.rm{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.rtag{font-size:10px;padding:2px 6px;border-radius:3px;font-family:var(--fm);background:var(--bg-el);border:1px solid var(--bdr);color:var(--ts)}
+.rw-dot{width:13px;height:13px;border-radius:50%;background:var(--bdr);border:1px solid var(--bdr);transition:var(--tr)}
+.rw-dot.done{background:var(--ok);border-color:var(--ok)}.rw-dot.cur{background:var(--em);border-color:var(--emb);animation:pulse 1.5s ease infinite}.rw-dot.boss-dot{background:var(--red);border-color:var(--red)}
+
+/* ── CONFIG ── */
+.cfg-sec{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:18px;margin-bottom:12px}
+.cfg-sec h3{font-family:var(--fd);font-size:12px;letter-spacing:.1em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.spr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:10px}
+.spr-slot{aspect-ratio:1;background:var(--bg-el);border:1px dashed var(--bdr);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);font-size:10px;color:var(--tm);gap:4px;padding:6px;text-align:center;overflow:hidden}
+.spr-slot:hover{border-color:var(--em)}.spr-slot img{width:100%;height:78%;object-fit:contain}
+
+/* ── SECTION TABS ── */
+.stabs{display:flex;gap:3px;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:3px;margin-bottom:16px;width:fit-content}
+.stab{padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;color:var(--tm);transition:var(--tr)}
+.stab.active{background:var(--bg-el);color:var(--tp)}
+
+.ftabs{display:flex;gap:3px;background:var(--bg-card);border-radius:var(--r);padding:3px;border:1px solid var(--bdr)}
+.ftab{padding:5px 11px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--tm);transition:var(--tr)}
+.ftab.active{background:var(--em);color:#fff}
+
+.hc{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);transition:var(--tr);margin-bottom:7px}
+.hc:hover{border-color:var(--bdr-g)}
+.hchk{width:24px;height:24px;border-radius:5px;border:2px solid var(--bdr);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px;transition:var(--tr);flex-shrink:0}
+.hchk:hover{border-color:var(--gold)}.hchk.done-t{background:var(--gold);border-color:var(--gold);color:var(--bg-deep)}
+.forg-btn{padding:10px 13px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--bg-el);color:var(--tp);font-family:var(--fb);font-size:13px;cursor:pointer;text-align:left;transition:var(--tr);width:100%;margin-bottom:7px}
+.forg-btn:hover{border-color:var(--em)}.forg-btn.par:hover{border-color:var(--ok);background:rgba(62,200,106,.07)}.forg-btn.pen:hover{border-color:var(--red);background:rgba(224,48,48,.07)}
+
+/* CAL */
+.cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.cal-dl{font-family:var(--fd);font-size:15px;letter-spacing:.05em;flex:1;text-align:center}
+.cal-grid{display:grid;grid-template-columns:52px 1fr;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.cal-hr{height:50px;display:flex;align-items:flex-start;padding:3px 6px;font-size:10px;color:var(--tm);font-family:var(--fm);border-bottom:1px solid var(--bdr)}
+.cal-hl{height:50px;border-bottom:1px solid var(--bdr)}
+.cal-ev{position:absolute;left:3px;right:3px;border-radius:4px;padding:3px 6px;font-size:11px;font-weight:500;overflow:hidden;cursor:pointer;transition:var(--tr)}
+
+/* utils */
+.flex{display:flex}.fca{flex-direction:column}.iac{align-items:center}.jb{justify-content:space-between}.jc{justify-content:center}
+.g2_{gap:8px}.g3_{gap:11px}.g4_{gap:14px}
+.mt1{margin-top:4px}.mt2{margin-top:8px}.mt3{margin-top:12px}.mt4{margin-top:18px}
+.mb2{margin-bottom:8px}.mb3{margin-bottom:12px}
+.c-em{color:var(--emb)}.c-gold{color:var(--gold)}.c-red{color:var(--red)}.c-muted{color:var(--tm)}.c-ok{color:var(--ok)}.c-pur{color:var(--purple)}
+.t-sm{font-size:12px}.t-xs{font-size:10px}.mono{font-family:var(--fm)}.fw6{font-weight:600}
+.dv{height:1px;background:var(--bdr);margin:12px 0}
+.page-h{margin-bottom:20px}
+.page-h h1{font-family:var(--fd);font-size:19px;font-weight:600;letter-spacing:.07em}
+.page-h p{font-size:12px;color:var(--tm);margin-top:2px}
+.tr-{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-el);border-radius:var(--r);border:1px solid var(--bdr);font-size:12px;transition:var(--tr);margin-bottom:6px}
+.tr-:hover{border-color:var(--bdr-g)}
+.tc-btn{width:18px;height:18px;border-radius:3px;border:2px solid var(--bdr);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:transparent;font-size:10px;flex-shrink:0}
+.tc-btn:hover{border-color:var(--ok)}.tc-btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+</style>
+</head>
+<body>
+<div class="tc" id="TC"></div>
+<!-- Domain overlay (hidden by default) -->
+<div id="domainOverlay" style="display:none"></div>
+
+<div class="shell">
+<aside class="sidebar">
+  <div class="sb-logo"><div class="lt">Jujutsu Kaisen</div><div class="ls">// Sistema del Hechicero</div></div>
+  <div class="em-mini">
+    <label>Energía Maldita</label>
+    <div class="emv" id="sbEM">0</div>
+    <div class="emt"><div class="emf" id="sbEMBar" style="width:0%"></div></div>
+  </div>
+  <nav>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Principal</div>
+      <div class="ni active" onclick="nav('dashboard')"><span class="ico">⛩</span> Dashboard</div>
+      <div class="ni" onclick="nav('player')"><span class="ico">⚔️</span> Jugador</div>
+      <div class="ni" onclick="nav('missions')"><span class="ico">📋</span> Misiones</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Jujutsu</div>
+      <div class="ni" onclick="nav('map')"><span class="ico">🗾</span> Mapa</div>
+      <div class="ni-sub" onclick="nav('battle')">⚔ Misiones de Limpieza</div>
+      <div class="ni-sub" onclick="nav('raids')">🌀 Raids</div>
+      <div class="ni-sub" onclick="nav('bosses')">💀 Jefes</div>
+      <div class="ni-sub" onclick="nav('calendar')">📅 Calendario</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Sistema</div>
+      <div class="ni" onclick="nav('config')"><span class="ico">⚙️</span> Configuración</div>
+    </div>
+  </nav>
+  <div class="sb-foot">
+    <div class="pm" onclick="nav('player')">
+      <div class="pm-av" id="sbAv">🧑</div>
+      <div class="pm-info"><div class="pn" id="sbName">Hechicero</div><div class="pg" id="sbGrade">Grado 4</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-h"><h1>Dashboard</h1><p>Resumen del Sistema del Hechicero</p></div>
+  <div id="dynEventTicker"></div>
+  <div class="dash-top">
+    <div class="dem">
+      <div class="el">⚡ Energía Maldita</div>
+      <div class="eb" id="dEM">0</div>
+      <div class="t-xs mono c-muted">/ <span id="dEMMax">500</span> máx</div>
+      <div class="pw mt2" style="height:4px"><div class="pf p-em" id="dEMBar" style="width:0%"></div></div>
+      <div class="mt2 t-xs mono c-muted">Completa tareas para generar EM</div>
+    </div>
+    <div class="sc"><div class="sl">Nivel</div><div class="sv c-em" id="dLv">1</div><div class="sd mono">XP: <span id="dXP">0</span>/<span id="dXPN">100</span></div><div class="pw mt2"><div class="pf p-xp" id="dXPBar" style="width:0%"></div></div></div>
+    <div class="sc"><div class="sl">Grado</div><div class="sv" id="dGr" style="color:var(--g4)">G-4</div><div class="sd" id="dGrN">Próximo: Grado 3</div></div>
+    <div class="sc"><div class="sl">Técnica</div><div class="sv" id="dTech" style="font-size:13px;line-height:1.3">—</div></div>
+  </div>
+  <div class="g2 mb3">
+    <div class="card"><div class="ct">📋 Tareas Activas</div><div id="dTaskList"><div class="c-muted t-sm">Sin tareas activas.</div></div><div class="mt3"><button class="btn btn-g btn-sm" onclick="nav('missions')">Ver todas →</button></div></div>
+    <div class="card"><div class="ct">⚡ Misiones de Limpieza Activas</div><div id="dMissionList"><div class="c-muted t-sm">Sin misiones aceptadas.</div></div><div class="mt3"><button class="btn btn-g btn-sm" onclick="nav('battle')">Ver misiones →</button></div></div>
+  </div>
+  <div class="card"><div class="ct">📊 Actividad Reciente</div><div id="dActivity" class="c-muted t-sm">Sin actividad todavía.</div></div>
+</div>
+
+<!-- PLAYER -->
+<div class="page" id="page-player">
+  <div class="page-h"><h1>Perfil del Hechicero</h1></div>
+  <div class="stabs">
+    <div class="stab active" onclick="switchPTab('perfil',this)">Perfil</div>
+    <div class="stab" onclick="switchPTab('tecnica',this)">Técnica</div>
+    <div class="stab" onclick="switchPTab('tecnicas-extra',this)">Técnicas Extra</div>
+    <div class="stab" onclick="switchPTab('stats',this)">Estadísticas</div>
+    <div class="stab" onclick="switchPTab('evaluaciones',this)">Evaluaciones</div>
+  </div>
+  <div id="ptab-perfil">
+    <div class="profile-layout">
+      <div class="profile-card">
+        <div class="profile-level-badge" id="ppLvlBadge">▲ NIVEL 1</div>
+        <div class="profile-portrait" id="ppPortrait" onclick="triggerAvatarUpload()">
+          <div style="font-size:60px" id="ppPh">🧑</div>
+          <img id="ppImg" src="" alt="" style="display:none">
+          <div class="pp-over"><span>📷</span><span style="font-size:10px">Subir foto</span></div>
+          <input type="file" id="avInput" accept="image/*" style="display:none" onchange="handleAvatar(event)">
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="ppName">Hechicero</div>
+          <div class="profile-grade-b" id="ppGradeBadge">⬡ GRADO 4</div>
+          <div class="profile-tech">Técnica: <strong id="ppTech">Sin asignar</strong></div>
+          <div class="profile-xp mt2">
+            <div class="pxp-row"><span>XP: <span id="ppXP">0</span>/<span id="ppXPN">100</span></span><span>Nv.<span id="ppLv">1</span></span></div>
+            <div class="pw" style="height:6px"><div class="pf p-xp" id="ppXPBar" style="width:0%"></div></div>
+          </div>
+          <div class="dv"></div>
+          <div class="flex iac jb"><div class="t-xs c-muted mono">HP</div><div class="mono fw6" style="color:var(--red)" id="ppHP">100/100</div></div>
+          <div class="flex iac jb mt1"><div class="t-xs c-muted mono">EM</div><div class="mono fw6 c-em" id="ppEM">0</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="card mb3"><div class="ct">🕸 Perfil de Habilidades</div><canvas id="radarC" width="300" height="220"></canvas></div>
+        <div class="card"><div class="ct">🏅 Progreso de Grado</div><div id="gradeProgress"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="ptab-tecnica" style="display:none"><div id="techContent"></div></div>
+  <div id="ptab-tecnicas-extra" style="display:none"><div id="techExtraContent"></div></div>
+  <div id="ptab-stats" style="display:none"><div id="statsContent"></div></div>
+  <div id="ptab-evaluaciones" style="display:none"><div id="evalContent"></div></div>
+</div>
+
+<!-- MISSIONS (productivity) -->
+<div class="page" id="page-missions">
+  <div class="page-h"><h1>Misiones</h1><p>Genera Energía Maldita completando tareas, hábitos y objetivos</p></div>
+  <div class="stabs">
+    <div class="stab active" onclick="switchMTab('tareas',this)">Tareas</div>
+    <div class="stab" onclick="switchMTab('habitos',this)">Hábitos</div>
+    <div class="stab" onclick="switchMTab('objetivos',this)">Objetivos</div>
+  </div>
+  <div id="mtab-tareas">
+    <div class="flex iac g3_ mb3" style="flex-wrap:wrap">
+      <button class="btn btn-p" onclick="openTaskModal()">+ Nueva Tarea</button>
+      <div class="ftabs">
+        <div class="ftab active" onclick="filterT('todas',this)">Todas</div>
+        <div class="ftab" onclick="filterT('activas',this)">Activas</div>
+        <div class="ftab" onclick="filterT('completadas',this)">Completadas</div>
+        <div class="ftab" onclick="filterT('vencidas',this)">Vencidas</div>
+      </div>
+    </div>
+    <div id="taskList"></div>
+  </div>
+  <div id="mtab-habitos" style="display:none"><div class="mb3"><button class="btn btn-p" onclick="openHabitModal()">+ Nuevo Hábito</button></div><div id="habitList"></div></div>
+  <div id="mtab-objetivos" style="display:none"><div class="mb3"><button class="btn btn-p" onclick="openGoalModal()">+ Nuevo Objetivo</button></div><div id="goalList"></div></div>
+</div>
+
+<!-- MAP -->
+<div class="page" id="page-map">
+  <div class="page-h"><h1>Mapa de Japón</h1><p>Zonas activas con eventos dinámicos — se regeneran con el tiempo</p></div>
+  <div id="mapEventBanner"></div>
+  <div class="map-c">
+    <div class="map-bg">
+      <div class="mgrid"></div>
+      <div class="japan-label" style="left:42%;top:3%">JAPÓN</div>
+      <div class="japan-label" style="left:62%;top:8%">HOKKAIDO</div>
+      <div class="japan-label" style="left:62%;top:22%">TOHOKU</div>
+      <div class="japan-label" style="left:50%;top:42%">KANTO</div>
+      <div class="japan-label" style="left:14%;top:50%">KANSAI</div>
+      <div id="mapZones"></div>
+      <div class="mleg">
+        <div class="mli"><div class="mld" style="background:var(--red)"></div> Peligrosa</div>
+        <div class="mli"><div class="mld" style="background:var(--em)"></div> Activa</div>
+        <div class="mli"><div class="mld" style="background:var(--ok)"></div> Segura</div>
+        <div class="mli"><div class="mld" style="background:#445"></div> Bloqueada</div>
+      </div>
+    </div>
+  </div>
+  <div id="zoneInfo"></div>
+</div>
+
+<!-- BATTLE — Zone Clearing Missions -->
+<div class="page" id="page-battle">
+  <div class="page-h"><h1>Misiones de Limpieza</h1><p>Acepta misiones ajustadas a tu nivel y grado. Completa objetivos para grandes recompensas.</p></div>
+  <div id="missionBoardSel">
+    <div class="stabs mb3">
+      <div class="stab active" onclick="switchBoardTab('disponibles',this)">Disponibles</div>
+      <div class="stab" onclick="switchBoardTab('aceptadas',this)">Aceptadas</div>
+      <div class="stab" onclick="switchBoardTab('completadas',this)">Completadas</div>
+    </div>
+    <div id="boardTab-disponibles"><div class="mission-board" id="missionBoardAvail"></div></div>
+    <div id="boardTab-aceptadas" style="display:none"><div class="mission-board" id="missionBoardAccepted"></div></div>
+    <div id="boardTab-completadas" style="display:none"><div class="mission-board" id="missionBoardDone"></div></div>
+  </div>
+  <div id="battleMain" style="display:none">
+    <div id="zoneProg"></div>
+    <div class="battle-wrap">
+      <div class="battle-arena" id="battleArena">
+        <div class="ba-topbar">
+          <span id="bTopZone">Zona</span>
+          <span id="bTopEnemy" style="font-size:13px;font-weight:700">—</span>
+          <span id="bTopTimer">12s</span>
+        </div>
+        <div class="ba-timer"><div class="ba-timer-fill" id="bTimerFill" style="width:100%"></div></div>
+        <div class="ba-enemy-side">
+          <div class="ba-enemy-panel">
+            <div class="ba-ep-name" id="bEnemyName">Maldición</div>
+            <div class="ba-ep-tags" id="bEnemyTags"></div>
+            <div class="ba-hp-lbl"><span>HP</span><span id="bEnemyHPTxt">100/100</span></div>
+            <div class="ba-hp-bar"><div class="ba-hp-fill" id="bEnemyHP" style="width:100%"></div></div>
+            <div class="status-row" id="enemyStatusRow"></div>
+          </div>
+          <div class="ba-enemy-sprite" id="bEnemySprite">👺</div>
+        </div>
+        <div class="ba-player-side">
+          <div class="ba-player-sprite" id="bPlayerSprite">🧑</div>
+          <div class="ba-player-panel">
+            <div class="ba-pp-name" id="bPlayerName">Hechicero</div>
+            <div class="ba-hp-lbl"><span>HP</span><span id="bPlayerHPTxt">100/100</span></div>
+            <div class="ba-hp-bar"><div class="ba-hp-fill" id="bPlayerHP" style="width:100%"></div></div>
+            <div class="ba-pp-em">EM: <span id="bEM">0</span></div>
+            <div class="status-row" id="playerStatusRow"></div>
+          </div>
+        </div>
+        <div class="ba-actions">
+          <div class="ba-act-prompt">¿Qué hará <span id="bPromptName">Hechicero</span>?</div>
+          <div class="ba-act-grid" id="bActGrid"></div>
+        </div>
+        <div id="bResOverlay"></div>
+      </div>
+      <div class="clog">
+        <div class="clog-hdr"><span>Combat Log</span><button class="btn btn-g btn-sm" onclick="clearCLog()">Limpiar</button></div>
+        <div class="clog-body" id="clogBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RAIDS -->
+<div class="page" id="page-raids">
+  <div class="page-h"><h1>Raids</h1><p>Incursiones de oleadas. Combate ola por ola hasta el jefe.</p></div>
+  <div id="raidActive" style="display:none"></div>
+  <div id="raidList" class="raid-grid"></div>
+</div>
+
+<!-- BOSSES -->
+<div class="page" id="page-bosses">
+  <div class="page-h"><h1>Jefes</h1><p>Aparecen con ventana de tiempo. Derrótales antes de que desaparezcan.</p></div>
+  <div id="bossPanel"></div>
+</div>
+
+<!-- CALENDAR -->
+<div class="page" id="page-calendar">
+  <div class="page-h"><h1>Calendario</h1></div>
+  <div class="cal-nav">
+    <button class="btn btn-g btn-sm" onclick="calPrev()">← Anterior</button>
+    <div class="cal-dl" id="calLbl"></div>
+    <button class="btn btn-g btn-sm" onclick="calNext()">Siguiente →</button>
+  </div>
+  <div class="cal-grid"><div id="calTime"></div><div style="position:relative" id="calEv"></div></div>
+</div>
+
+<!-- CONFIG -->
+<div class="page" id="page-config">
+  <div class="page-h"><h1>Configuración</h1></div>
+  <div class="cfg-sec">
+    <h3>👤 Perfil del Jugador</h3>
+    <div class="g2">
+      <div class="fg"><label>Nombre</label><input class="fi" id="cfgName" oninput="saveCfgName()"></div>
+      <div class="fg"><label>Foto de perfil</label><button class="btn btn-g" onclick="triggerAvatarUpload()">📷 Subir foto</button></div>
+    </div>
+    <div class="fg"><label>Sprite del jugador (combate)</label><button class="btn btn-g btn-sm" onclick="triggerSpriteUpload('player')">📷 Subir sprite</button> <span id="pSpritePrev" class="t-xs c-muted"></span></div>
+  </div>
+  <div class="cfg-sec"><h3>🖼 Sprites de Enemigos</h3><p class="t-sm c-muted mb3">PNG/JPG para reemplazar emojis en combate.</p><div class="spr-grid" id="sprGrid"></div></div>
+  <div class="cfg-sec"><h3>💾 Datos</h3><div class="flex g3_"><button class="btn btn-g" onclick="exportData()">📤 Exportar</button><button class="btn btn-g" onclick="importTrigger()">📥 Importar</button><input type="file" id="impInput" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-d btn-sm" onclick="resetAll()">🗑 Resetear</button></div></div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="mo" id="taskMo"><div class="md">
+  <div class="mh"><div class="mt-" id="taskMoT">Nueva Tarea</div><div class="mc" onclick="cm('taskMo')">✕</div></div>
+  <div class="fg"><label>Nombre *</label><input class="fi" id="tkName" placeholder="¿Qué tienes que hacer?"></div>
+  <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="tkPri"><option value="alta">🔴 Alta (+80 EM)</option><option value="media" selected>🟡 Media (+50 EM)</option><option value="baja">🟢 Baja (+25 EM)</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="tkDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
+  <div class="g2"><div class="fg"><label>Fecha inicio</label><input type="date" class="fi" id="tkS"></div><div class="fg"><label>Deadline *</label><input type="date" class="fi" id="tkE"></div></div>
+  <div class="fg"><label>Notas</label><textarea class="fta" id="tkN" placeholder="Descripción..."></textarea></div>
+  <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('taskMo')">Cancelar</button><button class="btn btn-p" onclick="saveTask()">✓ Guardar</button></div>
+</div></div>
+
+<div class="mo" id="habitMo"><div class="md">
+  <div class="mh"><div class="mt-">Nuevo Hábito</div><div class="mc" onclick="cm('habitMo')">✕</div></div>
+  <div class="fg"><label>Nombre *</label><input class="fi" id="hbName"></div>
+  <div class="g2"><div class="fg"><label>Frecuencia</label><select class="fs" id="hbFreq"><option value="daily">Diario</option><option value="weekly">Semanal</option></select></div><div class="fg"><label>EM por vez</label><input type="number" class="fi" id="hbEM" value="20" min="5" max="150"></div></div>
+  <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('habitMo')">Cancelar</button><button class="btn btn-p" onclick="saveHabit()">✓ Guardar</button></div>
+</div></div>
+
+<div class="mo" id="goalMo"><div class="md">
+  <div class="mh"><div class="mt-">Nuevo Objetivo</div><div class="mc" onclick="cm('goalMo')">✕</div></div>
+  <div class="fg"><label>Nombre *</label><input class="fi" id="glName"></div>
+  <div class="fg"><label>Descripción</label><textarea class="fta" id="glDesc"></textarea></div>
+  <div class="g2"><div class="fg"><label>Deadline</label><input type="date" class="fi" id="glE"></div><div class="fg"><label>Recompensa EM</label><input type="number" class="fi" id="glEM" value="200" min="50"></div></div>
+  <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('goalMo')">Cancelar</button><button class="btn btn-p" onclick="saveGoal()">✓ Guardar</button></div>
+</div></div>
+
+<div class="mo" id="forgiveMo"><div class="md">
+  <div class="mh"><div class="mt-">⚖️ Sistema de Perdón</div><div class="mc" onclick="cm('forgiveMo')">✕</div></div>
+  <p class="t-sm mb3" style="color:var(--ts);line-height:1.7">No completaste <strong id="fgName">"..."</strong> antes del deadline.<br>¿Tienes una razón válida?</p>
+  <div class="fg"><label>Motivo</label><textarea class="fta" id="fgReason" placeholder="Explica qué ocurrió..."></textarea></div>
+  <button class="forg-btn par" onclick="forgive(true)">✅ Razón válida — Perdonar sin penalización</button>
+  <button class="forg-btn pen" onclick="forgive(false)">❌ Era una excusa — Sin EM, registrar fallo</button>
+</div></div>
+
+<div class="mo" id="techPickMo"><div class="md wide">
+  <div class="mh"><div class="mt-">⚡ Elige tu Técnica Innata</div></div>
+  <p class="t-sm mb3" style="color:var(--ts);line-height:1.7">Como nuevo hechicero, el mundo maldito te otorga tres posibles técnicas. Una vez elegida, es permanente.</p>
+  <div id="techPickOpts" style="display:flex;flex-direction:column;gap:9px"></div>
+</div></div>
+
+<div class="mo" id="zoneMo"><div class="md">
+  <div class="mh"><div class="mt-" id="zoneMoT">Zona</div><div class="mc" onclick="cm('zoneMo')">✕</div></div>
+  <div id="zoneMoBody"></div>
+</div></div>
+
+<div class="mo" id="skInfoMo"><div class="md">
+  <div class="mh"><div class="mt-" id="skInfoT">Habilidad</div><div class="mc" onclick="cm('skInfoMo')">✕</div></div>
+  <div id="skInfoBody"></div>
+</div></div>
+
+<div class="mo" id="missionAcceptMo"><div class="md">
+  <div class="mh"><div class="mt-" id="maMoT">Misión</div><div class="mc" onclick="cm('missionAcceptMo')">✕</div></div>
+  <div id="maMoBody"></div>
+</div></div>
+
+<script>
+// ═══════════════════════════════
+// TECHNIQUES DATA
+// ═══════════════════════════════
+const TECHNIQUES={
+  maldicion_ilimitada:{id:'maldicion_ilimitada',name:'Maldición Ilimitada',user:'Satoru Gojo',grade:'special',rarity:'Legendaria',rc:'var(--gsp)',emoji:'♾️',desc:'Manipulación absoluta del espacio al infinito.',type:'innata',
+    skills:[
+      {id:'infinito',name:'Infinito',icon:'🔵',type:'defense',cost:0,power:0,lvlReq:1,desc:'Barrera pasiva. Absorbe el siguiente ataque completamente.',statusEffect:null},
+      {id:'azul',name:'Azul',icon:'💙',type:'attack',cost:45,power:90,lvlReq:3,desc:'Atracción espacial. Aplasta al enemigo.',statusEffect:null},
+      {id:'rojo',name:'Rojo',icon:'🔴',type:'attack',cost:60,power:110,lvlReq:8,desc:'Repulsión violenta que destruye todo.',statusEffect:null},
+      {id:'violeta',name:'Técnica Hueca Violeta',icon:'🟣',type:'attack',cost:180,power:300,lvlReq:18,desc:'Técnica definitiva. Combina Azul y Rojo.',statusEffect:null},
+      {id:'domain_infinite',name:'Dominio Infinito',icon:'⬡',type:'domain',cost:280,power:0,lvlReq:30,desc:'El dominio más poderoso. Ataques certeros absolutos.',statusEffect:null},
+    ],unlockReq:{type:'grade',value:'special',desc:'Requiere Grado Especial'}
+  },
+  seis_ojos:{id:'seis_ojos',name:'Seis Ojos',user:'Satoru Gojo',grade:'special',rarity:'Legendaria',rc:'var(--gsp)',emoji:'👁️‍🗨️',desc:'Percepción sobrehumana. Optimiza el consumo de EM.',type:'innata',
+    skills:[
+      {id:'vision_em',name:'Visión de EM',icon:'👁',type:'buff',cost:20,power:0,lvlReq:1,desc:'Analiza enemigo. +20% daño próximo turno.',statusEffect:'boost'},
+      {id:'percepcion_max',name:'Percepción Máxima',icon:'🔮',type:'defense',cost:35,power:0,lvlReq:5,desc:'Esquiva automáticamente el próximo ataque.',statusEffect:null},
+      {id:'opt_em',name:'Optimización de EM',icon:'⚡',type:'buff',cost:0,power:0,lvlReq:12,desc:'Reduce coste de habilidades 30% por 3 turnos.',statusEffect:'boost'},
+      {id:'domain_six',name:'Dominio: Ojos del Infinito',icon:'⬡',type:'domain',cost:260,power:0,lvlReq:25,desc:'Visión omnisciente. Imposible esquivar.',statusEffect:null},
+    ],unlockReq:{type:'boss',value:'sukuna',desc:'Derrota a Ryomen Sukuna'}
+  },
+  transformacion_inactiva:{id:'transformacion_inactiva',name:'Transformación Inactiva',user:'Mahito',grade:1,rarity:'Épica',rc:'var(--g1)',emoji:'🧬',desc:'Manipula el alma distorsionando cuerpos.',type:'innata',
+    skills:[
+      {id:'distorsion',name:'Distorsión Corporal',icon:'💀',type:'attack',cost:40,power:70,lvlReq:1,desc:'Transforma parte del cuerpo causando daño grave.',statusEffect:'bleed'},
+      {id:'multiples_almas',name:'Múltiples Almas',icon:'👥',type:'buff',cost:50,power:0,lvlReq:5,desc:'Siguiente ataque garantizado.',statusEffect:'boost'},
+      {id:'plenitud',name:'Plenitud Corporal',icon:'🔄',type:'heal',cost:55,power:80,lvlReq:10,desc:'Remoldea tu cuerpo reparando heridas.',statusEffect:null},
+      {id:'soul_mult',name:'Multiplicidad del Alma',icon:'🌀',type:'attack',cost:110,power:150,lvlReq:20,desc:'Fusiona almas en masa. Daño masivo.',statusEffect:'bleed'},
+      {id:'domain_self',name:'Dominio Propio',icon:'⬡',type:'domain',cost:240,power:0,lvlReq:32,desc:'Tu alma SE convierte en el dominio.',statusEffect:null},
+    ],unlockReq:{type:'missions',value:10,desc:'Completa 10 misiones de limpieza'}
+  },
+  manipulacion_maldiciones:{id:'manipulacion_maldiciones',name:'Manipulación de Maldiciones',user:'Suguru Geto',grade:1,rarity:'Épica',rc:'var(--g1)',emoji:'👁',desc:'Absorbe y controla espíritus malditos como ejército.',type:'innata',
+    skills:[
+      {id:'absorcion',name:'Absorción',icon:'⬆️',type:'heal',cost:30,power:45,lvlReq:1,desc:'Absorbe energía del enemigo para recuperar HP.',statusEffect:null},
+      {id:'liberation',name:'Liberación Maldita',icon:'💣',type:'attack',cost:65,power:100,lvlReq:4,desc:'Libera un espíritu acumulado.',statusEffect:null},
+      {id:'max_uzumaki',name:'Máximo Uzumaki',icon:'🌀',type:'attack',cost:120,power:180,lvlReq:12,desc:'Todos los espíritus acumulados explotan.',statusEffect:'poison'},
+      {id:'domain_prison',name:'Cárcel de Maldiciones',icon:'⬡',type:'domain',cost:260,power:0,lvlReq:28,desc:'Atrapa al enemigo en cárcel de espíritus.',statusEffect:null},
+    ],unlockReq:{type:'level',value:20,desc:'Requiere Nivel 20'}
+  },
+  sombras_diez:{id:'sombras_diez',name:'Sombras de Diez Tipos',user:'Megumi Fushiguro',grade:2,rarity:'Rara',rc:'var(--g2)',emoji:'🐉',desc:'Invoca shikigami usando las sombras como portal.',type:'heredada',
+    skills:[
+      {id:'perros_div',name:'Perros Divinos',icon:'🐕',type:'attack',cost:35,power:60,lvlReq:1,desc:'Dos perros divinos atacan coordinados.',statusEffect:null},
+      {id:'nue',name:'Nue',icon:'🦅',type:'attack',cost:50,power:80,lvlReq:4,desc:'El pájaro del trueno electrocuta.',statusEffect:'paralyze'},
+      {id:'gran_serpiente',name:'Gran Serpiente',icon:'🐍',type:'debuff',cost:45,power:40,lvlReq:7,desc:'Inmoviliza al enemigo.',statusEffect:'freeze'},
+      {id:'maxwell',name:'Maxwell',icon:'🐸',type:'heal',cost:40,power:50,lvlReq:11,desc:'Shikigami sanador.',statusEffect:null},
+      {id:'orbe_ocho',name:'Orbe de las Ocho Armas',icon:'⚡',type:'attack',cost:100,power:140,lvlReq:18,desc:'Shikigami de élite. Daño masivo.',statusEffect:null},
+      {id:'domain_ten',name:'Templo de las Sombras',icon:'⬡',type:'domain',cost:230,power:0,lvlReq:28,desc:'Todos los shikigami se materializan.',statusEffect:null},
+    ],unlockReq:{type:'level',value:15,desc:'Requiere Nivel 15'}
+  },
+  manipulacion_sangre:{id:'manipulacion_sangre',name:'Manipulación de Sangre',user:'Choso / Clan Kamo',grade:1,rarity:'Épica',rc:'var(--g1)',emoji:'🩸',desc:'Control absoluto de la sangre para atacar o curar.',type:'heredada',
+    skills:[
+      {id:'piercing',name:'Sangre Perforadora',icon:'💉',type:'attack',cost:30,power:65,lvlReq:1,desc:'Dispara sangre a velocidad de bala.',statusEffect:null},
+      {id:'crimson',name:'Ligadura Carmesí',icon:'🔴',type:'debuff',cost:40,power:35,lvlReq:4,desc:'Enreda al enemigo reduciendo ataques.',statusEffect:'bleed'},
+      {id:'blood_edge',name:'Filo de Sangre',icon:'🗡',type:'attack',cost:55,power:90,lvlReq:8,desc:'Cuchillas de sangre endurecida.',statusEffect:'bleed'},
+      {id:'supernova',name:'Supernova',icon:'💥',type:'attack',cost:110,power:155,lvlReq:16,desc:'Explosión de sangre masiva a rango total.',statusEffect:null},
+      {id:'decay',name:'Putrefacción',icon:'☠️',type:'attack',cost:130,power:180,lvlReq:24,desc:'Envenena la sangre. Daño continuo.',statusEffect:'poison'},
+    ],unlockReq:{type:'missions',value:20,desc:'Completa 20 misiones de limpieza'}
+  },
+  muneco_paja:{id:'muneco_paja',name:'Muñeco de Paja',user:'Nobara Kugisaki',grade:3,rarity:'Poco común',rc:'var(--g3)',emoji:'🔨',desc:'Clavos y martillo para dañar a distancia.',type:'innata',
+    skills:[
+      {id:'nail',name:'Clavar Clavo',icon:'🔩',type:'attack',cost:22,power:45,lvlReq:1,desc:'Clava clavo maldito.',statusEffect:null},
+      {id:'resonance',name:'Resonancia',icon:'🌀',type:'attack',cost:45,power:75,lvlReq:4,desc:'Daño que rebota con sangrado.',statusEffect:'bleed'},
+      {id:'hairpin',name:'Horquilla',icon:'⚡',type:'attack',cost:65,power:100,lvlReq:9,desc:'Explosión de EM.',statusEffect:null},
+      {id:'domain_wicker',name:'Dominio Vacío',icon:'⬡',type:'domain',cost:200,power:0,lvlReq:22,desc:'Conexión con objetivo para daño inevitable.',statusEffect:null},
+    ],unlockReq:{type:'level',value:8,desc:'Requiere Nivel 8'}
+  },
+  proporcion:{id:'proporcion',name:'Proporción',user:'Kento Nanami',grade:1,rarity:'Épica',rc:'var(--g1)',emoji:'🔢',desc:'Identifica el punto débil con ratio 7:3.',type:'innata',
+    skills:[
+      {id:'analisis',name:'Análisis 7:3',icon:'🔍',type:'buff',cost:20,power:0,lvlReq:1,desc:'Revela punto débil. +50% daño próximo.',statusEffect:'boost'},
+      {id:'punto_crit',name:'Punto Crítico',icon:'💥',type:'attack',cost:50,power:90,lvlReq:4,desc:'Golpe directo al punto débil.',statusEffect:null},
+      {id:'ratio_total',name:'Ratio Total',icon:'⚖️',type:'attack',cost:80,power:130,lvlReq:12,desc:'Maximiza ratio en todo el cuerpo.',statusEffect:null},
+      {id:'overtime',name:'Hora Extra',icon:'⏰',type:'buff',cost:60,power:0,lvlReq:18,desc:'+30% todos los stats por 3 turnos.',statusEffect:'boost'},
+    ],unlockReq:{type:'level',value:25,desc:'Requiere Nivel 25'}
+  },
+  boogie_woogie:{id:'boogie_woogie',name:'Boogie Woogie',user:'Aoi Todo',grade:1,rarity:'Rara',rc:'var(--g1)',emoji:'👏',desc:'Intercambia la posición de cualquier ser.',type:'innata',
+    skills:[
+      {id:'clap_swap',name:'Palmada de Intercambio',icon:'🔄',type:'debuff',cost:25,power:30,lvlReq:1,desc:'Confunde al enemigo.',statusEffect:'paralyze'},
+      {id:'boogie_strike',name:'Golpe Woogie',icon:'👊',type:'attack',cost:40,power:75,lvlReq:3,desc:'Golpe potenciado tras el intercambio.',statusEffect:null},
+      {id:'inf_swap',name:'Intercambio Infinito',icon:'♾️',type:'attack',cost:85,power:110,lvlReq:10,desc:'Múltiples intercambios. Confusión total.',statusEffect:'paralyze'},
+      {id:'great_boogie',name:'Gran Boogie',icon:'💥',type:'attack',cost:130,power:165,lvlReq:20,desc:'Intercambio y golpe combinado definitivo.',statusEffect:null},
+    ],unlockReq:{type:'missions',value:5,desc:'Completa 5 misiones de limpieza'}
+  },
+  maldicion_volcanica:{id:'maldicion_volcanica',name:'Maldición Volcánica',user:'Jogo',grade:'semi',rarity:'Legendaria',rc:'var(--gse)',emoji:'🌋',desc:'Control del fuego y el magma.',type:'innata',
+    skills:[
+      {id:'bola_fuego',name:'Bola de Fuego',icon:'🔥',type:'attack',cost:30,power:60,lvlReq:1,desc:'Proyectil de fuego.',statusEffect:'burn'},
+      {id:'magma',name:'Magma',icon:'🌋',type:'attack',cost:55,power:90,lvlReq:5,desc:'Invoca magma. Daño continuo.',statusEffect:'burn'},
+      {id:'volcan',name:'Volcán en Erupción',icon:'💥',type:'attack',cost:100,power:150,lvlReq:12,desc:'Erupción total.',statusEffect:'burn'},
+      {id:'domain_vol',name:'Dominio Volcánico',icon:'⬡',type:'domain',cost:250,power:0,lvlReq:28,desc:'El mundo se convierte en volcán.',statusEffect:null},
+    ],unlockReq:{type:'boss',value:'jogo',desc:'Derrota a Jogo'}
+  },
+  discurso_maldito:{id:'discurso_maldito',name:'Discurso Maldito',user:'Toge Inumaki',grade:2,rarity:'Rara',rc:'var(--g2)',emoji:'📢',desc:'Palabras que tienen efecto literal sobre quien las escucha.',type:'heredada',
+    skills:[
+      {id:'no_muevas',name:'No te muevas',icon:'🛑',type:'debuff',cost:30,power:0,lvlReq:1,desc:'Paraliza al enemigo 1 turno.',statusEffect:'paralyze'},
+      {id:'explota',name:'Explota',icon:'💥',type:'attack',cost:55,power:95,lvlReq:5,desc:'El enemigo explota.',statusEffect:null},
+      {id:'arrancat',name:'Arráncate',icon:'✂️',type:'attack',cost:70,power:110,lvlReq:10,desc:'Daño masivo por separación.',statusEffect:'bleed'},
+      {id:'regresa',name:'Regresa',icon:'🔙',type:'heal',cost:40,power:60,lvlReq:8,desc:'Tu cuerpo vuelve a estado óptimo.',statusEffect:null},
+      {id:'atomize',name:'Vuélvete polvo',icon:'🌫️',type:'attack',cost:150,power:220,lvlReq:25,desc:'Desintegración total del objetivo.',statusEffect:null},
+    ],unlockReq:{type:'level',value:18,desc:'Requiere Nivel 18'}
+  },
+  santuario:{id:'santuario',name:'Santuario',user:'Ryomen Sukuna',grade:'special',rarity:'Legendaria',rc:'var(--gsp)',emoji:'👹',desc:'Técnica del Rey. Desmantelar y Hender.',type:'innata',
+    skills:[
+      {id:'desmantelar',name:'Desmantelar',icon:'⚔️',type:'attack',cost:35,power:70,lvlReq:1,desc:'Corte invisible que destruye lo material.',statusEffect:null},
+      {id:'hender',name:'Hender',icon:'🔥',type:'attack',cost:55,power:100,lvlReq:6,desc:'Corte que ignora defensa maldita.',statusEffect:null},
+      {id:'lluvia_cortes',name:'Lluvia de Cortes',icon:'🌪️',type:'attack',cost:90,power:140,lvlReq:14,desc:'Docenas de cortes en todos los ángulos.',statusEffect:'bleed'},
+      {id:'inv_sukuna',name:'Técnica Inversa',icon:'💚',type:'heal',cost:50,power:120,lvlReq:12,desc:'Sukuna cura con EM invertida.',statusEffect:null},
+      {id:'domain_sukuna',name:'Altar del Conquistador',icon:'⬡',type:'domain',cost:320,power:0,lvlReq:40,desc:'El dominio del Rey. No hay defensa.',statusEffect:null},
+    ],unlockReq:{type:'boss',value:'sukuna',desc:'Derrota a Ryomen Sukuna (fragmento)'}
+  },
+  puño_divergente:{id:'puño_divergente',name:'Puño Divergente',user:'Yuji Itadori',grade:4,rarity:'Común',rc:'var(--g4)',emoji:'👊',desc:'Golpe físico con EM retrasada.',type:'general',
+    skills:[
+      {id:'div_hit',name:'Golpe Divergente',icon:'👊',type:'attack',cost:18,power:42,lvlReq:1,desc:'Golpe base con EM retrasada.',statusEffect:null},
+      {id:'rush',name:'Combo Acelerado',icon:'⚡',type:'attack',cost:35,power:70,lvlReq:4,desc:'Serie de golpes rápidos.',statusEffect:null},
+      {id:'black_flash',name:'Destello Negro',icon:'⚫',type:'attack',cost:55,power:115,lvlReq:9,desc:'Concentración máxima. Daño x2.5.',statusEffect:null},
+      {id:'sukuna_boost',name:'Instante de Sukuna',icon:'👹',type:'buff',cost:75,power:0,lvlReq:16,desc:'Sukuna toma control por 2 turnos. +70% daño.',statusEffect:'boost'},
+    ],unlockReq:null // starter technique
+  },
+  nube_juguetona:{id:'nube_juguetona',name:'Nube Juguetona',user:'Toji Fushiguro',grade:'semi',rarity:'Épica',rc:'var(--gse)',emoji:'⛓️',desc:'Cadena maldita de tres partes. Sin técnica innata, solo fuerza.',type:'general',
+    skills:[
+      {id:'chain_hit',name:'Golpe Encadenado',icon:'⛓️',type:'attack',cost:0,power:52,lvlReq:1,desc:'Ataque base. Sin coste EM.',statusEffect:null},
+      {id:'bind',name:'Ligadura',icon:'🔗',type:'debuff',cost:20,power:25,lvlReq:3,desc:'Inmoviliza brevemente.',statusEffect:'freeze'},
+      {id:'triple',name:'Triple Golpe',icon:'💫',type:'attack',cost:45,power:95,lvlReq:8,desc:'Tres golpes consecutivos.',statusEffect:null},
+      {id:'penetrate',name:'Penetrar',icon:'⚡',type:'attack',cost:65,power:130,lvlReq:15,desc:'Atraviesa todas las defensas malditas.',statusEffect:null},
+    ],unlockReq:{type:'level',value:35,desc:'Requiere Nivel 35'}
+  },
+};
+
+// ═══════════════════════════════
+// ZONE MISSION TEMPLATES
+// ═══════════════════════════════
+const ZONE_MISSIONS_TPL=[
+  {id:'zm_training_clear',title:'Limpiar Área de Entrenamiento',desc:'Elimina todas las maldiciones del Área de Entrenamiento. Misión inicial para hechiceros novatos.',zoneId:'training',killCount:4,difficulty:'facil',minGrade:4,minLevel:1,reward:{xp:120,em:80},repeatable:true,repeatHours:6},
+  {id:'zm_shibuya_clear',title:'Operación Shibuya',desc:'Elimina todas las maldiciones de Shibuya. Zona de alta prioridad con presencia de espíritus corruptos.',zoneId:'shibuya',killCount:15,difficulty:'dificil',minGrade:4,minLevel:3,reward:{xp:500,em:200},repeatable:true,repeatHours:24},
+  {id:'zm_shinjuku_patrol',title:'Patrulla Shinjuku',desc:'Limpia 10 maldiciones de Shinjuku. Zona comercial de media amenaza.',zoneId:'shinjuku',killCount:10,difficulty:'normal',minGrade:4,minLevel:2,reward:{xp:300,em:130},repeatable:true,repeatHours:12},
+  {id:'zm_akihabara',title:'Incidente de Akihabara',desc:'Las maldiciones tecnológicas se han multiplicado. Elimina a todas.',zoneId:'akihabara',killCount:8,difficulty:'normal',minGrade:3,minLevel:5,reward:{xp:280,em:110},repeatable:true,repeatHours:12},
+  {id:'zm_harajuku_elite',title:'Crisis de Harajuku',desc:'Zona de máxima amenaza. Requiere hechicero de Grado 2 como mínimo. Recompensa excepcional.',zoneId:'harajuku',killCount:22,difficulty:'extreme',minGrade:2,minLevel:12,reward:{xp:1200,em:450},repeatable:false},
+  {id:'zm_osaka_sweep',title:'Barrido de Osaka',desc:'Las maldiciones se han extendido por Namba. Limpieza urgente.',zoneId:'osaka_namba',killCount:12,difficulty:'dificil',minGrade:3,minLevel:7,reward:{xp:600,em:220},repeatable:true,repeatHours:18},
+  {id:'zm_kyoto_spirit',title:'Espíritus de Kioto',desc:'Los espíritus ancestrales de Kioto se han vuelto hostiles. Neutralízalos.',zoneId:'kyoto_gion',killCount:14,difficulty:'dificil',minGrade:3,minLevel:8,reward:{xp:650,em:240},repeatable:true,repeatHours:20},
+  {id:'zm_roppongi_elite',title:'Zona de Exclusión: Roppongi',desc:'Zona de máxima peligrosidad. Solo Semi-Especiales o superior.',zoneId:'roppongi',killCount:18,difficulty:'extreme',minGrade:'semi',minLevel:45,reward:{xp:3000,em:900},repeatable:false},
+  {id:'zm_sapporo_winter',title:'Maldición de las Nieves',desc:'Las maldiciones gélidas de Sapporo bloquean las rutas del norte.',zoneId:'sapporo',killCount:6,difficulty:'facil',minGrade:4,minLevel:1,reward:{xp:140,em:90},repeatable:true,repeatHours:8},
+  {id:'zm_sendai_north',title:'Incidente del Norte — Sendai',desc:'Maldiciones de media amenaza se han asentado en Sendai.',zoneId:'sendai',killCount:10,difficulty:'normal',minGrade:3,minLevel:5,reward:{xp:320,em:140},repeatable:true,repeatHours:14},
+];
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+const DFLT={
+  player:{name:'Hechicero',avatar:null,playerSprite:null,level:1,xp:0,xpNext:100,grade:4,hp:100,maxHp:100,em:0,maxEm:500,statPoints:0,
+    stats:{fuerza:5,defensa:5,velocidad:5,inteligencia:5,maldicion:5,dominio:5},
+    technique:null,secondaryTechs:[],unlockedSkills:[],skillMastery:{},
+    failStreak:0,missionsCompleted:0,bossesKilled:{}
+  },
+  tasks:[],habits:[],goals:[],sprites:{curse_low:null,curse_mid:null,curse_high:null,boss_mahito:null,boss_hanami:null,boss_jogo:null,boss_sukuna:null},
+  zones:mkZones(),activeBosses:[],
+  log:[],raidProgress:{},activeMissions:[],completedMissions:[],
+  dynamicEvents:[],lastEventTick:0,
+  calDate:new Date().toISOString().slice(0,10),
+};
+
+function mkZones(){
+  return [
+    {id:'training',name:'Área de Entrenamiento',x:56,y:42,status:'safe',total:4,remaining:0,threat:'baja',unlockGrade:4,events:[],city:'Tokio',region:'Kanto'},
+    {id:'shibuya',name:'Shibuya',x:52,y:55,status:'danger',total:15,remaining:15,threat:'alta',unlockGrade:4,events:['boss_mahito'],city:'Tokio',region:'Kanto'},
+    {id:'shinjuku',name:'Shinjuku',x:48,y:48,status:'active',total:10,remaining:10,threat:'media',unlockGrade:4,events:[],city:'Tokio',region:'Kanto'},
+    {id:'akihabara',name:'Akihabara',x:57,y:50,status:'active',total:8,remaining:8,threat:'media',unlockGrade:3,events:[],city:'Tokio',region:'Kanto'},
+    {id:'harajuku',name:'Harajuku',x:50,y:57,status:'danger',total:22,remaining:22,threat:'muy_alta',unlockGrade:2,events:['boss_hanami'],city:'Tokio',region:'Kanto'},
+    {id:'ikebukuro',name:'Ikebukuro',x:48,y:52,status:'active',total:9,remaining:9,threat:'media',unlockGrade:3,events:[],city:'Tokio',region:'Kanto'},
+    {id:'roppongi',name:'Roppongi',x:53,y:58,status:'danger',total:18,remaining:18,threat:'muy_alta',unlockGrade:'semi',events:['boss_sukuna'],city:'Tokio',region:'Kanto'},
+    {id:'asakusa',name:'Asakusa',x:58,y:47,status:'safe',total:5,remaining:0,threat:'baja',unlockGrade:2,events:[],city:'Tokio',region:'Kanto'},
+    {id:'osaka_namba',name:'Namba',x:34,y:62,status:'active',total:12,remaining:12,threat:'alta',unlockGrade:3,events:[],city:'Osaka',region:'Kansai'},
+    {id:'osaka_umeda',name:'Umeda',x:31,y:58,status:'active',total:8,remaining:8,threat:'media',unlockGrade:2,events:[],city:'Osaka',region:'Kansai'},
+    {id:'kyoto_gion',name:'Gion',x:30,y:64,status:'danger',total:14,remaining:14,threat:'alta',unlockGrade:3,events:[],city:'Kioto',region:'Kansai'},
+    {id:'kyoto_arashiyama',name:'Arashiyama',x:26,y:65,status:'active',total:7,remaining:7,threat:'media',unlockGrade:2,events:[],city:'Kioto',region:'Kansai'},
+    {id:'sendai',name:'Sendai',x:63,y:28,status:'active',total:10,remaining:10,threat:'media',unlockGrade:3,events:[],city:'Sendai',region:'Tohoku'},
+    {id:'hiroshima',name:'Hiroshima',x:22,y:68,status:'danger',total:16,remaining:16,threat:'alta',unlockGrade:2,events:[],city:'Hiroshima',region:'Chugoku'},
+    {id:'fukuoka',name:'Fukuoka',x:15,y:75,status:'active',total:11,remaining:11,threat:'media',unlockGrade:3,events:[],city:'Fukuoka',region:'Kyushu'},
+    {id:'sapporo',name:'Sapporo',x:70,y:8,status:'safe',total:6,remaining:6,threat:'baja',unlockGrade:4,events:[],city:'Sapporo',region:'Hokkaido'},
+    {id:'nagoya',name:'Nagoya',x:42,y:60,status:'active',total:9,remaining:9,threat:'media',unlockGrade:3,events:[],city:'Nagoya',region:'Chubu'},
+    {id:'yokohama',name:'Yokohama',x:56,y:58,status:'active',total:11,remaining:11,threat:'alta',unlockGrade:3,events:[],city:'Yokohama',region:'Kanto'},
+    {id:'kobe',name:'Kobe',x:28,y:62,status:'active',total:8,remaining:8,threat:'media',unlockGrade:2,events:[],city:'Kobe',region:'Kansai'},
+    {id:'jujutsu_high',name:'Tokyo Jujutsu High',x:50,y:45,status:'safe',total:3,remaining:0,threat:'minima',unlockGrade:4,events:[],city:'Tokio',region:'Kanto'},
+  ];
+}
+
+let S=loadS();
+function loadS(){try{const s=localStorage.getItem('jjk_v3');if(s){const d=JSON.parse(s);if(!d.player.skillMastery)d.player.skillMastery={};if(!d.player.secondaryTechs)d.player.secondaryTechs=[];if(!d.player.bossesKilled)d.player.bossesKilled={};if(!d.activeMissions)d.activeMissions=[];if(!d.completedMissions)d.completedMissions=[];if(!d.dynamicEvents)d.dynamicEvents=[];return d;}}catch(e){}return JSON.parse(JSON.stringify(DFLT));}
+function saveS(){localStorage.setItem('jjk_v3',JSON.stringify(S));}
+
+// ═══════════════════════════════
+// GRADES
+// ═══════════════════════════════
+const GRADES=[
+  {id:4,label:'Grado 4',short:'G-4',color:'var(--g4)',lvReq:1},
+  {id:3,label:'Grado 3',short:'G-3',color:'var(--g3)',lvReq:5},
+  {id:2,label:'Grado 2',short:'G-2',color:'var(--g2)',lvReq:15},
+  {id:1,label:'Grado 1',short:'G-1',color:'var(--g1)',lvReq:30},
+  {id:'semi',label:'Semi Especial',short:'SE',color:'var(--gse)',lvReq:50},
+  {id:'special',label:'Grado Especial',short:'ESP',color:'var(--gsp)',lvReq:80},
+];
+function gd(id){return GRADES.find(g=>g.id===id)||GRADES[0];}
+function gnext(id){const i=GRADES.findIndex(g=>g.id===id);return i<GRADES.length-1?GRADES[i+1]:null;}
+function gradeOrder(id){return GRADES.findIndex(g=>g.id===id);}
+function isGradeGte(a,b){return gradeOrder(a)>=gradeOrder(b);}
+
+// EM & XP
+const EM_PRI={alta:80,media:50,baja:25};
+const DIFF_MULT={facil:1.0,normal:1.2,dificil:1.5};
+const XP_PRI={alta:60,media:35,baja:15};
+function calcEM(t){return Math.round((EM_PRI[t.priority]||50)*(DIFF_MULT[t.difficulty]||1));}
+function calcXP(t){return Math.round((XP_PRI[t.priority]||35)*(DIFF_MULT[t.difficulty]||1));}
+
+function addEM(amt,reason){
+  S.player.em=Math.min(S.player.em+amt,S.player.maxEm);
+  log_(`+${amt} EM — ${reason}`);uiAll();saveS();
+}
+function useEM(amt){if(S.player.em<amt)return false;S.player.em-=amt;uiAll();saveS();return true;}
+
+function addXP(amt){
+  S.player.xp+=amt;
+  while(S.player.xp>=S.player.xpNext){
+    S.player.xp-=S.player.xpNext;S.player.level++;
+    S.player.xpNext=Math.round(S.player.xpNext*1.35+60);
+    S.player.statPoints+=3;
+    S.player.maxHp+=12;S.player.hp=Math.min(S.player.hp+12,S.player.maxHp);
+    S.player.maxEm+=30; // +30 EM per level
+    toast(`🎉 ¡Nivel ${S.player.level}! +3 stats · +30 EM máx`,'gold');
+    checkGrade();checkSkillUnlocks();
+  }
+  uiAll();saveS();
+}
+
+function checkGrade(){
+  const ng=gnext(S.player.grade);if(!ng)return;
+  if(S.player.level>=ng.lvReq){
+    S.player.grade=ng.id;
+    toast(`⬆️ ¡Ascendiste a ${ng.label}!`,'gold');
+    log_(`Ascenso a ${ng.label}`);
+    genDynamicEvents(); // new grade = new events
+  }
+}
+
+function checkSkillUnlocks(){
+  const tech=TECHNIQUES[S.player.technique];if(!tech)return;
+  tech.skills.forEach(sk=>{
+    if(S.player.level>=sk.lvlReq&&!S.player.unlockedSkills.includes(sk.id)){
+      S.player.unlockedSkills.push(sk.id);
+      if(!S.player.skillMastery[sk.id])S.player.skillMastery[sk.id]=0;
+      toast(`⚡ Habilidad desbloqueada: ${sk.name}`,'em');
+    }
+  });
+  S.player.secondaryTechs.forEach(tid=>{
+    const t2=TECHNIQUES[tid];if(!t2)return;
+    t2.skills.forEach(sk=>{
+      if(S.player.level>=sk.lvlReq+5&&!S.player.unlockedSkills.includes(sk.id+'_2')){
+        S.player.unlockedSkills.push(sk.id+'_2');
+        toast(`⚡ [${t2.name}] ${sk.name} desbloqueada`,'em');
+      }
+    });
+  });
+}
+
+function gainMastery(skillId,amount=1){
+  if(!S.player.skillMastery[skillId])S.player.skillMastery[skillId]=0;
+  const prev=S.player.skillMastery[skillId];
+  S.player.skillMastery[skillId]=Math.min(100,prev+amount);
+  const cur=S.player.skillMastery[skillId];
+  // Check milestones
+  const milestones=[25,50,75,100];
+  milestones.forEach(m=>{if(prev<m&&cur>=m){
+    const tech=TECHNIQUES[S.player.technique];
+    const sk=tech?.skills.find(s=>s.id===skillId);
+    if(sk)toast(`🌟 Maestría ${m}% — ${sk.name}!`,m===100?'gold':'em');
+  }});
+  saveS();
+}
+
+function getMasteryBonus(skillId){
+  const m=S.player.skillMastery[skillId]||0;
+  return 1+(m/100)*0.5; // up to +50% power at 100%
+}
+
+function log_(txt){S.log.unshift({text:txt,time:Date.now()});if(S.log.length>60)S.log.pop();}
+
+// ═══════════════════════════════
+// DYNAMIC EVENTS
+// ═══════════════════════════════
+function genDynamicEvents(){
+  const now=Date.now();
+  if(now-S.lastEventTick<3600000&&S.dynamicEvents.length>0)return; // 1h cooldown
+  S.lastEventTick=now;
+  const newEvents=[];
+  // Regenerate zones randomly
+  S.zones.forEach(z=>{
+    if(z.remaining===0&&isZoneUL(z)&&Math.random()<0.35){
+      const regen=Math.floor(z.total*0.4)+1;
+      z.remaining=regen;z.status='active';
+      newEvents.push({type:'regen',text:`⚠️ Nuevas maldiciones detectadas en ${z.name} (+${regen})`,zoneId:z.id,time:now});
+    }
+  });
+  // Random boss spawn
+  const bossPool=['mahito','hanami','jogo'];
+  if(Math.random()<0.3){
+    const bossId=bossPool[Math.floor(Math.random()*bossPool.length)];
+    if(!S.activeBosses.find(b=>b.id===bossId)){
+      const bd=BOSSES.find(b=>b.id===bossId);
+      if(bd&&isGradeGte(S.player.grade,bd.minGrade)){
+        S.activeBosses.push({...bd,expires:now+5400000});
+        newEvents.push({type:'boss',text:`💀 ¡${bd.name} ha aparecido en ${bd.zone}!`,time:now});
+      }
+    }
+  }
+  // Surge event: a zone gets +50% enemies
+  if(Math.random()<0.2){
+    const ulZones=S.zones.filter(z=>isZoneUL(z)&&z.remaining>0);
+    if(ulZones.length>0){
+      const z=ulZones[Math.floor(Math.random()*ulZones.length)];
+      const surge=Math.floor(z.total*0.3);
+      z.remaining+=surge;z.status='danger';
+      newEvents.push({type:'surge',text:`🔴 OLEADA MALDITA en ${z.name}! +${surge} maldiciones adicionales`,time:now});
+    }
+  }
+  S.dynamicEvents=[...newEvents,...(S.dynamicEvents||[])].slice(0,8);
+  saveS();
+  renderDynEventBanner();
+}
+
+function renderDynEventBanner(){
+  const el=document.getElementById('dynEventTicker');if(!el)return;
+  const recent=S.dynamicEvents?.slice(0,3)||[];
+  if(!recent.length){el.innerHTML='';return;}
+  el.innerHTML=recent.map(e=>`<div class="event-ticker mb2"><div class="et-dot"></div><span>${e.text}</span></div>`).join('');
+}
+
+function renderMapEventBanner(){
+  const el=document.getElementById('mapEventBanner');if(!el)return;
+  const recent=S.dynamicEvents?.slice(0,2)||[];
+  if(!recent.length){el.innerHTML='';return;}
+  el.innerHTML=recent.map(e=>`<div class="event-ticker mb2"><div class="et-dot"></div><span>${e.text}</span></div>`).join('');
+}
+
+// ═══════════════════════════════
+// TOAST / NAV
+// ═══════════════════════════════
+function toast(msg,type='em'){
+  const c=document.getElementById('TC');
+  const t=document.createElement('div');t.className=`toast t-${type}`;t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(100%)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300);},3500);
+}
+
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni,.ni-sub').forEach(i=>i.classList.remove('active'));
+  document.getElementById(`page-${page}`)?.classList.add('active');
+  const nm={dashboard:0,player:1,missions:2,map:3,battle:3,raids:3,bosses:3,calendar:3,config:4};
+  document.querySelectorAll('.ni')[nm[page]]?.classList.add('active');
+  const fn={dashboard:renderDash,player:renderPlayer,missions:renderMissions,map:renderMap,battle:renderMissionBoard,raids:renderRaids,bosses:renderBosses,calendar:renderCalendar,config:renderConfig};
+  fn[page]?.();
+}
+
+// ═══════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════
+function uiAll(){
+  const p=S.player,g=gd(p.grade);
+  const emPct=(p.em/p.maxEm*100).toFixed(1);
+  const xpPct=(p.xp/p.xpNext*100).toFixed(1);
+  document.getElementById('sbEM').textContent=p.em;
+  document.getElementById('sbEMBar').style.width=emPct+'%';
+  document.getElementById('sbName').textContent=p.name;
+  document.getElementById('sbGrade').textContent=g.label;
+  const av=document.getElementById('sbAv');
+  if(p.avatar){av.innerHTML=`<img src="${p.avatar}" alt="">`;}else{av.textContent='🧑';}
+  const el=id=>document.getElementById(id);
+  el('dEM').textContent=p.em;el('dEMMax').textContent=p.maxEm;
+  el('dEMBar').style.width=emPct+'%';
+  el('dLv').textContent=p.level;el('dXP').textContent=p.xp;el('dXPN').textContent=p.xpNext;
+  el('dXPBar').style.width=xpPct+'%';
+  el('dGr').textContent=g.short;el('dGr').style.color=g.color;
+  const ng=gnext(p.grade);el('dGrN').textContent=ng?`Próximo: ${ng.label}`:'¡Grado Máximo!';
+  const tech=p.technique?TECHNIQUES[p.technique]:null;
+  el('dTech').textContent=tech?tech.name:'—';
+}
+
+// ═══════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════
+function renderDash(){
+  genDynamicEvents();
+  renderDynEventBanner();
+  const active=S.tasks.filter(t=>!t.completed&&!isOD(t)).slice(0,4);
+  const tl=document.getElementById('dTaskList');
+  if(!active.length){tl.innerHTML='<div class="c-muted t-sm">Sin tareas activas.</div>';}
+  else{tl.innerHTML=active.map(t=>`<div class="tr-"><button class="tc-btn" onclick="qComplete('${t.id}')">✓</button><span style="flex:1;font-size:12px;font-weight:600">${t.name}</span>${bBadge(t.priority,'p')}<span class="c-em mono t-xs">⚡${calcEM(t)}</span></div>`).join('');}
+  // Active cleaning missions
+  const ml=document.getElementById('dMissionList');
+  const accepted=S.activeMissions||[];
+  if(!accepted.length){ml.innerHTML='<div class="c-muted t-sm">Sin misiones aceptadas. Ve a Misiones de Limpieza.</div>';}
+  else{ml.innerHTML=accepted.map(m=>`<div class="tr-"><span style="font-size:14px">${getDiffIcon(m.difficulty)}</span><span style="flex:1;font-size:12px;font-weight:600">${m.title}</span><span class="c-em mono t-xs">${m.progress||0}/${m.killCount}</span></div>`).join('');}
+  const ac=document.getElementById('dActivity');
+  if(!S.log.length){ac.innerHTML='<span class="c-muted t-sm">Sin actividad todavía.</span>';}
+  else{ac.innerHTML=S.log.slice(0,5).map(l=>`<div class="flex g2_ mb2"><span class="c-muted mono t-xs">${new Date(l.time).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</span><span class="t-xs">${l.text}</span></div>`).join('');}
+}
+
+function getDiffIcon(d){return {facil:'🟢',normal:'🔵',dificil:'🟡',extreme:'🔴'}[d]||'⚫';}
+
+// ═══════════════════════════════
+// PLAYER
+// ═══════════════════════════════
+function renderPlayer(){
+  const p=S.player,g=gd(p.grade),tech=p.technique?TECHNIQUES[p.technique]:null;
+  if(p.avatar){document.getElementById('ppPh').style.display='none';document.getElementById('ppImg').src=p.avatar;document.getElementById('ppImg').style.display='block';}
+  else{document.getElementById('ppPh').style.display='block';document.getElementById('ppImg').style.display='none';}
+  document.getElementById('ppLvlBadge').textContent=`▲ NIVEL ${p.level}`;
+  document.getElementById('ppName').textContent=p.name;
+  const gb=document.getElementById('ppGradeBadge');
+  gb.textContent=`⬡ ${g.label.toUpperCase()}`;gb.style.color=g.color;gb.style.borderColor=g.color+'55';gb.style.background=g.color+'18';
+  document.getElementById('ppTech').textContent=tech?tech.name:'Sin asignar';
+  document.getElementById('ppXP').textContent=p.xp;document.getElementById('ppXPN').textContent=p.xpNext;
+  document.getElementById('ppLv').textContent=p.level;
+  document.getElementById('ppXPBar').style.width=(p.xp/p.xpNext*100)+'%';
+  document.getElementById('ppHP').textContent=`${p.hp}/${p.maxHp}`;
+  document.getElementById('ppEM').textContent=p.em;
+  renderRadar();renderGradeProg();
+}
+
+function renderRadar(){
+  const c=document.getElementById('radarC');if(!c)return;
+  const ctx=c.getContext('2d');drawRadarOn(ctx,c.width,c.height);
+}
+
+function drawRadarOn(ctx,W,H){
+  const cx=W/2,cy=H/2+8,r=Math.min(W,H)*.34,st=S.player.stats,keys=Object.keys(st),labels=['Fuerza','Defensa','Velocidad','Intelig.','Maldición','Dominio'],n=keys.length,mx=30;
+  ctx.clearRect(0,0,W,H);
+  for(let ring=1;ring<=5;ring++){ctx.beginPath();for(let i=0;i<n;i++){const a=(Math.PI*2*i/n)-Math.PI/2,rr=r*(ring/5),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath();ctx.strokeStyle=ring===5?'#253060':'#161c2e';ctx.lineWidth=1;ctx.stroke();}
+  for(let i=0;i<n;i++){const a=(Math.PI*2*i/n)-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.strokeStyle='#1a2040';ctx.lineWidth=1;ctx.stroke();}
+  ctx.beginPath();keys.forEach((k,i)=>{const v=Math.min(st[k],mx),a=(Math.PI*2*i/n)-Math.PI/2,rr=r*(v/mx),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle='rgba(59,124,244,.2)';ctx.fill();ctx.strokeStyle='#3b7cf4';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='10px Rajdhani,sans-serif';ctx.fillStyle='#6a7898';ctx.textAlign='center';
+  keys.forEach((k,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2,lx=cx+(r+20)*Math.cos(a),ly=cy+(r+20)*Math.sin(a);ctx.fillText(labels[i],lx,ly+4);});
+  keys.forEach((k,i)=>{const v=Math.min(st[k],mx),a=(Math.PI*2*i/n)-Math.PI/2,rr=r*(v/mx),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#6ba3ff';ctx.fill();});
+}
+
+function renderGradeProg(){
+  const el=document.getElementById('gradeProgress');if(!el)return;
+  el.innerHTML=GRADES.map(g=>{
+    const achieved=gradeOrder(g.id)<gradeOrder(S.player.grade);const cur=g.id===S.player.grade;
+    return `<div class="flex iac g3_ mb3" style="opacity:${achieved||cur?1:.38}">
+      <div style="width:32px;height:32px;border-radius:6px;background:${g.color}18;border:2px solid ${cur?g.color:g.color+'44'};display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--fm);color:${g.color};font-weight:700">${g.short}</div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600">${g.label}</div><div class="t-xs c-muted mono">Nivel ${g.lvReq}+</div></div>
+      ${cur?'<span class="t-xs c-em mono">ACTUAL</span>':achieved?'<span style="font-size:13px">✓</span>':''}
+    </div>`;
+  }).join('');
+}
+
+function renderTechContent(){
+  const el=document.getElementById('techContent');if(!el)return;
+  const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
+  if(!tech){el.innerHTML=`<div class="card" style="text-align:center;padding:36px"><div style="font-size:40px;margin-bottom:10px">⚡</div><div class="c-muted t-sm mb3">Sin técnica innata asignada</div><button class="btn btn-p" onclick="openTechPick()">Elegir Técnica</button></div>`;return;}
+  el.innerHTML=`
+    <div class="card mb3">
+      <div class="flex iac g3_ mb3"><span style="font-size:30px">${tech.emoji}</span><div><div style="font-family:var(--fd);font-size:16px;color:${tech.rc}">${tech.name}</div><div class="t-xs mono" style="color:${tech.rc}">${tech.rarity} · ${tech.user}</div></div></div>
+      <div class="t-sm mb2" style="color:var(--ts);line-height:1.6">${tech.desc}</div>
+    </div>
+    <div class="card">
+      <div class="ct">🌳 Árbol de Habilidades — Maestría de Técnica</div>
+      <div class="t-xs mono c-muted mb3">Nv.${p.level} · Desbloqueadas: ${p.unlockedSkills.filter(id=>tech.skills.find(s=>s.id===id)).length}/${tech.skills.length}</div>
+      <div class="skill-tree">${buildSkillTree(tech,p)}</div>
+    </div>`;
+}
+
+function buildSkillTree(tech,p){
+  return tech.skills.map((sk,i)=>{
+    const unlocked=p.unlockedSkills.includes(sk.id);
+    const mastery=p.skillMastery[sk.id]||0;
+    const mastered=mastery>=100;
+    const canUnlock=p.level>=sk.lvlReq&&!unlocked;
+    const tColors={attack:'#e03030',defense:'#3ec86a',heal:'#3b7cf4',domain:'#f0c030',buff:'#a070f0',debuff:'#f08030'};
+    const tc=tColors[sk.type]||'#7a8ea0';
+    const masteryBonus=unlocked?Math.round((mastery/100)*50):0;
+    return `<div class="stree-row">
+      <div class="sk-node ${unlocked?'unlocked':''}">
+        <div class="sk-inner ${mastered?'mastered':unlocked?'unlocked':'locked'}" onclick="showSkillInfo('${tech.id}','${sk.id}')" style="${unlocked?`border-color:${tc}88`:''}">
+          <div class="sk-icon">${sk.icon}</div>
+          <div class="sk-name">${sk.name}</div>
+          <div class="sk-lvl" style="color:${unlocked?tc:'var(--tm)'}">Nv.${sk.lvlReq} · ${sk.cost===0?'Gratis':sk.cost+' EM'}</div>
+          ${unlocked?`<div class="sk-mastery-bar"><div class="sk-mastery-fill" style="width:${mastery}%"></div></div><div class="sk-mastery-lbl">${mastery}% maestría${masteryBonus>0?` (+${masteryBonus}% poder)`:''}</div>`:''}
+          ${canUnlock?`<button class="btn btn-p btn-sm" style="margin-top:5px;width:100%;font-size:10px" onclick="event.stopPropagation();unlockSkill('${sk.id}')">DESBLOQUEAR</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function unlockSkill(id){
+  if(S.player.unlockedSkills.includes(id))return;
+  const tech=TECHNIQUES[S.player.technique];if(!tech)return;
+  const sk=tech.skills.find(s=>s.id===id);if(!sk)return;
+  if(S.player.level<sk.lvlReq)return toast('Nivel insuficiente','error');
+  S.player.unlockedSkills.push(id);
+  if(!S.player.skillMastery[id])S.player.skillMastery[id]=0;
+  saveS();toast(`⚡ Habilidad desbloqueada: ${sk.name}`,'gold');
+  renderTechContent();
+}
+
+function showSkillInfo(techId,skId){
+  const tech=TECHNIQUES[techId];if(!tech)return;
+  const sk=tech.skills.find(s=>s.id===skId);if(!sk)return;
+  const unlocked=S.player.unlockedSkills.includes(sk.id);
+  const mastery=S.player.skillMastery[sk.id]||0;
+  const bonus=Math.round((mastery/100)*50);
+  const typeL={attack:'Ataque',defense:'Defensa',heal:'Curación',domain:'Dominio',buff:'Buff',debuff:'Debuff'};
+  document.getElementById('skInfoT').textContent=sk.name;
+  document.getElementById('skInfoBody').innerHTML=`
+    <div class="flex iac g3_ mb3"><span style="font-size:30px">${sk.icon}</span><div>
+      <div style="font-size:14px;font-weight:700">${sk.name}</div>
+      <div class="t-xs mono c-muted">${typeL[sk.type]} · Nivel ${sk.lvlReq}</div>
+    </div></div>
+    <div class="t-sm mb3" style="color:var(--ts);line-height:1.6">${sk.desc}</div>
+    ${sk.statusEffect?`<div class="mb3 t-xs">Estado infligible: <span class="status-pip sp-${sk.statusEffect}">${sk.statusEffect.toUpperCase()}</span></div>`:''}
+    <div class="g2 mb3">
+      <div class="sc" style="padding:9px"><div class="sl">Coste EM</div><div class="sv c-em" style="font-size:17px">${sk.cost===0?'Gratis':sk.cost}</div></div>
+      ${sk.power?`<div class="sc" style="padding:9px"><div class="sl">Poder base</div><div class="sv" style="font-size:17px;color:var(--red)">${sk.power}</div></div>`:''}
+    </div>
+    ${unlocked?`<div class="mb3"><div class="flex iac jb mb2 t-xs mono c-muted"><span>Maestría</span><span>${mastery}% ${bonus>0?`(+${bonus}% poder)`:''}</span></div><div class="pw" style="height:6px"><div class="pf p-mastery" style="width:${mastery}%"></div></div><div class="t-xs c-muted mt1">Usa la habilidad en combate para ganar maestría</div></div>`:`<button class="btn btn-p" style="width:100%" onclick="unlockSkill('${sk.id}');cm('skInfoMo')">⚡ Desbloquear (Nivel ${sk.lvlReq})</button>`}`;
+  document.getElementById('skInfoMo').classList.add('open');
+}
+
+// ── EXTRA TECHNIQUES ──
+function renderTechExtraContent(){
+  const el=document.getElementById('techExtraContent');if(!el)return;
+  const p=S.player;
+  const allTechs=Object.values(TECHNIQUES).filter(t=>t.id!==p.technique);
+  el.innerHTML=`<div class="card mb3">
+    <div class="ct">🔓 Técnicas Desbloqueables</div>
+    <div class="t-sm c-muted mb3" style="line-height:1.6">Puedes desbloquear técnicas secundarias completando los requisitos indicados. No reemplazas tu técnica principal — las usas como apoyo en combate.</div>
+    <div class="tech-unlock-grid">${allTechs.map(t=>{
+      const owned=p.secondaryTechs?.includes(t.id);
+      const req=t.unlockReq;
+      const canUnlock=req&&checkTechReq(req);
+      const status=owned?'owned':canUnlock?'available':'locked';
+      return `<div class="tech-unlock-card ${status}" onclick="${status==='available'?`unlockSecondaryTech('${t.id}')`:''}" >
+        <div style="font-size:26px">${t.emoji}</div>
+        <div class="tuc-name" style="color:${t.rc}">${t.name}</div>
+        <div class="tuc-rarity" style="color:${t.rc}">${t.rarity} · ${t.user}</div>
+        ${owned?'<div class="t-xs c-ok mt2">✓ Desbloqueada</div>'
+        :req?`<div class="tuc-req mt2">📋 ${req.desc}<br>${canUnlock?'<span style="color:var(--ok)">✓ Requisito cumplido</span>':'<span>Pendiente</span>'}</div>`
+        :'<div class="tuc-req mt2">Sin requisito conocido</div>'}
+        ${status==='available'?'<button class="btn btn-pur btn-sm" style="margin-top:8px;width:100%">Desbloquear</button>':''}
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+}
+
+function checkTechReq(req){
+  if(!req)return false;
+  const p=S.player;
+  if(req.type==='level')return p.level>=req.value;
+  if(req.type==='grade')return isGradeGte(p.grade,req.value);
+  if(req.type==='missions')return (p.missionsCompleted||0)>=req.value;
+  if(req.type==='boss')return !!(p.bossesKilled&&p.bossesKilled[req.value]);
+  return false;
+}
+
+function unlockSecondaryTech(id){
+  if(!S.player.secondaryTechs)S.player.secondaryTechs=[];
+  if(S.player.secondaryTechs.includes(id))return;
+  const tech=TECHNIQUES[id];if(!tech)return;
+  if(!checkTechReq(tech.unlockReq))return toast('No cumples el requisito','error');
+  S.player.secondaryTechs.push(id);
+  saveS();toast(`🌟 Técnica desbloqueada: ${tech.name}`,'gold');
+  log_(`Técnica secundaria desbloqueada: ${tech.name}`);
+  renderTechExtraContent();
+}
+
+// STATS TAB
+function renderStatsContent(){
+  const el=document.getElementById('statsContent');if(!el)return;
+  const p=S.player;
+  const sn={fuerza:'Fuerza',defensa:'Defensa',velocidad:'Velocidad',inteligencia:'Intelig.',maldicion:'Maldición',dominio:'Dominio'};
+  const se={fuerza:'⚔️',defensa:'🛡',velocidad:'💨',inteligencia:'🧠',maldicion:'👁',dominio:'⬡'};
+  el.innerHTML=`<div class="card mb3">
+    ${p.statPoints>0?`<div class="flex iac jb mb3" style="background:rgba(240,192,48,.08);border:1px solid rgba(240,192,48,.3);border-radius:var(--r);padding:9px 13px"><span class="t-sm">⭐ Puntos disponibles</span><span class="mono c-gold" style="font-size:17px;font-weight:700">${p.statPoints}</span></div>`:''}
+    <div class="stats-al">${Object.entries(p.stats).map(([k,v])=>`
+      <div class="sal"><div class="sn">${se[k]} ${sn[k]}</div><div class="sv">${v}</div>
+      <div class="sb"><div class="sf" style="width:${Math.min(v/30*100,100)}%"></div></div>
+      <div class="sbtns"><button class="sabt" onclick="allocSt('${k}',-1)" ${v<=1?'disabled':''}>−</button><button class="sabt" onclick="allocSt('${k}',1)" ${p.statPoints<=0?'disabled':''}>+</button></div></div>`).join('')}
+    </div>
+  </div>
+  <div class="card"><div class="ct">🕸 Radar de Stats</div><canvas id="radarC2" width="280" height="210"></canvas></div>`;
+  setTimeout(()=>{const c2=document.getElementById('radarC2');if(c2){drawRadarOn(c2.getContext('2d'),c2.width,c2.height);}},50);
+}
+
+function allocSt(stat,delta){
+  const p=S.player;
+  if(delta>0&&p.statPoints<=0)return toast('Sin puntos','error');
+  if(delta<0&&p.stats[stat]<=1)return;
+  p.stats[stat]+=delta;if(delta>0)p.statPoints--;else p.statPoints++;
+  saveS();renderStatsContent();renderRadar();
+}
+
+// EVALUACIONES
+function renderEvalContent(){
+  const el=document.getElementById('evalContent');if(!el)return;
+  const ev=computeEval();
+  el.innerHTML=`<div class="eval-tabs">
+    <div class="eval-tab active" onclick="switchETab('hoy',this)">Hoy</div>
+    <div class="eval-tab" onclick="switchETab('semana',this)">Semana</div>
+  </div>
+  <div id="eTab-hoy">${buildEvalPanel(ev,'Hoy')}</div>
+  <div id="eTab-semana" style="display:none">${buildEvalPanel(ev,'Esta semana')}</div>`;
+}
+
+function switchETab(t,el){
+  document.querySelectorAll('[id^=eTab-]').forEach(e=>e.style.display='none');
+  document.getElementById(`eTab-${t}`).style.display='block';
+  document.querySelectorAll('.eval-tab').forEach(e=>e.classList.remove('active'));el?.classList.add('active');
+}
+
+function computeEval(){
+  const today=new Date().toISOString().slice(0,10);
+  let total=0,done=0,doneHigh=0,totalHigh=0,onTime=0,failed=0;
+  S.tasks.forEach(t=>{
+    total++;if(t.priority==='alta')totalHigh++;
+    if(t.completed){done++;if(!isOD(t))onTime++;if(t.priority==='alta')doneHigh++;}
+    if(t.failed)failed++;
+  });
+  const cr=total>0?Math.round(done/total*100):0;
+  const hpr=totalHigh>0?Math.round(doneHigh/totalHigh*100):0;
+  const otr=done>0?Math.round(onTime/done*100):100;
+  const hd=S.habits.filter(h=>h.lastDone===today).length;
+  const mc=S.player.missionsCompleted||0;
+  const score=Math.min(100,Math.round(cr*.35+hpr*.3+otr*.2+Math.min(hd*10,10)+Math.min(mc*2,5)));
+  const grade=score>=90?'S':score>=75?'A':score>=60?'B':score>=40?'C':'D';
+  return {score,grade,total,done,failed,onTime,completionRate:cr,highPriorityRate:hpr,onTimeRate:otr,habitsDone:hd,missionsCompleted:mc};
+}
+
+function buildEvalPanel(ev,lbl){
+  const gc={S:'pg-s',A:'pg-a',B:'pg-b',C:'pg-c',D:'pg-d'};
+  const metrics=[
+    {label:'Tasa de completación',val:ev.completionRate,color:'var(--ok)'},
+    {label:'Alta prioridad',val:ev.highPriorityRate,color:'var(--red)'},
+    {label:'Entregadas a tiempo',val:ev.onTimeRate,color:'var(--emb)'},
+    {label:'Hábitos completados',val:Math.min(100,ev.habitsDone*20),color:'var(--gold)'},
+    {label:'Misiones de limpieza',val:Math.min(100,ev.missionsCompleted*5),color:'var(--purple)'},
+  ];
+  return `<div class="perf-grade">
+    <div class="pg-letter ${gc[ev.grade]||'pg-d'}">${ev.grade}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;mb2">Rendimiento ${lbl}</div>
+      <div class="pw" style="height:5px"><div class="pf p-perf" style="width:${ev.score}%"></div></div>
+      <div class="t-xs c-muted mono mt1">${ev.score}/100 · ${ev.done} completadas · ${ev.failed} fallos</div>
+    </div>
+  </div>
+  <div class="card">${metrics.map(m=>`<div class="metric-row">
+    <div class="mr-label">${m.label}</div>
+    <div class="mr-bar"><div class="mr-fill" style="width:${m.val}%;background:${m.color}"></div></div>
+    <div class="mr-val" style="color:${m.color}">Nv.${Math.max(1,Math.round(m.val/20))}</div>
+  </div>`).join('')}</div>`;
+}
+
+// ═══════════════════════════════
+// TECHNIQUE PICKER
+// ═══════════════════════════════
+function openTechPick(){
+  const techList=Object.values(TECHNIQUES);
+  const byGrade=techList.filter(t=>{
+    const go=[4,3,2,1,'semi','special'];
+    return go.indexOf(t.grade)<=go.indexOf(S.player.grade);
+  });
+  const shuffled=[...byGrade].sort(()=>Math.random()-.5).slice(0,3);
+  document.getElementById('techPickOpts').innerHTML=shuffled.map(t=>`
+    <button class="forg-btn" onclick="selectTech('${t.id}')" style="display:flex;align-items:flex-start;gap:11px;padding:12px">
+      <span style="font-size:24px;flex-shrink:0">${t.emoji}</span>
+      <div style="text-align:left">
+        <div style="font-size:13px;font-weight:700;color:${t.rc}">${t.name}</div>
+        <div class="t-xs mono c-muted mb1">${t.rarity} · ${t.user}</div>
+        <div class="t-sm" style="color:var(--ts);line-height:1.5">${t.desc}</div>
+        <div class="t-xs mono mt2" style="color:${t.rc}">${t.skills.length} habilidades</div>
+      </div>
+    </button>`).join('');
+  document.getElementById('techPickMo').classList.add('open');
+}
+
+function selectTech(id){
+  S.player.technique=id;S.player.unlockedSkills=[];S.player.skillMastery={};
+  const tech=TECHNIQUES[id];
+  tech.skills.filter(sk=>sk.lvlReq<=1).forEach(sk=>{
+    S.player.unlockedSkills.push(sk.id);S.player.skillMastery[sk.id]=0;
+  });
+  saveS();cm('techPickMo');uiAll();
+  toast(`⚡ Técnica seleccionada: ${tech.name}`,'gold');
+  renderPlayer();
+}
+
+// ═══════════════════════════════
+// TASKS / HABITS / GOALS
+// ═══════════════════════════════
+let editTkId=null,tFilter='todas',forgPendId=null;
+
+function openTaskModal(id=null){
+  editTkId=id;const today=new Date().toISOString().slice(0,10);
+  document.getElementById('taskMoT').textContent=id?'Editar Tarea':'Nueva Tarea';
+  if(id){const t=S.tasks.find(t=>t.id===id);document.getElementById('tkName').value=t.name;document.getElementById('tkPri').value=t.priority;document.getElementById('tkDif').value=t.difficulty;document.getElementById('tkS').value=t.startDate||today;document.getElementById('tkE').value=t.endDate||today;document.getElementById('tkN').value=t.notes||'';}
+  else{['tkName','tkN'].forEach(i=>document.getElementById(i).value='');document.getElementById('tkPri').value='media';document.getElementById('tkDif').value='normal';document.getElementById('tkS').value=today;document.getElementById('tkE').value=today;}
+  document.getElementById('taskMo').classList.add('open');
+}
+function saveTask(){
+  const name=document.getElementById('tkName').value.trim();if(!name)return toast('Nombre obligatorio','error');
+  const end=document.getElementById('tkE').value;if(!end)return toast('Deadline obligatorio','error');
+  const t={id:editTkId||'tk_'+Date.now(),name,priority:document.getElementById('tkPri').value,difficulty:document.getElementById('tkDif').value,startDate:document.getElementById('tkS').value,endDate:end,notes:document.getElementById('tkN').value,completed:false,createdAt:Date.now()};
+  if(editTkId){const i=S.tasks.findIndex(x=>x.id===editTkId);if(i>=0)S.tasks[i]={...S.tasks[i],...t,id:editTkId};}
+  else S.tasks.push(t);
+  saveS();cm('taskMo');renderMissions();renderDash();
+  toast(editTkId?'Tarea actualizada':`✓ +${calcEM(t)} EM al completar`,'em');
+}
+function isOD(t){return t.endDate&&new Date(t.endDate)<new Date(new Date().toISOString().slice(0,10))&&!t.completed;}
+function filterT(f,el){tFilter=f;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));el?.classList.add('active');renderTaskList();}
+function renderTaskList(){
+  let tasks=[...S.tasks];
+  if(tFilter==='activas')tasks=tasks.filter(t=>!t.completed&&!isOD(t));
+  else if(tFilter==='completadas')tasks=tasks.filter(t=>t.completed);
+  else if(tFilter==='vencidas')tasks=tasks.filter(t=>isOD(t));
+  const el=document.getElementById('taskList');
+  if(!tasks.length){el.innerHTML='<div class="c-muted t-sm" style="padding:16px 0">Sin tareas en esta categoría.</div>';return;}
+  el.innerHTML=tasks.map(t=>{
+    const od=isOD(t);
+    return `<div class="tcard ${od?'overdue':''} ${t.completed?'done-t':''}">
+      <button class="tck ${t.completed?'done':''}" onclick="toggleTask('${t.id}')">✓</button>
+      <div class="tb"><div class="tn">${t.name}</div>
+      <div class="tm-">${bBadge(t.priority,'p')}${bBadge(t.difficulty,'d')}<span class="td- ${od?'ov':''}">${t.endDate?'⏰ '+t.endDate:''}</span>${!t.completed?`<span class="ter">⚡${calcEM(t)}</span>`:''}</div></div>
+      <div class="ta-">
+        ${od&&!t.completed?`<button class="tab-" onclick="openForgive('${t.id}')">⚖️</button>`:''}
+        <button class="tab-" onclick="openTaskModal('${t.id}')">✏️</button>
+        <button class="tab- del" onclick="delTask('${t.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  if(t.completed){t.completed=false;saveS();renderMissions();return;}
+  t.completed=true;S.player.failStreak=0;
+  const em=calcEM(t),xp=calcXP(t);
+  addEM(em,`Tarea: "${t.name}"`);addXP(xp);
+  toast(`✅ +${em} EM · +${xp} XP — "${t.name}"`,'success');
+  log_(`Tarea completada: "${t.name}"`);
+  // Check if any cleaning mission benefits
+  updateMissionProgress(null,0);
+  saveS();renderMissions();renderDash();
+}
+function qComplete(id){toggleTask(id);}
+function delTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);saveS();renderMissions();renderDash();}
+function openForgive(id){forgPendId=id;const t=S.tasks.find(t=>t.id===id);document.getElementById('fgName').textContent=t.name;document.getElementById('fgReason').value='';document.getElementById('forgiveMo').classList.add('open');}
+function forgive(pardon){
+  const t=S.tasks.find(t=>t.id===forgPendId);if(!t)return;
+  if(pardon){t.completed=true;t.pardoned=true;S.player.failStreak=0;toast('⚖️ Tarea perdonada.','em');log_(`Perdonada: "${t.name}"`);}
+  else{t.failed=true;S.player.failStreak=(S.player.failStreak||0)+1;const sk=S.player.failStreak;if(sk>=3){const pen=sk*12;S.player.em=Math.max(0,S.player.em-pen);toast(`❌ Fallo #${sk}. −${pen} EM`,'error');}else toast(`❌ Fallo #${sk}`,'error');}
+  saveS();cm('forgiveMo');renderMissions();
+}
+function bBadge(v,type){
+  if(type==='p'){const m={alta:'b-alta',media:'b-media',baja:'b-baja'},l={alta:'Alta',media:'Media',baja:'Baja'};return `<span class="badge ${m[v]||''}">${l[v]||v}</span>`;}
+  const m={facil:'b-facil',normal:'b-normal',dificil:'b-dificil'},l={facil:'Fácil',normal:'Normal',dificil:'Difícil'};return `<span class="badge ${m[v]||''}">${l[v]||v}</span>`;
+}
+function openHabitModal(){document.getElementById('habitMo').classList.add('open');}
+function saveHabit(){const n=document.getElementById('hbName').value.trim();if(!n)return toast('Nombre obligatorio','error');S.habits.push({id:'h_'+Date.now(),name:n,freq:document.getElementById('hbFreq').value,emReward:parseInt(document.getElementById('hbEM').value)||20,streak:0,lastDone:null});saveS();cm('habitMo');renderMissions();toast('Hábito creado','success');}
+function renderHabitList(){const el=document.getElementById('habitList');if(!el)return;if(!S.habits.length){el.innerHTML='<div class="c-muted t-sm">Sin hábitos.</div>';return;}const today=new Date().toISOString().slice(0,10);el.innerHTML=S.habits.map(h=>{const dt=h.lastDone===today;return `<div class="hc"><button class="hchk ${dt?'done-t':''}" onclick="checkHabit('${h.id}')" ${dt?'disabled':''}>✓</button><div style="flex:1"><div style="font-size:13px;font-weight:600">${h.name}</div><div class="t-xs c-muted">${h.freq==='daily'?'Diario':'Semanal'} · ${h.emReward} EM/vez</div></div><div class="mono t-xs" style="color:var(--warn)">🔥 ${h.streak}</div><button class="tab- del" onclick="delHabit('${h.id}')">🗑</button></div>`;}).join('');}
+function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);if(h.lastDone===today)return;h.lastDone=today;h.streak++;addEM(h.emReward,`Hábito: "${h.name}"`);addXP(10);toast(`✅ +${h.emReward} EM — Hábito`,'success');saveS();renderHabitList();}
+function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);saveS();renderHabitList();}
+function openGoalModal(){document.getElementById('goalMo').classList.add('open');}
+function saveGoal(){const n=document.getElementById('glName').value.trim();if(!n)return toast('Nombre obligatorio','error');S.goals.push({id:'g_'+Date.now(),name:n,desc:document.getElementById('glDesc').value,endDate:document.getElementById('glE').value,emReward:parseInt(document.getElementById('glEM').value)||200,completed:false});saveS();cm('goalMo');renderMissions();toast('Objetivo creado','success');}
+function renderGoalList(){const el=document.getElementById('goalList');if(!el)return;if(!S.goals.length){el.innerHTML='<div class="c-muted t-sm">Sin objetivos.</div>';return;}el.innerHTML=S.goals.map(g=>`<div class="tcard ${g.completed?'done-t':''}"><button class="tck ${g.completed?'done':''}" onclick="toggleGoal('${g.id}')">✓</button><div class="tb"><div class="tn">${g.name}</div><div class="tm-"><span class="td-">${g.endDate||''}</span><span class="ter">⚡${g.emReward}</span></div></div><div class="ta-"><button class="tab- del" onclick="delGoal('${g.id}')">🗑</button></div></div>`).join('');}
+function toggleGoal(id){const g=S.goals.find(g=>g.id===id);if(!g||g.completed)return;g.completed=true;addEM(g.emReward,`Objetivo: "${g.name}"`);addXP(g.emReward);toast(`🏆 +${g.emReward} EM`,'gold');saveS();renderMissions();}
+function delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);saveS();renderGoalList();}
+function renderMissions(){renderTaskList();renderHabitList();renderGoalList();}
+function switchMTab(t,el){document.querySelectorAll('[id^=mtab-]').forEach(e=>e.style.display='none');document.getElementById('mtab-'+t).style.display='block';document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));el?.classList.add('active');}
+
+// ═══════════════════════════════
+// MAP
+// ═══════════════════════════════
+function renderMap(){
+  genDynamicEvents();
+  renderMapEventBanner();
+  const c=document.getElementById('mapZones');c.innerHTML='';
+  // Group label by region
+  S.zones.forEach(z=>{
+    const ul=isZoneUL(z);
+    const div=document.createElement('div');
+    div.className=`zone-n ${ul?'':'locked'}`;
+    div.style.left=z.x+'%';div.style.top=z.y+'%';
+    let pc=ul?(z.remaining>0?z.status:'safe'):'lk';
+    const hasBoss=z.events.some(e=>e.includes('boss'));
+    div.innerHTML=`<div class="zp ${pc} ${hasBoss?'event-boss':''}">${z.remaining>0?'⚠️':'🏙'}${z.events.length?`<div style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1px solid var(--bg-deep)"></div>`:''}</div><div class="zn">${z.name}</div><div class="zs">${ul?(z.remaining>0?z.remaining+' maldiciones':'Segura'):'🔒'}</div>`;
+    if(ul)div.onclick=()=>openZoneMo(z);
+    c.appendChild(div);
+  });
+}
+
+function isZoneUL(z){const go=[4,3,2,1,'semi','special'];return go.indexOf(S.player.grade)>=go.indexOf(z.unlockGrade);}
+
+function openZoneMo(z){
+  document.getElementById('zoneMoT').textContent=`📍 ${z.name}`;
+  document.getElementById('zoneMoBody').innerHTML=`
+    <div class="g3 mb3">
+      <div style="text-align:center"><div class="t-xs c-muted mono">Ciudad</div><div class="t-sm fw6 mt1">${z.city}</div></div>
+      <div style="text-align:center"><div class="t-xs c-muted mono">Maldiciones</div><div class="t-sm fw6 c-red mt1">${z.remaining}/${z.total}</div></div>
+      <div style="text-align:center"><div class="t-xs c-muted mono">Amenaza</div><div class="t-sm fw6 mt1">${z.threat}</div></div>
+    </div>
+    <div class="pw mb3" style="height:6px"><div class="pf" style="width:${z.total>0?(z.remaining/z.total*100):0}%;background:linear-gradient(90deg,var(--red),#ff7050)"></div></div>
+    ${z.events.length?`<div class="mb3">${z.events.map(e=>`<div class="flex iac g2_ mb2"><div class="mld" style="background:var(--red)"></div><span class="t-sm">${e.includes('boss')?'⚔️ Jefe activo':'🌀 Raid disponible'}</span></div>`).join('')}</div>`:''}
+    ${z.remaining>0?`<button class="btn btn-d" style="width:100%" onclick="cm('zoneMo');nav('battle');setTimeout(()=>filterBoardToZone('${z.id}'),100)">⚔️ Ver Misiones de esta Zona</button>`:'<div class="c-ok t-sm">✓ Zona limpia</div>'}`;
+  document.getElementById('zoneMo').classList.add('open');
+}
+
+// ═══════════════════════════════
+// MISSION BOARD
+// ═══════════════════════════════
+function getMissionStatus(m){
+  const accepted=S.activeMissions?.find(am=>am.id===m.id);
+  const done=S.completedMissions?.find(cm=>cm.id===m.id);
+  return done?'completed':accepted?'accepted':'available';
+}
+
+function canAcceptMission(m){
+  if(!isGradeGte(S.player.grade,m.minGrade))return false;
+  if(S.player.level<m.minLevel)return false;
+  return true;
+}
+
+let boardZoneFilter=null;
+function filterBoardToZone(zid){boardZoneFilter=zid;renderMissionBoard();switchBoardTab('disponibles',null);}
+
+function renderMissionBoard(){
+  boardZoneFilter=null;
+  renderBoardTab('disponibles');
+  renderBoardTab('aceptadas');
+  renderBoardTab('completadas');
+}
+
+function switchBoardTab(tab,el){
+  document.querySelectorAll('[id^=boardTab-]').forEach(e=>e.style.display='none');
+  document.getElementById(`boardTab-${tab}`).style.display='block';
+  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));
+  el?.classList.add('active');
+}
+
+function renderBoardTab(tab){
+  if(tab==='disponibles'){
+    const avail=ZONE_MISSIONS_TPL.filter(m=>{
+      const st=getMissionStatus(m);
+      if(st==='completed'&&!m.repeatable)return false;
+      if(st==='accepted')return false;
+      return canAcceptMission(m);
+    });
+    document.getElementById('missionBoardAvail').innerHTML=avail.length?avail.map(m=>missionCardHtml(m)).join(''):'<div class="c-muted t-sm">No hay misiones disponibles para tu nivel/grado actual.</div>';
+  }
+  else if(tab==='aceptadas'){
+    const acc=S.activeMissions||[];
+    document.getElementById('missionBoardAccepted').innerHTML=acc.length?acc.map(m=>missionCardHtml(m,true)).join(''):'<div class="c-muted t-sm">Sin misiones aceptadas. Acepta misiones del tablero.</div>';
+  }
+  else if(tab==='completadas'){
+    const done=S.completedMissions||[];
+    document.getElementById('missionBoardDone').innerHTML=done.length?done.map(m=>missionCardHtml(m,false,true)).join(''):'<div class="c-muted t-sm">Sin misiones completadas aún.</div>';
+  }
+}
+
+function missionCardHtml(m,accepted=false,completed=false){
+  const zone=S.zones.find(z=>z.id===m.zoneId)||{name:'?',remaining:0};
+  const progress=accepted?((S.activeMissions.find(am=>am.id===m.id)||{}).progress||0):0;
+  const pct=m.killCount>0?(progress/m.killCount*100):0;
+  return `<div class="mboard-card diff-${m.difficulty} ${accepted?'accepted':''} ${completed?'completed':''}">
+    <div class="mb-header">
+      <div>
+        <span class="mb-diff-tag">${m.difficulty.toUpperCase()}</span>
+        <div class="mb-title mt1">${m.title}</div>
+      </div>
+      <div class="t-xs mono c-muted" style="text-align:right">📍 ${zone.name}<br>${zone.remaining} maldiciones</div>
+    </div>
+    <div class="mb-desc">${m.desc}</div>
+    ${accepted?`<div class="mb-progress"><div class="mb-prog-lbl"><span>Progreso</span><span>${progress}/${m.killCount}</span></div><div class="pw" style="height:5px"><div class="pf p-em" style="width:${pct}%"></div></div></div>`:''}
+    <div class="mb-rewards">
+      <span class="mb-rew">⚡ +${m.reward.em} EM</span>
+      <span class="mb-rew">⭐ +${m.reward.xp} XP</span>
+      <span class="mb-rew">🗡 ${m.killCount} eliminaciones</span>
+      ${m.repeatable?`<span class="mb-rew" style="color:var(--ok)">↺ Repetible</span>`:'<span class="mb-rew" style="color:var(--warn)">! Única</span>'}
+    </div>
+    <div class="flex iac jb">
+      <div class="t-xs c-muted mono">Grado ${m.minGrade}+ · Nivel ${m.minLevel}+</div>
+      ${completed?'<span class="t-xs c-ok mono">✓ COMPLETADA</span>':
+        accepted?`<button class="btn btn-d btn-sm" onclick="startMissionBattle('${m.id}')">⚔️ Combatir</button>`:
+        `<button class="btn btn-p btn-sm" onclick="acceptMission('${m.id}')">✓ Aceptar Misión</button>`}
+    </div>
+  </div>`;
+}
+
+function acceptMission(id){
+  const m=ZONE_MISSIONS_TPL.find(m=>m.id===id);if(!m)return;
+  if(!canAcceptMission(m))return toast('No cumples los requisitos','error');
+  if(!S.activeMissions)S.activeMissions=[];
+  if(S.activeMissions.find(am=>am.id===id))return toast('Ya tienes esta misión aceptada','em');
+  S.activeMissions.push({...m,progress:0,acceptedAt:Date.now()});
+  saveS();toast(`📋 Misión aceptada: ${m.title}`,'em');
+  renderBoardTab('disponibles');renderBoardTab('aceptadas');renderDash();
+}
+
+function startMissionBattle(mId){
+  const m=S.activeMissions?.find(am=>am.id===mId);if(!m)return;
+  const zone=S.zones.find(z=>z.id===m.zoneId);if(!zone)return;
+  if(zone.remaining<=0)return toast('Esta zona ya está limpia. Espera a que se regenere.','em');
+  document.getElementById('missionBoardSel').style.display='none';
+  document.getElementById('battleMain').style.display='block';
+  activeMissionId=mId;
+  startCombat(m.zoneId);
+}
+
+// ═══════════════════════════════
+// ENEMIES
+// ═══════════════════════════════
+const ENEMIES={
+  training:[{name:'Maldición Débil',hp:50,maxHp:50,atk:7,def:1,xp:25,em:15,sprite:'curse_low',emoji:'👹',tags:['MALDICION','DEBIL'],statusAbilities:[]},{name:'Fantasma Maldito',hp:40,maxHp:40,atk:5,def:0,xp:18,em:10,sprite:'curse_low',emoji:'👻',tags:['ESPIRITU'],statusAbilities:['poison']}],
+  shibuya:[{name:'Maldición Grado 3',hp:120,maxHp:120,atk:20,def:6,xp:70,em:30,sprite:'curse_mid',emoji:'👺',tags:['GRADO 3'],statusAbilities:['bleed']},{name:'Espíritu Corrupto',hp:100,maxHp:100,atk:17,def:4,xp:60,em:25,sprite:'curse_mid',emoji:'🔮',tags:['ESPIRITU'],statusAbilities:['poison']},{name:'Maldición Flamígera',hp:140,maxHp:140,atk:28,def:9,xp:90,em:40,sprite:'curse_high',emoji:'🔥',tags:['FUEGO'],statusAbilities:['burn']}],
+  shinjuku:[{name:'Maldición Urbana',hp:90,maxHp:90,atk:16,def:5,xp:55,em:22,sprite:'curse_mid',emoji:'🏙',tags:['MALDICION'],statusAbilities:['bleed']},{name:'Entidad Maldita',hp:110,maxHp:110,atk:19,def:7,xp:65,em:28,sprite:'curse_mid',emoji:'💀',tags:['ENTIDAD'],statusAbilities:['paralyze']}],
+  akihabara:[{name:'Maldición Tecnológica',hp:80,maxHp:80,atk:15,def:4,xp:50,em:20,sprite:'curse_mid',emoji:'⚡',tags:['TECH'],statusAbilities:['paralyze']}],
+  asakusa:[{name:'Espíritu del Templo',hp:70,maxHp:70,atk:11,def:7,xp:40,em:18,sprite:'curse_low',emoji:'⛩',tags:['ESPIRITU'],statusAbilities:[]}],
+  harajuku:[{name:'Maldición Grado 2',hp:200,maxHp:200,atk:38,def:14,xp:130,em:60,sprite:'curse_high',emoji:'🌑',tags:['GRADO 2'],statusAbilities:['bleed','poison']},{name:'Entidad Ancestral',hp:180,maxHp:180,atk:32,def:16,xp:110,em:55,sprite:'curse_high',emoji:'👁',tags:['ANCESTRAL'],statusAbilities:['freeze']}],
+  ikebukuro:[{name:'Maldición Comercial',hp:130,maxHp:130,atk:23,def:8,xp:80,em:35,sprite:'curse_mid',emoji:'🛒',tags:['MALDICION'],statusAbilities:['bleed']}],
+  roppongi:[{name:'Maldición Grado 1',hp:280,maxHp:280,atk:52,def:18,xp:200,em:90,sprite:'curse_high',emoji:'💎',tags:['GRADO 1'],statusAbilities:['bleed','burn','paralyze']}],
+  osaka_namba:[{name:'Maldición de Namba',hp:140,maxHp:140,atk:26,def:10,xp:85,em:38,sprite:'curse_mid',emoji:'🌃',tags:['MALDICION'],statusAbilities:['bleed']}],
+  osaka_umeda:[{name:'Espíritu Nocturno',hp:100,maxHp:100,atk:19,def:7,xp:62,em:27,sprite:'curse_mid',emoji:'🌙',tags:['ESPIRITU'],statusAbilities:['freeze']}],
+  kyoto_gion:[{name:'Demonio de Gion',hp:160,maxHp:160,atk:30,def:12,xp:100,em:45,sprite:'curse_high',emoji:'⛩',tags:['DEMONIO'],statusAbilities:['poison','bleed']}],
+  kyoto_arashiyama:[{name:'Espíritu del Bosque',hp:90,maxHp:90,atk:18,def:9,xp:58,em:24,sprite:'curse_mid',emoji:'🌿',tags:['ESPIRITU'],statusAbilities:['poison']}],
+  sendai:[{name:'Maldición del Norte',hp:120,maxHp:120,atk:22,def:8,xp:75,em:32,sprite:'curse_mid',emoji:'🏔',tags:['MALDICION'],statusAbilities:['freeze']}],
+  hiroshima:[{name:'Maldición de Hiroshima',hp:150,maxHp:150,atk:28,def:11,xp:95,em:42,sprite:'curse_high',emoji:'🌸',tags:['MALDICION'],statusAbilities:['bleed']}],
+  fukuoka:[{name:'Espíritu Mercader',hp:110,maxHp:110,atk:20,def:7,xp:68,em:30,sprite:'curse_mid',emoji:'⚓',tags:['ESPIRITU'],statusAbilities:['paralyze']}],
+  sapporo:[{name:'Maldición Gélida',hp:80,maxHp:80,atk:14,def:8,xp:48,em:20,sprite:'curse_low',emoji:'❄️',tags:['HIELO'],statusAbilities:['freeze']}],
+  nagoya:[{name:'Maldición Industrial',hp:115,maxHp:115,atk:21,def:7,xp:72,em:31,sprite:'curse_mid',emoji:'🏭',tags:['MALDICION'],statusAbilities:['burn']}],
+  yokohama:[{name:'Maldición Portuaria',hp:125,maxHp:125,atk:23,def:9,xp:78,em:34,sprite:'curse_mid',emoji:'🚢',tags:['MALDICION'],statusAbilities:['poison']}],
+  kobe:[{name:'Espíritu del Puerto',hp:95,maxHp:95,atk:17,def:6,xp:60,em:26,sprite:'curse_mid',emoji:'⚓',tags:['ESPIRITU'],statusAbilities:['bleed']}],
+  jujutsu_high:[{name:'Shikigami de Entrenamiento',hp:30,maxHp:30,atk:4,def:0,xp:10,em:5,sprite:'curse_low',emoji:'🥋',tags:['TRAINING'],statusAbilities:[]}],
+};
+
+// STATUS EFFECT DEFINITIONS
+const STATUS_DEFS={
+  poison:{label:'VENENO',icon:'☣️',cls:'sp-poison',dmgPerTurn:12,turns:3,desc:'Daño por veneno cada turno'},
+  burn:{label:'QUEMADURA',icon:'🔥',cls:'sp-burn',dmgPerTurn:15,turns:2,desc:'Quemadura. Daño por fuego'},
+  bleed:{label:'SANGRADO',icon:'🩸',cls:'sp-bleed',dmgPerTurn:10,turns:4,desc:'Sangrado. Daño continuo'},
+  paralyze:{label:'PARÁLISIS',icon:'⚡',cls:'sp-paralyze',skipChance:.4,turns:2,desc:'Parálisis. Puede perder el turno'},
+  freeze:{label:'CONGELADO',icon:'❄️',cls:'sp-freeze',skipChance:.6,turns:1,desc:'Congelado. Pierde el turno'},
+  boost:{label:'POTENCIADO',icon:'💪',cls:'sp-boost',dmgMult:1.3,turns:2,desc:'Daño aumentado'},
+  barrier:{label:'BARRERA',icon:'🛡',cls:'sp-barrier',blockPct:.7,turns:1,desc:'Absorbe 70% del próximo ataque'},
+};
+
+// ═══════════════════════════════
+// COMBAT SYSTEM
+// ═══════════════════════════════
+let BD={};let timerInt=null;let activeMissionId=null;
+
+function startCombat(zoneId){
+  const zone=S.zones.find(z=>z.id===zoneId);if(!zone)return;
+  const pool=ENEMIES[zoneId]||ENEMIES.training;
+  const enemy=JSON.parse(JSON.stringify(pool[Math.floor(Math.random()*pool.length)]));
+  const p=S.player;
+  BD={zoneId,zone,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,
+      playerStatus:[],enemyStatus:[],dmgMult:1,ended:false};
+  updateCombat();buildBActions();clearCLog();
+  clog(`⚔️ ${zone.name} — ${zone.remaining} maldiciones restantes`,'cl-info');
+  clog(`Enemigo: ${enemy.name}`,'cl-log');
+  document.getElementById('bResOverlay').innerHTML='';
+  startTimer();
+}
+
+function updateCombat(){
+  const bd=BD,p=S.player,z=bd.zone;if(!bd.enemy)return;
+  // Zone progress bar
+  const zp=document.getElementById('zoneProg');
+  const am=S.activeMissions?.find(m=>m.id===activeMissionId);
+  if(zp&&z){
+    zp.innerHTML=`<div class="zone-prog-bar">
+      <div class="flex iac jb mb2">
+        <div class="zp-name">📍 ${z.name} ${am?`— Misión: ${am.title}`:''}</div>
+        <div class="t-sm mono c-muted">${z.remaining} maldiciones</div>
+      </div>
+      <div class="zp-bar-wrap"><div class="zp-fill" style="width:${z.total>0?(z.remaining/z.total*100):0}%"></div></div>
+      ${am?`<div class="zp-stats"><span>Objetivo: ${am.progress||0}/${am.killCount}</span><span>⚡${p.em}/${p.maxEm} EM</span></div>`:'<div class="zp-stats"><span>0</span><span>${z.total} total</span></div>'}
+    </div>`;
+  }
+  // Top bar
+  document.getElementById('bTopZone').textContent=z?.name||'?';
+  document.getElementById('bTopEnemy').textContent=bd.enemy.name;
+  // Enemy panel
+  document.getElementById('bEnemyName').textContent=bd.enemy.name;
+  document.getElementById('bEnemyHPTxt').textContent=`${bd.enemy.hp}/${bd.enemy.maxHp}`;
+  const ehp=bd.enemy.hp/bd.enemy.maxHp*100;
+  const ehpEl=document.getElementById('bEnemyHP');ehpEl.style.width=ehp+'%';
+  ehpEl.className='ba-hp-fill'+(ehp<25?' crit':ehp<50?' low':'');
+  document.getElementById('bEnemyTags').innerHTML=(bd.enemy.tags||[]).map(t=>`<span class="type-tag" style="background:rgba(224,48,48,.25);color:#fff">${t}</span>`).join('');
+  renderStatusRow('enemyStatusRow',bd.enemyStatus);
+  // Player panel
+  document.getElementById('bPlayerName').textContent=p.name;
+  document.getElementById('bPlayerHPTxt').textContent=`${bd.playerHP}/${bd.playerMaxHP}`;
+  const php=bd.playerHP/bd.playerMaxHP*100;
+  const phpEl=document.getElementById('bPlayerHP');phpEl.style.width=php+'%';
+  phpEl.className='ba-hp-fill'+(php<25?' crit':php<50?' low':'');
+  document.getElementById('bEM').textContent=p.em;
+  document.getElementById('bPromptName').textContent=p.name;
+  renderStatusRow('playerStatusRow',bd.playerStatus);
+  // Sprites
+  const ps=document.getElementById('bPlayerSprite');
+  if(p.playerSprite){ps.innerHTML=`<img src="${p.playerSprite}" alt="">`;}else{ps.textContent='🧑';}
+  const es=document.getElementById('bEnemySprite');
+  if(S.sprites[bd.enemy.sprite]){es.innerHTML=`<img src="${S.sprites[bd.enemy.sprite]}" alt="">`;}else{es.textContent=bd.enemy.emoji;}
+}
+
+function renderStatusRow(elId,statuses){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=(statuses||[]).filter(s=>s.turns>0).map(s=>{
+    const d=STATUS_DEFS[s.type];if(!d)return '';
+    return `<span class="status-pip ${d.cls}">${d.icon} ${d.label} (${s.turns})</span>`;
+  }).join('');
+}
+
+function applyStatus(target,statusType,turns){
+  const existing=target.find(s=>s.type===statusType);
+  if(existing){existing.turns=Math.max(existing.turns,turns);}
+  else{target.push({type:statusType,turns});}
+}
+
+function processStatusEffects(target,targetLabel){
+  let totalDmg=0;
+  target.forEach(s=>{
+    const d=STATUS_DEFS[s.type];if(!d)return;
+    if(d.dmgPerTurn){totalDmg+=d.dmgPerTurn;clog(`${d.icon} ${targetLabel} ${d.label}: −${d.dmgPerTurn} HP`,'cl-status');}
+    s.turns--;
+    if(s.turns<=0)clog(`${d.icon} ${d.label} de ${targetLabel} terminó.`,'cl-log');
+  });
+  // Remove expired
+  const remove=target.filter(s=>s.turns<=0);
+  remove.forEach(s=>{const i=target.indexOf(s);if(i>=0)target.splice(i,1);});
+  return totalDmg;
+}
+
+function isParalyzed(statuses){
+  return statuses.some(s=>{
+    const d=STATUS_DEFS[s.type];
+    return d&&d.skipChance&&Math.random()<d.skipChance;
+  });
+}
+
+function buildBActions(){
+  const el=document.getElementById('bActGrid');
+  const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
+  const btns=[];
+  btns.push(`<button class="ba-btn basic" onclick="bAction('basic')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--ok)">GRATIS · Poder: ${10+Math.round(p.stats.fuerza*1.5)}</div><div class="bbt">Ataque físico sin coste EM</div></button>`);
+  if(tech){
+    const usable=tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id));
+    usable.forEach(sk=>{
+      const afford=sk.cost===0||p.em>=sk.cost;
+      const mastery=p.skillMastery[sk.id]||0;
+      const isDomain=sk.type==='domain';
+      btns.push(`<button class="ba-btn ${isDomain?'domain-btn':''} ${afford?'':'disabled'}" ${!afford?'disabled':''} onclick="bAction('skill','${sk.id}')">
+        <div class="bbn">${sk.icon} ${sk.name}</div>
+        <div class="bbc">${sk.cost===0?'GRATIS':sk.cost+' EM'}${sk.power?` · ${sk.power}`:''} ${mastery>0?`<span style="color:var(--purple)">(🌟${mastery}%)</span>`:''}</div>
+        <div class="bbt">${sk.type}${sk.statusEffect?` · inflige ${sk.statusEffect}`:''}</div>
+      </button>`);
+    });
+  }
+  btns.push(`<button class="ba-btn flee" onclick="bAction('flee')"><div class="bbn">🏃 Huir</div><div class="bbc" style="color:var(--warn)">60% éxito</div><div class="bbt">Escapar del combate</div></button>`);
+  el.innerHTML=btns.join('');
+}
+
+function startTimer(){
+  clearInterval(timerInt);let sec=12;
+  const tf=document.getElementById('bTimerFill'),ts=document.getElementById('bTopTimer');
+  timerInt=setInterval(()=>{
+    if(BD.ended){clearInterval(timerInt);return;}
+    sec--;ts.textContent=sec+'s';tf.style.width=(sec/12*100)+'%';
+    if(sec<=3)tf.classList.add('urg');else tf.classList.remove('urg');
+    if(sec<=0){clearInterval(timerInt);clog('⏰ ¡Tiempo agotado!','cl-dmg');enemyTurn();}
+  },1000);
+}
+
+function bAction(type,skillId){
+  if(BD.ended||BD.turn!=='player')return;
+  clearInterval(timerInt);
+  document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=true);
+
+  // Check paralysis
+  if(isParalyzed(BD.playerStatus)){
+    clog('⚡ ¡Paralizado! Pierdes el turno.','cl-status');
+    setTimeout(enemyTurn,800);return;
+  }
+
+  const p=S.player,enemy=BD.enemy,tech=p.technique?TECHNIQUES[p.technique]:null;
+  let dmg=0,heal=0,cost=0;let aName='';let skillId_=null;
+
+  if(type==='flee'){
+    if(Math.random()<.6){clog('🏃 ¡Huiste!','cl-info');setTimeout(()=>endCombat(false),700);}
+    else{clog('❌ No pudiste huir.','cl-dmg');setTimeout(enemyTurn,700);}
+    return;
+  }
+
+  if(type==='basic'){
+    dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);aName='Golpe Básico';
+  } else if(type==='skill'&&tech){
+    const sk=tech.skills.find(s=>s.id===skillId);if(!sk)return;
+    if(sk.cost>0&&p.em<sk.cost){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    cost=sk.cost;aName=sk.name;skillId_=sk.id;
+
+    const mastBonus=getMasteryBonus(sk.id);
+
+    if(sk.type==='attack'||sk.type==='domain'){
+      dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mastBonus);
+      if(sk.type==='domain'){
+        triggerDomainAnim(tech.name+' — '+sk.name);
+        dmg=Math.round(dmg*1.4);
+        clog(`⬡ DOMINIO EXPANDIDO: ${sk.name}!`,'cl-domain');
+      }
+      // Apply status effect from skill
+      if(sk.statusEffect&&sk.statusEffect!=='boost'&&sk.statusEffect!=='barrier'){
+        const d=STATUS_DEFS[sk.statusEffect];
+        if(d&&Math.random()<.65){
+          applyStatus(BD.enemyStatus,sk.statusEffect,d.turns);
+          clog(`${d.icon} Infligido: ${d.label} al ${enemy.name}`,'cl-status');
+          floatDmg(d.label,'status');
+        }
+      }
+    } else if(sk.type==='heal'){
+      heal=Math.round((sk.power+p.stats.defensa*1.5)*mastBonus);
+    } else if(sk.type==='defense'){
+      applyStatus(BD.playerStatus,'barrier',1);
+      clog(`🛡 ${aName}: barrera activada.`,'cl-def');
+    } else if(sk.type==='buff'){
+      applyStatus(BD.playerStatus,sk.statusEffect||'boost',2);
+      clog(`⚡ ${aName}: potenciado.`,'cl-info');
+    } else if(sk.type==='debuff'){
+      dmg=Math.round((sk.power||0)*mastBonus);
+      if(sk.statusEffect){
+        const d=STATUS_DEFS[sk.statusEffect];
+        if(d){applyStatus(BD.enemyStatus,sk.statusEffect,d.turns);clog(`${d.icon} ${sk.statusEffect} aplicado.`,'cl-status');}
+      }
+    }
+  }
+
+  if(cost>0&&!useEM(cost)){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+
+  // Check player boost status
+  const boost=BD.playerStatus.find(s=>s.type==='boost');
+  if(boost&&dmg>0)dmg=Math.round(dmg*(STATUS_DEFS.boost?.dmgMult||1.3));
+
+  // Apply damage
+  if(dmg>0){
+    const fd=Math.max(1,dmg-Math.round((enemy.def||0)*.4));
+    enemy.hp-=fd;
+    clog(`💥 ${aName}: −${fd} HP al ${enemy.name}`,'cl-hit');
+    floatDmg(fd,'ed');aniSprite('bPlayerSprite','atk');aniSprite('bEnemySprite','shaking');
+    // Gain mastery
+    if(skillId_)gainMastery(skillId_,2);
+  }
+  if(heal>0){BD.playerHP=Math.min(BD.playerHP+heal,BD.playerMaxHP);clog(`💚 ${aName}: +${heal} HP`,'cl-hit');}
+
+  // Process player status effects tick
+  const playerStatusDmg=processStatusEffects(BD.playerStatus,'Tú');
+  if(playerStatusDmg>0)BD.playerHP=Math.max(0,BD.playerHP-playerStatusDmg);
+
+  updateCombat();buildBActions();
+
+  if(enemy.hp<=0){enemy.hp=0;updateCombat();setTimeout(()=>combatVictory(),600);return;}
+  BD.turn='enemy';
+  setTimeout(enemyTurn,1100);
+}
+
+function enemyTurn(){
+  if(BD.ended)return;
+  const enemy=BD.enemy,p=S.player;
+
+  // Check enemy paralysis/freeze
+  if(isParalyzed(BD.enemyStatus)){
+    clog(`⚡ ${enemy.name} está paralizado. Pierde el turno.`,'cl-status');
+    processStatusEffects(BD.enemyStatus,enemy.name);
+    BD.turn='player';setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},400);
+    return;
+  }
+
+  let dmg=(enemy.atk||12)+Math.round(Math.random()*6);
+  // Barrier check
+  const barrier=BD.playerStatus.find(s=>s.type==='barrier');
+  if(barrier){const blockPct=STATUS_DEFS.barrier?.blockPct||.7;dmg=Math.round(dmg*(1-blockPct));BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);clog(`🛡 Barrera absorbe el ataque! (−${Math.round(blockPct*100)}% daño)`,'cl-def');}
+  dmg=Math.max(1,dmg-Math.round(p.stats.defensa*1.1));
+
+  if(Math.random()<.08){clog(`✨ MISS — ${enemy.name} ha fallado`,'cl-info');floatDmg('MISS','ms');}
+  else{
+    BD.playerHP=Math.max(0,BD.playerHP-dmg);
+    clog(`🔴 ${enemy.name}: −${dmg} HP`,'cl-dmg');
+    floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');
+    // Enemy tries to apply status
+    const abilList=enemy.statusAbilities||[];
+    if(abilList.length&&Math.random()<.3){
+      const abil=abilList[Math.floor(Math.random()*abilList.length)];
+      const d=STATUS_DEFS[abil];
+      if(d&&!BD.playerStatus.find(s=>s.type===abil)){
+        applyStatus(BD.playerStatus,abil,d.turns);
+        clog(`${d.icon} ¡${enemy.name} te infligió ${d.label}!`,'cl-status');
+      }
+    }
+  }
+
+  // Process enemy status ticks
+  const enemyStatusDmg=processStatusEffects(BD.enemyStatus,enemy.name);
+  if(enemyStatusDmg>0){
+    BD.enemy.hp=Math.max(0,BD.enemy.hp-enemyStatusDmg);
+    floatDmg(enemyStatusDmg,'ed');
+  }
+
+  updateCombat();
+  if(BD.playerHP<=0){BD.playerHP=0;updateCombat();setTimeout(()=>combatDefeat(),600);return;}
+  if(BD.enemy.hp<=0){BD.enemy.hp=0;updateCombat();setTimeout(()=>combatVictory(),600);return;}
+
+  BD.turn='player';
+  setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},400);
+}
+
+function combatVictory(){
+  if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
+  const enemy=BD.enemy,zone=BD.zone;
+  addXP(enemy.xp||30);addEM(enemy.em||15,`Victoria vs ${enemy.name}`);
+  S.player.hp=BD.playerHP;
+  if(zone.remaining>0)zone.remaining--;
+  if(zone.remaining===0){zone.status='safe';toast(`✅ Zona ${zone.name} limpiada!`,'gold');}
+  // Update mission progress
+  updateMissionProgress(zone.id,1);
+  saveS();log_(`Victoria vs ${enemy.name} en ${zone.name}`);
+  showCombatResult(true,enemy.xp,enemy.em,zone.remaining);
+  clog(`🏆 ¡Victoria! +${enemy.xp}XP +${enemy.em}EM`,'cl-special');
+}
+
+function combatDefeat(){
+  if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
+  S.player.hp=Math.max(1,Math.round(BD.playerMaxHP*.08));
+  const el=Math.round(S.player.em*.12);S.player.em=Math.max(0,S.player.em-el);
+  saveS();log_(`Derrota vs ${BD.enemy.name}`);
+  showCombatResult(false,0,-el,BD.zone.remaining);
+  clog(`💀 Derrota. −${el} EM`,'cl-dmg');
+}
+
+function updateMissionProgress(zoneId,kills){
+  if(!S.activeMissions)return;
+  S.activeMissions.forEach(m=>{
+    if(!zoneId||m.zoneId===zoneId){
+      m.progress=(m.progress||0)+kills;
+      if(m.progress>=m.killCount){
+        completeMission(m.id);
+      }
+    }
+  });
+}
+
+function completeMission(id){
+  const m=S.activeMissions?.find(m=>m.id===id);if(!m)return;
+  S.activeMissions=S.activeMissions.filter(m=>m.id!==id);
+  if(!S.completedMissions)S.completedMissions=[];
+  S.completedMissions.push({...m,completedAt:Date.now()});
+  S.player.missionsCompleted=(S.player.missionsCompleted||0)+1;
+  addEM(m.reward.em,`Misión completada: ${m.title}`);
+  addXP(m.reward.xp);
+  toast(`🏆 ¡MISIÓN COMPLETADA! ${m.title} +${m.reward.xp}XP +${m.reward.em}EM`,'gold');
+  log_(`Misión completada: ${m.title}`);
+  saveS();
+}
+
+function showCombatResult(win,xp,em,remCurses){
+  const o=document.getElementById('bResOverlay');
+  o.innerHTML=`<div class="bres">
+    <div class="bres-title ${win?'win':'lose'}">${win?'⚔️ VICTORIA':'💀 DERROTA'}</div>
+    ${win?`<div class="bres-rwds"><div><div class="t-xs c-muted">XP</div><div class="rw-val c-em">+${xp}</div></div><div><div class="t-xs c-muted">EM</div><div class="rw-val c-em">+${em}</div></div><div><div class="t-xs c-muted">Restantes</div><div class="rw-val c-red">${remCurses}</div></div></div>`:'<div class="t-sm c-muted">HP mínimo. Recupera energía.</div>'}
+    ${win&&remCurses>0?`<button class="btn btn-d" onclick="continueCombat()">⚔️ Siguiente (${remCurses} restantes)</button>`:win?'<button class="btn btn-p" onclick="endCombat(true)">✅ Zona limpiada</button>':''}
+    <button class="btn btn-g" onclick="endCombat(${win})">← Volver al tablero</button>
+  </div>`;
+}
+
+function continueCombat(){
+  document.getElementById('bResOverlay').innerHTML='';
+  const zone=BD.zone;
+  if(zone.remaining<=0)return toast('Zona limpia','em');
+  if(S.player.em<5)return toast('Sin EM. Completa tareas primero.','error');
+  const pool=ENEMIES[BD.zoneId]||ENEMIES.training;
+  const enemy=JSON.parse(JSON.stringify(pool[Math.floor(Math.random()*pool.length)]));
+  BD={...BD,enemy,playerHP:S.player.hp,turn:'player',ended:false,playerStatus:[],enemyStatus:[]};
+  updateCombat();buildBActions();
+  clog(`⚔️ Siguiente: ${enemy.name}`,'cl-info');startTimer();
+}
+
+function endCombat(success){
+  clearInterval(timerInt);BD.ended=true;
+  document.getElementById('battleMain').style.display='none';
+  document.getElementById('missionBoardSel').style.display='block';
+  activeMissionId=null;
+  renderMissionBoard();uiAll();
+}
+
+// DOMAIN ANIMATION
+function triggerDomainAnim(name){
+  const el=document.getElementById('domainOverlay');
+  el.innerHTML=`<div class="domain-overlay" onclick="this.parentElement.style.display='none'">
+    <div class="domain-bg"></div>
+    <div class="domain-circles">
+      ${[1,2,3].map((_,i)=>`<div class="domain-circle" style="width:${200+i*150}px;height:${200+i*150}px;left:50%;top:50%;animation-delay:${i*.8}s"></div>`).join('')}
+    </div>
+    <div class="domain-content">
+      <div class="domain-name-big">DOMINIO EXPANDIDO</div>
+      <div class="domain-sub">${name}</div>
+      <div class="t-xs c-muted mono" style="margin-top:16px">Pulsa para cerrar</div>
+    </div>
+  </div>`;
+  el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},3500);
+}
+
+function floatDmg(val,type){
+  const scene=document.getElementById('battleArena');if(!scene)return;
+  const s=document.createElement('div');s.className=`dmgf ${type}`;s.textContent=val;
+  s.style.top='40%';scene.appendChild(s);setTimeout(()=>s.remove(),950);
+}
+function aniSprite(id,cls){
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.remove('shaking','atk','hurt');void el.offsetWidth;el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls),550);
+}
+function clog(txt,cls='cl-log'){const el=document.getElementById('clogBody');if(!el)return;const d=document.createElement('div');d.className=cls;d.textContent=txt;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function clearCLog(){const el=document.getElementById('clogBody');if(el)el.innerHTML='';}
+
+// ═══════════════════════════════
+// RAIDS
+// ═══════════════════════════════
+const RAIDS=[
+  {id:'r1',name:'Incursión: Shibuya Básica',zone:'shibuya',waves:3,bossName:'Espíritu de Shibuya',minGrade:4,desc:'3 oleadas y jefe final.',reward:{xp:200,em:80},emCost:60},
+  {id:'r2',name:'Incursión: Shinjuku Media',zone:'shinjuku',waves:5,bossName:'Señor del Distrito',minGrade:3,desc:'5 oleadas de grado 3.',reward:{xp:450,em:150},emCost:100},
+  {id:'r3',name:'Incursión: Harajuku Alta',zone:'harajuku',waves:7,bossName:'Hanami',minGrade:2,desc:'7 oleadas y jefe semi-especial.',reward:{xp:900,em:280},emCost:180},
+  {id:'r4',name:'Incursión: Osaka Nocturna',zone:'osaka_namba',waves:5,bossName:'Entidad de Namba',minGrade:3,desc:'5 oleadas nocturnas.',reward:{xp:500,em:170},emCost:110},
+  {id:'r5',name:'Incursión: Kioto Ancestral',zone:'kyoto_gion',waves:6,bossName:'Demonio Ancestral',minGrade:2,desc:'6 oleadas de demonios.',reward:{xp:700,em:230},emCost:150},
+  {id:'r6',name:'Incursión Élite: Roppongi',zone:'roppongi',waves:10,bossName:'Ryomen Sukuna (Fragmento)',minGrade:'semi',desc:'10 oleadas. Jefe máximo.',reward:{xp:2000,em:600},emCost:350},
+];
+let activeRaid=null;
+function renderRaids(){
+  const ra=document.getElementById('raidActive');
+  if(activeRaid){ra.style.display='block';renderActiveRaid();}else{ra.style.display='none';}
+  const go=[4,3,2,1,'semi','special'],ci=go.indexOf(S.player.grade);
+  document.getElementById('raidList').innerHTML=RAIDS.map(r=>{
+    const locked=ci<go.indexOf(r.minGrade);
+    return `<div class="raid-c ${locked?'lk':''}">
+      <div class="rn">${r.name}</div><div class="rd">${r.desc}</div>
+      <div class="rm"><span class="rtag">🌊 ${r.waves} oleadas</span><span class="rtag">⚔️ ${r.bossName}</span><span class="rtag">⚡+${r.reward.em}</span><span class="rtag">⭐+${r.reward.xp}</span><span class="rtag">Coste: ${r.emCost} EM</span></div>
+      ${locked?`<div class="t-xs mono c-muted">🔒 ${GRADES.find(g=>g.id===r.minGrade)?.label}</div>`:`<button class="btn btn-d btn-sm" onclick="startRaid('${r.id}')">${activeRaid?.id===r.id?'Continuar':'⚔️ Iniciar'}</button>`}
+    </div>`;
+  }).join('');
+}
+function startRaid(id){const r=RAIDS.find(r=>r.id===id);if(!r)return;if(!useEM(r.emCost))return toast(`Necesitas ${r.emCost} EM`,'error');activeRaid={...r,currentWave:1,paused:false};toast(`🌀 Raid: ${r.name}`,'em');renderRaids();}
+function renderActiveRaid(){if(!activeRaid)return;const r=activeRaid;const dots=Array.from({length:r.waves+1},(_,i)=>{const isBoss=i===r.waves;const done=i<r.currentWave-1;const cur=i===r.currentWave-1;return `<div class="rw-dot ${isBoss?'boss-dot':''} ${done?'done':cur?'cur':''}"></div>`;}).join('');document.getElementById('raidActive').innerHTML=`<div class="zone-prog-bar mb3"><div class="flex iac jb mb2"><div class="zp-name">${r.name} — Oleada ${r.currentWave}/${r.waves}+Jefe</div>${r.paused?'<span class="t-xs c-muted mono">⏸ PAUSA</span>':'<span class="c-em t-xs mono">▶ ACTIVA</span>'}</div><div class="flex g2_ mb2">${dots}</div><div class="flex iac jb">${!r.paused?`<button class="btn btn-g btn-sm" onclick="pauseRaid()">⏸ Pausar</button>`:`<button class="btn btn-p btn-sm" onclick="resumeRaid()">▶ Reanudar (50 EM)</button>`}<button class="btn btn-d btn-sm" onclick="advanceRaid()">⚔️ Combatir oleada ${r.currentWave}</button><button class="btn btn-g btn-sm" onclick="abandonRaid()">🚪 Abandonar</button></div></div>`;}
+function advanceRaid(){if(!activeRaid||activeRaid.paused)return;const r=activeRaid;if(!useEM(30))return pauseRaid();const isBoss=r.currentWave>r.waves;const xp=isBoss?r.reward.xp:Math.round(r.reward.xp/r.waves);const em=isBoss?r.reward.em:Math.round(r.reward.em/r.waves);addXP(xp);addEM(em,isBoss?`Jefe de Raid: ${r.bossName}`:`Oleada ${r.currentWave}`);if(isBoss){toast(`🏆 Raid completada! +${r.reward.xp}XP +${r.reward.em}EM`,'gold');log_(`Raid completada: ${r.name}`);activeRaid=null;renderRaids();return;}r.currentWave++;toast(`⚔️ Oleada superada!`,'success');if(S.player.em<30){r.paused=true;toast('⏸ Sin EM. Raid pausada.','em');}saveS();renderRaids();}
+function pauseRaid(){if(!activeRaid)return;activeRaid.paused=true;renderActiveRaid();}
+function resumeRaid(){if(!activeRaid)return;if(!useEM(50))return toast('50 EM','error');activeRaid.paused=false;renderActiveRaid();}
+function abandonRaid(){if(!activeRaid)return;if(confirm('¿Abandonar raid?')){activeRaid=null;saveS();renderRaids();}}
+
+// ═══════════════════════════════
+// BOSSES
+// ═══════════════════════════════
+const BOSSES=[
+  {id:'mahito',name:'Mahito',emoji:'🧟',zone:'Shibuya',hp:500,atk:60,minGrade:3,reward:{xp:600,em:200},desc:'Manipula el alma. Muy peligroso.'},
+  {id:'hanami',name:'Hanami',emoji:'🌸',zone:'Harajuku',hp:700,atk:80,minGrade:2,reward:{xp:1200,em:400},desc:'Espíritu de la naturaleza. Raíces letales.'},
+  {id:'jogo',name:'Jogo',emoji:'🌋',zone:'Akihabara',hp:600,atk:75,minGrade:2,reward:{xp:900,em:300},desc:'Espíritu del fuego volcánico.'},
+  {id:'sukuna',name:'Ryomen Sukuna',emoji:'👹',zone:'Roppongi',hp:2000,atk:150,minGrade:'semi',reward:{xp:5000,em:1000},desc:'El Rey de las Maldiciones.'},
+  {id:'dagon',name:'Dagon',emoji:'🌊',zone:'Osaka',hp:800,atk:85,minGrade:1,reward:{xp:1500,em:500},desc:'Espíritu del mar.'},
+];
+function renderBosses(){
+  const p=S.player;
+  if(!S.activeBosses||!S.activeBosses.length){document.getElementById('bossPanel').innerHTML=`<div class="card" style="text-align:center;padding:32px"><div style="font-size:40px;mb3">🌅</div><div style="font-size:15px;fw6;mb2">Sin Jefes Activos</div><div class="t-sm c-muted mb3">Los jefes aparecen aleatoriamente al completar misiones.</div><button class="btn btn-d" onclick="spawnBoss()">💀 Invocar Jefe (50 EM)</button></div>`;return;}
+  const go=[4,3,2,1,'semi','special'],ci=go.indexOf(p.grade);
+  document.getElementById('bossPanel').innerHTML='<div class="raid-grid">'+S.activeBosses.filter(b=>b.expires>Date.now()).map(b=>{const bd=BOSSES.find(x=>x.id===b.id)||b;const locked=ci<go.indexOf(bd.minGrade);const rem=Math.max(0,Math.floor((b.expires-Date.now())/60000));return `<div class="raid-c ${locked?'lk':''}"><div class="flex iac g3_ mb3"><span style="font-size:32px">${b.emoji}</span><div><div class="rn">${b.name}</div><div class="t-xs mono c-muted">📍 ${bd.zone} · ⏰ ${rem}min</div></div></div><div class="rd">${bd.desc}</div><div class="rm"><span class="rtag">❤️ ${bd.hp} HP</span><span class="rtag">⭐+${bd.reward.xp}</span><span class="rtag">⚡+${bd.reward.em}</span></div>${locked?`<div class="t-xs c-muted mono">🔒 ${GRADES.find(g=>g.id===bd.minGrade)?.label}</div>`:`<button class="btn btn-d" onclick="fightBoss('${b.id}')">⚔️ Combatir</button>`}</div>`;}).join('')+'</div><div class="mt3"><button class="btn btn-g btn-sm" onclick="spawnBoss()">💀 Invocar otro (50 EM)</button></div>';
+}
+function spawnBoss(){if(!useEM(50))return toast('50 EM','error');const go=[4,3,2,1,'semi','special'],ci=go.indexOf(S.player.grade);const avail=BOSSES.filter(b=>go.indexOf(b.minGrade)<=ci);if(!avail.length)return toast('Sin jefes disponibles','error');const b={...avail[Math.floor(Math.random()*avail.length)],expires:Date.now()+3600000};if(!S.activeBosses)S.activeBosses=[];S.activeBosses.push(b);saveS();toast(`💀 Jefe invocado: ${b.name}`,'error');renderBosses();}
+function fightBoss(id){
+  const b=S.activeBosses?.find(x=>x.id===id),bd=BOSSES.find(x=>x.id===id);if(!b||!bd)return;
+  if(!useEM(80))return toast('80 EM','error');
+  const power=S.player.stats.fuerza+S.player.stats.maldicion+S.player.stats.dominio;
+  const chance=Math.min(.85,Math.max(.15,power/55));
+  if(Math.random()<chance){
+    addXP(bd.reward.xp);addEM(bd.reward.em,`Jefe: ${b.name}`);
+    S.activeBosses=S.activeBosses.filter(x=>x.id!==id);
+    // Mark boss as killed for tech unlock
+    if(!S.player.bossesKilled)S.player.bossesKilled={};
+    S.player.bossesKilled[id]=true;
+    saveS();toast(`🏆 ¡${b.name} derrotado!`,'gold');log_(`Jefe derrotado: ${b.name}`);
+  } else {
+    S.player.hp=Math.max(1,Math.round(S.player.hp*.3));const el=50;S.player.em=Math.max(0,S.player.em-el);saveS();
+    toast(`💀 Derrotado por ${b.name}. −${el} EM`,'error');
+  }
+  renderBosses();uiAll();
+}
+
+// ═══════════════════════════════
+// CALENDAR
+// ═══════════════════════════════
+let calDate=new Date();
+function renderCalendar(){
+  document.getElementById('calLbl').textContent=calDate.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const hours=Array.from({length:17},(_,i)=>i+7);
+  document.getElementById('calTime').innerHTML=hours.map(h=>`<div class="cal-hr">${h.toString().padStart(2,'0')}:00</div>`).join('');
+  const ec=document.getElementById('calEv');ec.innerHTML=hours.map(()=>`<div class="cal-hl"></div>`).join('');
+  const ds=calDate.toISOString().slice(0,10);
+  const cols={alta:'#e03030',media:'#f0a020',baja:'#3ec86a'};
+  S.tasks.filter(t=>{const s=t.startDate||t.endDate,e=t.endDate||t.startDate;return s&&e&&s<=ds&&ds<=e;}).forEach((t,i)=>{
+    const b=document.createElement('div');b.className='cal-ev';
+    const h=8+(i%9);b.style.top=(h-7)*50+3+'px';b.style.height='43px';
+    const c=cols[t.priority]||'#3b7cf4';
+    b.style.background=c+'28';b.style.borderLeft=`3px solid ${c}`;
+    b.innerHTML=`<div style="font-size:11px;font-weight:700;color:${c}">${t.name}</div><div style="font-size:9px;color:var(--tm)">${t.priority}</div>`;
+    ec.appendChild(b);
+  });
+}
+function calPrev(){calDate.setDate(calDate.getDate()-1);renderCalendar();}
+function calNext(){calDate.setDate(calDate.getDate()+1);renderCalendar();}
+
+// ═══════════════════════════════
+// CONFIG
+// ═══════════════════════════════
+function renderConfig(){
+  document.getElementById('cfgName').value=S.player.name;
+  const skeys=['curse_low','curse_mid','curse_high','boss_mahito','boss_hanami','boss_jogo','boss_sukuna'];
+  const slbls={curse_low:'Maldición Débil',curse_mid:'Maldición Media',curse_high:'Maldición Fuerte',boss_mahito:'Jefe: Mahito',boss_hanami:'Jefe: Hanami',boss_jogo:'Jefe: Jogo',boss_sukuna:'Jefe: Sukuna'};
+  document.getElementById('sprGrid').innerHTML=skeys.map(k=>`<div class="spr-slot" onclick="triggerSpr('${k}')">${S.sprites[k]?`<img src="${S.sprites[k]}" alt=""><div>${slbls[k]}</div>`:`<span style="font-size:18px">📷</span><span>${slbls[k]}</span>`}</div>`).join('');
+  document.getElementById('pSpritePrev').textContent=S.player.playerSprite?'✓ Sprite subido':'Sin sprite';
+}
+function saveCfgName(){S.player.name=document.getElementById('cfgName').value;saveS();uiAll();}
+function triggerAvatarUpload(){document.getElementById('avInput')?.click();}
+function handleAvatar(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.player.avatar=ev.target.result;saveS();uiAll();renderPlayer();toast('Avatar actualizado','success');};r.readAsDataURL(f);}
+function triggerSpr(key){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.sprites[key]=ev.target.result;saveS();renderConfig();toast('Sprite actualizado','success');};r.readAsDataURL(f);};i.click();}
+function triggerSpriteUpload(type){if(type==='player'){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.player.playerSprite=ev.target.result;saveS();renderConfig();toast('Sprite actualizado','success');};r.readAsDataURL(f);};i.click();}}
+function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`jjk_v3_${S.player.name}_${Date.now()}.json`;a.click();toast('Exportado','success');}
+function importTrigger(){document.getElementById('impInput').click();}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{Object.assign(S,JSON.parse(ev.target.result));saveS();uiAll();nav('dashboard');toast('Importado','success');}catch{toast('Error al importar','error');}};r.readAsText(f);}
+function resetAll(){if(confirm('¿Resetear TODO?')){localStorage.removeItem('jjk_v3');S=JSON.parse(JSON.stringify(DFLT));saveS();uiAll();nav('dashboard');toast('Reseteado','em');}}
+
+// ═══════════════════════════════
+// MODALS
+// ═══════════════════════════════
+function cm(id){document.getElementById(id)?.classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+function switchPTab(t,el){
+  document.querySelectorAll('[id^=ptab-]').forEach(e=>e.style.display='none');
+  document.getElementById('ptab-'+t).style.display='block';
+  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));el?.classList.add('active');
+  if(t==='tecnica')renderTechContent();
+  else if(t==='tecnicas-extra')renderTechExtraContent();
+  else if(t==='stats')renderStatsContent();
+  else if(t==='evaluaciones')renderEvalContent();
+  else if(t==='perfil'){renderRadar();renderGradeProg();}
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+function init(){
+  uiAll();renderDash();calDate=new Date();
+  if(!S.player.technique)setTimeout(openTechPick,700);
+  // Auto-unlock lvl 1 skills
+  if(S.player.technique&&S.player.unlockedSkills.length===0){
+    const tech=TECHNIQUES[S.player.technique];
+    tech?.skills.filter(sk=>sk.lvlReq<=S.player.level).forEach(sk=>{
+      if(!S.player.unlockedSkills.includes(sk.id)){S.player.unlockedSkills.push(sk.id);if(!S.player.skillMastery[sk.id])S.player.skillMastery[sk.id]=0;}
+    });saveS();
+  }
+  // Run dynamic event tick on load
+  genDynamicEvents();
+}
+init();
+</script>
+</body>
+</html>
