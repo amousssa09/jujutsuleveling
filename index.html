@@ -524,8 +524,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div class="page-h"><h1>Perfil del Hechicero</h1></div>
   <div class="stabs">
     <div class="stab active" onclick="switchPTab('perfil',this)">Perfil</div>
-    <div class="stab" onclick="switchPTab('tecnica',this)">Técnica</div>
-    <div class="stab" onclick="switchPTab('maestria',this)">Maestría</div>
+    <div class="stab" onclick="switchPTab('maestria',this)">Técnica & Maestría</div>
     <div class="stab" onclick="switchPTab('evolucionar',this)">Evolucionar</div>
     <div class="stab" onclick="switchPTab('arbol',this)">Árbol de Stats</div>
     <div class="stab" onclick="switchPTab('evaluaciones',this)">Evaluaciones</div>
@@ -560,7 +559,6 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
       </div>
     </div>
   </div>
-  <div id="ptab-tecnica" style="display:none"><div id="techContent"></div></div>
   <div id="ptab-maestria" style="display:none"><div id="maestriaContent"></div></div>
   <div id="ptab-evolucionar" style="display:none"><div id="techEvolContent"></div></div>
   <div id="ptab-arbol" style="display:none"><div id="arbolContent"></div></div>
@@ -664,9 +662,14 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 <!-- RAIDS -->
 <div class="page" id="page-raids">
-  <div class="page-h"><h1>Raids</h1><p>Oleadas de alta dificultad en zonas peligrosas.</p></div>
-  <div id="raidActive" style="display:none"></div>
+  <div class="page-h"><h1>Raids</h1><p>Accede a cualquier raid que cumpla los requisitos de grado.</p></div>
   <div id="raidList" class="raid-grid"></div>
+</div>
+
+<!-- RAID COMBAT (dedicated page) -->
+<div class="page" id="page-raid-combat">
+  <div class="page-h" id="raidCombatHeader"><h1>⚔️ Raid en curso</h1></div>
+  <div id="raidActive"></div>
 </div>
 
 <!-- BOSSES -->
@@ -694,6 +697,18 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
     <div class="fg"><label>Sprite (combate)</label><button class="btn btn-g btn-sm" onclick="triggerSpriteUpload('player')">📷 Subir sprite</button> <span id="pSpritePrev" class="t-xs c-muted"></span></div>
   </div>
   <div class="cfg-sec"><h3>🖼 Sprites de Enemigos</h3><div class="spr-grid" id="sprGrid"></div></div>
+  <div class="cfg-sec" style="border-color:rgba(240,192,48,.3)">
+    <h3>🧪 Modo de Testeo</h3>
+    <p class="t-sm c-muted mb3">Herramientas de desarrollo para probar el sistema sin grinding.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-gold" onclick="testUnlockAll()">⚡ EM Ilimitada + Max Stats</button>
+      <button class="btn btn-gold" onclick="testMaxMastery()">🌟 Maestría al Máximo</button>
+      <button class="btn btn-gold" onclick="testUnlockTechs()">🔓 Todas las Técnicas</button>
+      <button class="btn btn-gold" onclick="testUnlockStatTree()">🌳 Árbol de Stats Completo</button>
+      <button class="btn btn-gold" onclick="testMaxGrade()">⬆️ Subir al Grado Especial</button>
+      <button class="btn btn-gold" onclick="testAddXP()">📈 +5000 XP</button>
+    </div>
+  </div>
   <div class="cfg-sec"><h3>💾 Datos</h3>
     <div class="flex g3_"><button class="btn btn-g" onclick="exportData()">📤 Exportar</button><button class="btn btn-g" onclick="importTrigger()">📥 Importar</button><input type="file" id="impInput" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-d btn-sm" onclick="resetAll()">🗑 Resetear</button></div>
   </div>
@@ -884,77 +899,76 @@ const TECHNIQUES={
 };
 
 // ═══════════════════════════════════════════════════════
-// CITIES & ZONES
+// CITIES & ZONES — re-mapped to new 8-tier grade system
 // ═══════════════════════════════════════════════════════
 const CITIES={
-  tokyo:{id:'tokyo',name:'Tokio',emoji:'🏙',region:'Kanto',
-    mapX:'63%',mapY:'47%', // % position on svg
-    unlockGrade:4,minLevel:1,
-    color:'var(--red)',
-    desc:'La metrópolis más maldita de Japón. Sede de la Academia Jujutsu.',
+  fukuoka:{id:'fukuoka',name:'Fukuoka',emoji:'⚓',region:'Kyushu',
+    unlockGrade:5,color:'#607080',
+    desc:'Ciudad inicial. Maldiciones débiles, perfecta para novatos de Grado 5.',
     zones:[
-      {id:'jujutsu_high',name:'Academia Jujutsu',threat:'minima',grade:4,emoji:'⛩',raidAvail:false,desc:'Área de entrenamiento controlada.',enemies:['training']},
-      {id:'shibuya',name:'Shibuya',threat:'alta',grade:4,emoji:'🚶',raidAvail:true,desc:'Cruce maldito. Incidente reciente.',enemies:['shibuya']},
-      {id:'shinjuku',name:'Shinjuku',threat:'media',grade:4,emoji:'🌃',raidAvail:false,desc:'Zona comercial infestada.',enemies:['shinjuku']},
-      {id:'akihabara',name:'Akihabara',threat:'media',grade:3,emoji:'⚡',raidAvail:false,desc:'Maldiciones tecnológicas.',enemies:['akihabara']},
-      {id:'harajuku',name:'Harajuku',threat:'muy_alta',grade:2,emoji:'🌸',raidAvail:true,desc:'Zona de alta densidad maldita.',enemies:['harajuku']},
-      {id:'roppongi',name:'Roppongi',threat:'extrema',grade:'semi',emoji:'💎',raidAvail:true,desc:'Territorio del Rey. Solo hechiceros especiales.',enemies:['roppongi']},
-    ]},
-  kyoto:{id:'kyoto',name:'Kioto',emoji:'⛩',region:'Kansai',
-    mapX:'39%',mapY:'63%',
-    unlockGrade:3,minLevel:6,
-    color:'var(--purple)',
-    desc:'Ciudad antigua. Espíritus ancestrales y demonios del pasado.',
-    zones:[
-      {id:'gion',name:'Gion',threat:'alta',grade:3,emoji:'🏮',raidAvail:true,desc:'Distrito de entretenimiento maldito.',enemies:['kyoto_gion']},
-      {id:'arashiyama',name:'Arashiyama',threat:'media',grade:2,emoji:'🎋',raidAvail:false,desc:'Bosque de bambú con espíritus.',enemies:['kyoto_arashiyama']},
-      {id:'fushimi',name:'Fushimi Inari',threat:'muy_alta',grade:2,emoji:'🦊',raidAvail:true,desc:'Miles de torii y más espíritus.',enemies:['kyoto_fushimi']},
-    ]},
-  osaka:{id:'osaka',name:'Osaka',emoji:'🌊',region:'Kansai',
-    mapX:'35%',mapY:'61%',
-    unlockGrade:3,minLevel:7,
-    color:'var(--warn)',
-    desc:'Ciudad del comercio. Las maldiciones abundan en sus calles nocturnas.',
-    zones:[
-      {id:'namba',name:'Namba',threat:'alta',grade:3,emoji:'🎪',raidAvail:false,desc:'Corazón comercial infestado.',enemies:['osaka_namba']},
-      {id:'umeda',name:'Umeda',threat:'media',grade:2,emoji:'🏬',raidAvail:false,desc:'Zona empresarial bajo amenaza.',enemies:['osaka_umeda']},
-      {id:'dotonbori',name:'Dotonbori',threat:'muy_alta',grade:1,emoji:'🌉',raidAvail:true,desc:'Canal maldito. Entidades antiguas.',enemies:['osaka_dotonbori']},
-    ]},
-  sendai:{id:'sendai',name:'Sendai',emoji:'🏔',region:'Tohoku',
-    mapX:'68%',mapY:'27%',
-    unlockGrade:3,minLevel:5,
-    color:'var(--g3)',
-    desc:'Ciudad del norte. Maldiciones del bosque y el mar.',
-    zones:[
-      {id:'sendai_city',name:'Centro de Sendai',threat:'media',grade:3,emoji:'🏙',raidAvail:false,desc:'Área urbana con actividad media.',enemies:['sendai']},
-      {id:'matsushima',name:'Matsushima',threat:'alta',grade:2,emoji:'🌊',raidAvail:true,desc:'Bahía de islas con entidades marinas.',enemies:['sendai_matsushima']},
+      {id:'fukuoka_city',name:'Centro de Fukuoka',threat:'baja',grade:5,emoji:'🏙',raidAvail:false,desc:'Zona urbana tranquila. Maldiciones esporádicas.',enemies:['fukuoka']},
+      {id:'hakata',name:'Hakata',threat:'media',grade:5,emoji:'🚢',raidAvail:false,desc:'Puerto con espíritus marineros.',enemies:['fukuoka_hakata']},
+      {id:'fukuoka_academia',name:'Academia del Sur',threat:'minima',grade:5,emoji:'🏫',raidAvail:false,desc:'Pequeña sede jujutsu regional. Entrenamiento básico.',enemies:['training']},
+      {id:'fukuoka_bosque',name:'Bosque de Ito',threat:'media',grade:5,emoji:'🌲',raidAvail:false,desc:'Bosque al sur con espíritus menores.',enemies:['sapporo_wild']},
     ]},
   sapporo:{id:'sapporo',name:'Sapporo',emoji:'❄️',region:'Hokkaido',
-    mapX:'72%',mapY:'10%',
-    unlockGrade:4,minLevel:1,
-    color:'var(--freeze)',
-    desc:'Isla norteña. Maldiciones del hielo y la nieve.',
+    unlockGrade:4,color:'var(--freeze)',
+    desc:'Isla norteña. Maldiciones del hielo. Territorio de Grado 4.',
     zones:[
-      {id:'sapporo_city',name:'Centro de Sapporo',threat:'baja',grade:4,emoji:'🏙',raidAvail:false,desc:'Ciudad fría con baja actividad.',enemies:['sapporo']},
-      {id:'daisetsuzan',name:'Daisetsuzan',threat:'media',grade:3,emoji:'🏔',raidAvail:false,desc:'Parque nacional infestado.',enemies:['sapporo_wild']},
+      {id:'sapporo_city',name:'Centro de Sapporo',threat:'baja',grade:4,emoji:'🏙',raidAvail:false,desc:'Ciudad fría con actividad moderada.',enemies:['sapporo']},
+      {id:'daisetsuzan',name:'Daisetsuzan',threat:'media',grade:4,emoji:'🏔',raidAvail:true,desc:'Parque nacional infestado de bestias malditas.',enemies:['sapporo_wild']},
+      {id:'sapporo_puerto',name:'Puerto Ishikari',threat:'media',grade:4,emoji:'🌊',raidAvail:false,desc:'Espíritus del mar del norte.',enemies:['fukuoka_hakata']},
+      {id:'sapporo_tundra',name:'Tundra Maldita',threat:'alta',grade:4,emoji:'🌨',raidAvail:true,desc:'Páramo helado con maldiciones ancestrales.',enemies:['sendai']},
     ]},
   hiroshima:{id:'hiroshima',name:'Hiroshima',emoji:'🌸',region:'Chugoku',
-    mapX:'24%',mapY:'67%',
-    unlockGrade:2,minLevel:10,
-    color:'var(--g2)',
-    desc:'Ciudad marcada por el pasado. Almas sin descanso abundan aquí.',
+    unlockGrade:4,color:'var(--g2)',
+    desc:'Ciudad marcada. Almas del pasado y maldiciones de Grado 4-5.',
     zones:[
-      {id:'hiroshima_city',name:'Centro de Hiroshima',threat:'alta',grade:2,emoji:'🕊',raidAvail:false,desc:'Espíritus del pasado.',enemies:['hiroshima']},
-      {id:'miyajima',name:'Miyajima',threat:'muy_alta',grade:1,emoji:'⛩',raidAvail:true,desc:'Isla sagrada corrompida.',enemies:['hiroshima_miyajima']},
+      {id:'hiroshima_city',name:'Centro de Hiroshima',threat:'media',grade:4,emoji:'🕊',raidAvail:false,desc:'Espíritus del pasado en la ciudad.',enemies:['hiroshima']},
+      {id:'miyajima',name:'Miyajima',threat:'alta',grade:4,emoji:'⛩',raidAvail:true,desc:'Isla sagrada corrompida.',enemies:['hiroshima_miyajima']},
+      {id:'hiroshima_delta',name:'Delta del Río Ōta',threat:'media',grade:4,emoji:'🏞',raidAvail:false,desc:'Entidades acuáticas del delta.',enemies:['osaka_umeda']},
+      {id:'hiroshima_montaña',name:'Monte Futaba',threat:'alta',grade:4,emoji:'⛰',raidAvail:false,desc:'Cima con presencia maldita antigua.',enemies:['sendai_matsushima']},
     ]},
-  fukuoka:{id:'fukuoka',name:'Fukuoka',emoji:'⚓',region:'Kyushu',
-    mapX:'16%',mapY:'74%',
-    unlockGrade:3,minLevel:6,
-    color:'var(--ok)',
-    desc:'Puerto del sur. Maldiciones marineras y portuarias.',
+  sendai:{id:'sendai',name:'Sendai',emoji:'🏔',region:'Tohoku',
+    unlockGrade:3,color:'var(--g3)',
+    desc:'Ciudad del norte. Zona de Grado 3.',
     zones:[
-      {id:'fukuoka_city',name:'Centro de Fukuoka',threat:'media',grade:3,emoji:'🏙',raidAvail:false,desc:'Zona comercial con espíritus.',enemies:['fukuoka']},
-      {id:'hakata',name:'Hakata',threat:'alta',grade:2,emoji:'🌊',raidAvail:true,desc:'Bahía infestada de entidades.',enemies:['fukuoka_hakata']},
+      {id:'sendai_city',name:'Centro de Sendai',threat:'media',grade:3,emoji:'🏙',raidAvail:false,desc:'Área urbana activa.',enemies:['sendai']},
+      {id:'matsushima',name:'Matsushima',threat:'alta',grade:3,emoji:'🌊',raidAvail:true,desc:'Bahía con entidades marinas.',enemies:['sendai_matsushima']},
+      {id:'sendai_academia',name:'Rama de Sendai',threat:'baja',grade:3,emoji:'🏫',raidAvail:false,desc:'Sede regional del colegio jujutsu.',enemies:['training']},
+      {id:'sendai_campo',name:'Campos de Osaki',threat:'alta',grade:3,emoji:'🌾',raidAvail:false,desc:'Llanuras con espíritus de la tierra.',enemies:['kyoto_arashiyama']},
+      {id:'sendai_costa',name:'Costa del Pacífico',threat:'muy_alta',grade:'sg1',emoji:'🌀',raidAvail:true,desc:'Costa azotada por maldiciones marinas del calibre Semi-G1.',enemies:['sendai_matsushima']},
+    ]},
+  osaka:{id:'osaka',name:'Osaka',emoji:'🌊',region:'Kansai',
+    unlockGrade:2,color:'var(--warn)',
+    desc:'Ciudad del comercio. Zona de Grado 2 con bolsillos de Grado 1.',
+    zones:[
+      {id:'namba',name:'Namba',threat:'alta',grade:2,emoji:'🎪',raidAvail:true,desc:'Corazón comercial infestado de Grado 2.',enemies:['osaka_namba']},
+      {id:'umeda',name:'Umeda',threat:'media',grade:2,emoji:'🏬',raidAvail:false,desc:'Zona empresarial bajo amenaza.',enemies:['osaka_umeda']},
+      {id:'dotonbori',name:'Dotonbori',threat:'muy_alta',grade:2,emoji:'🌉',raidAvail:true,desc:'Canal maldito. Entidades Grado 2 antiguas.',enemies:['osaka_dotonbori']},
+      {id:'osaka_castillo',name:'Castillo de Osaka',threat:'alta',grade:2,emoji:'🏯',raidAvail:false,desc:'Fortaleza antigua con guardias malditos.',enemies:['kyoto_gion']},
+      {id:'osaka_bahia',name:'Bahía de Osaka',threat:'muy_alta',grade:'sg1',emoji:'🚢',raidAvail:true,desc:'Entidades marinas de Semi-Grado 1 en las aguas.',enemies:['osaka_dotonbori']},
+    ]},
+  kyoto:{id:'kyoto',name:'Kioto',emoji:'⛩',region:'Kansai',
+    unlockGrade:1,color:'var(--purple)',
+    desc:'Ciudad antigua. Espíritus milenarios. Grado 1 y Semi-Especial.',
+    zones:[
+      {id:'gion',name:'Gion',threat:'alta',grade:1,emoji:'🏮',raidAvail:true,desc:'Distrito de entretenimiento. Maldiciones Grado 1.',enemies:['kyoto_gion']},
+      {id:'arashiyama',name:'Arashiyama',threat:'muy_alta',grade:1,emoji:'🎋',raidAvail:true,desc:'Bosque de bambú. Espíritus ancestrales Grado 1.',enemies:['kyoto_arashiyama']},
+      {id:'fushimi',name:'Fushimi Inari',threat:'extrema',grade:1,emoji:'🦊',raidAvail:true,desc:'Miles de torii corrompidos. Presencia Grado 1.',enemies:['kyoto_fushimi']},
+      {id:'kyoto_palacio',name:'Palacio Imperial',threat:'muy_alta',grade:1,emoji:'🏛',raidAvail:false,desc:'Guardias espirituales corrompidos del palacio.',enemies:['hiroshima_miyajima']},
+      {id:'kyoto_kinkakuji',name:'Kinkaku-ji',threat:'extrema',grade:'semi',emoji:'🏅',raidAvail:true,desc:'Templo de Oro corrompido. Semi-Grado Especial.',enemies:['roppongi']},
+    ]},
+  tokyo:{id:'tokyo',name:'Tokio',emoji:'🏙',region:'Kanto',
+    unlockGrade:'special',color:'var(--red)',
+    desc:'La metrópolis más maldita. Solo para Grado Especial. Sede central jujutsu.',
+    zones:[
+      {id:'jujutsu_high',name:'Academia Jujutsu',threat:'minima',grade:'special',emoji:'⛩',raidAvail:false,desc:'Sede central del colegio. Zona segura.',enemies:['training']},
+      {id:'shibuya',name:'Shibuya',threat:'alta',grade:'special',emoji:'🚶',raidAvail:true,desc:'El incidente. Presencia del Rey.',enemies:['shibuya']},
+      {id:'shinjuku',name:'Shinjuku',threat:'muy_alta',grade:'special',emoji:'🌃',raidAvail:true,desc:'Zona comercial dominada por maldiciones de élite.',enemies:['harajuku']},
+      {id:'akihabara',name:'Akihabara',threat:'alta',grade:'special',emoji:'⚡',raidAvail:false,desc:'Maldiciones tecnológicas de alto nivel.',enemies:['akihabara']},
+      {id:'harajuku',name:'Harajuku',threat:'extrema',grade:'special',emoji:'🌸',raidAvail:true,desc:'Zona de máxima densidad maldita.',enemies:['harajuku']},
+      {id:'roppongi',name:'Roppongi',threat:'extrema',grade:'special',emoji:'💎',raidAvail:true,desc:'Territorio del Rey de las Maldiciones.',enemies:['roppongi']},
     ]},
 };
 
@@ -1032,12 +1046,14 @@ const STATUS_DEFS={
 // GRADES
 // ═══════════════════════════════════════════════════════
 const GRADES=[
-  {id:4,label:'Grado 4',short:'G-4',color:'var(--g4)',lvReq:1},
-  {id:3,label:'Grado 3',short:'G-3',color:'var(--g3)',lvReq:5},
-  {id:2,label:'Grado 2',short:'G-2',color:'var(--g2)',lvReq:15},
-  {id:1,label:'Grado 1',short:'G-1',color:'var(--g1)',lvReq:30},
-  {id:'semi',label:'Semi Especial',short:'SE',color:'var(--gse)',lvReq:50},
-  {id:'special',label:'Grado Especial',short:'ESP',color:'var(--gsp)',lvReq:80},
+  {id:5,  label:'Grado 5',       short:'G-5', color:'#607080',lvReq:1},
+  {id:4,  label:'Grado 4',       short:'G-4', color:'var(--g4)',lvReq:5},
+  {id:3,  label:'Grado 3',       short:'G-3', color:'var(--g3)',lvReq:12},
+  {id:2,  label:'Grado 2',       short:'G-2', color:'var(--g2)',lvReq:22},
+  {id:'sg1', label:'Semi-Grado 1',short:'SG-1',color:'#80a0e0',lvReq:35},
+  {id:1,  label:'Grado 1',       short:'G-1', color:'var(--g1)',lvReq:50},
+  {id:'semi',label:'Semi-Grado Especial',short:'SGE',color:'var(--gse)',lvReq:70},
+  {id:'special',label:'Grado Especial',short:'ESP',color:'var(--gsp)',lvReq:100},
 ];
 function gd(id){return GRADES.find(g=>g.id===id)||GRADES[0];}
 function gnext(id){const i=GRADES.findIndex(g=>g.id===id);return i<GRADES.length-1?GRADES[i+1]:null;}
@@ -1049,7 +1065,7 @@ function isGradeGte(a,b){return gradeOrder(a)>=gradeOrder(b);}
 // ═══════════════════════════════════════════════════════
 const DFLT={
   player:{name:'Hechicero',avatar:null,playerSprite:null,level:1,xp:0,xpNext:100,
-    grade:4,hp:100,maxHp:100,em:0,maxEm:500,statPoints:0,
+    grade:5,hp:100,maxHp:100,em:0,maxEm:500,statPoints:0,
     stats:{fuerza:5,defensa:5,velocidad:5,inteligencia:5,maldicion:5,dominio:5},
     technique:null,unlockedSkills:[],skillMastery:{},
     techMasteryXP:0,   // unified technique mastery XP
@@ -1082,6 +1098,8 @@ function loadS(){
       if(!d.dynamicEvents)d.dynamicEvents=[];
       if(!d.zoneStatus)d.zoneStatus={};
       if(!d.player.missionsCompleted)d.player.missionsCompleted=0;
+      // Migrate old grade 4 start → 5
+      if(d.player.grade===4&&d.player.level<=1)d.player.grade=5;
       return d;
     }
   }catch(e){}
@@ -1374,9 +1392,9 @@ function nav(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni,.ni-sub').forEach(i=>i.classList.remove('active'));
   document.getElementById('page-'+page)?.classList.add('active');
-  const nm={dashboard:0,player:1,missions:2,map:3,battle:3,raids:3,bosses:3,calendar:3,config:4};
+  const nm={dashboard:0,player:1,missions:2,map:3,battle:3,raids:3,'raid-combat':3,bosses:3,calendar:3,config:4};
   document.querySelectorAll('.ni')[nm[page]]?.classList.add('active');
-  ({dashboard:renderDash,player:renderPlayer,missions:renderMissions,map:renderMap,battle:renderBattlePage,raids:renderRaids,bosses:renderBosses,calendar:renderCalendar,config:renderConfig}[page]||(() =>{}))();
+  ({dashboard:renderDash,player:renderPlayer,missions:renderMissions,map:renderMap,battle:renderBattlePage,raids:renderRaids,'raid-combat':renderRaidCombatPage,bosses:renderBosses,calendar:renderCalendar,config:renderConfig}[page]||(() =>{}))();
 }
 function cm(id){document.getElementById(id)?.classList.remove('open');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -1675,70 +1693,76 @@ function renderArbolContent(){
     '</div>';
 }
 
-// ─── MAESTRÍA RENDER ───
+// ─── TÉCNICA + MAESTRÍA (combined tab) ───
 function renderMaestriaContent(){
   const el=document.getElementById('maestriaContent');if(!el)return;
   const p=S.player;const tech=p.technique?TECHNIQUES[p.technique]:null;
-  if(!tech){el.innerHTML='<div class="c-muted t-sm">Sin técnica asignada.</div>';return;}
+  if(!tech){
+    el.innerHTML='<div class="card" style="text-align:center;padding:32px"><div style="font-size:36px;margin-bottom:8px">⚡</div><div class="c-muted t-sm mb3">Sin técnica innata asignada</div><button class="btn btn-p" onclick="openTechPick()">Elegir Técnica</button></div>';
+    return;
+  }
   const mxp=p.techMasteryXP||0;
   const maxLv=getTechMaxMastery();
   const curLv=Math.min(getTechMasteryLevel(mxp),maxLv);
   const info=getMasteryInfo(mxp);
-  const pct=Math.min(100,Math.round((mxp/xpForLevel(maxLv))*100));
-  const nextLvXP=curLv<maxLv?info.xpToNext:0;
+  const totalXPNeeded=xpForLevel(maxLv);
+  const pct=Math.min(100,Math.round((mxp/totalXPNeeded)*100));
+  const evolvable=isTechEvolvable();
+  const typeColors={attack:'#e03030',defense:'#3ec86a',heal:'#3b7cf4',domain:'#f0c030',buff:'#a070f0',debuff:'#f08030'};
 
   el.innerHTML=
-    // Header bar
-    '<div class="tm-bar-wrap mb3">'+
-      '<div class="flex iac jb mb2">'+
-        '<div>'+
-          '<div class="t-sm fw6">'+tech.emoji+' '+tech.name+'</div>'+
-          '<div class="t-xs c-muted mono mt1">Maestría de Técnica — Nivel secundario</div>'+
+    // ── Technique header ──
+    '<div class="card mb3">'+
+      '<div class="flex iac g3_ mb3">'+
+        '<span style="font-size:30px">'+tech.emoji+'</span>'+
+        '<div style="flex:1">'+
+          '<div style="font-family:var(--fd);font-size:16px;color:'+tech.rc+'">'+tech.name+'</div>'+
+          '<div class="t-xs mono" style="color:'+tech.rc+'">'+tech.rarity+' · '+tech.user+' · Tier '+tech.tier+'</div>'+
         '</div>'+
-        '<div style="text-align:right">'+
-          '<div class="mono fw7" style="font-size:20px;color:var(--purple)">Nv.'+curLv+'<span class="t-xs c-muted">/'+maxLv+'</span></div>'+
-          '<div class="t-xs mono c-muted">'+mxp+' XP total</div>'+
-        '</div>'+
+        '<button class="btn btn-g btn-sm" onclick="openTechPick()">⟳ Cambiar</button>'+
+      '</div>'+
+      '<div class="t-sm mb3" style="color:var(--ts);line-height:1.5">'+tech.desc+'</div>'+
+      // Mastery bar
+      '<div class="flex iac jb mb1">'+
+        '<span class="t-xs mono c-muted">Maestría · Nivel <strong class="c-em">'+curLv+'</strong>/'+maxLv+'</span>'+
+        '<span class="t-xs mono c-em">'+mxp+' / '+totalXPNeeded+' XP</span>'+
       '</div>'+
       '<div class="pw mb1" style="height:8px"><div class="pf p-mastery" style="width:'+pct+'%"></div></div>'+
-      '<div class="flex iac jb t-xs mono c-muted">'+
-        '<span>'+pct+'% completado</span>'+
-        (curLv<maxLv?'<span>Próximo nivel: '+nextLvXP+' XP más</span>':'<span class="c-ok">✓ MAESTRÍA MÁXIMA</span>')+
+      '<div class="flex iac jb t-xs mono c-muted mb2">'+
+        '<span>Bonus de potencia: <strong class="c-em">+'+Math.round((getMasteryBonus()-1)*100)+'%</strong></span>'+
+        (curLv<maxLv?'<span>Siguiente nivel: '+info.xpToNext+' XP más</span>':'<span class="c-ok">✓ MAESTRÍA MÁXIMA</span>')+
       '</div>'+
-      '<div class="t-xs c-ts mt2">Usa habilidades en combate para ganar XP de maestría. Cada nivel sube el poder de tu técnica un +2% y desbloquea habilidades nuevas.</div>'+
+      (evolvable?'<div style="background:rgba(240,192,48,.08);border:1px solid rgba(240,192,48,.3);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--gold)">✨ Maestría al máximo — puedes evolucionar en la pestaña <strong>Evolucionar</strong></div>':'')+
     '</div>'+
-
-    // Power bonus summary
-    '<div class="card mb3">'+
-      '<div class="ct">⚡ Bonus de Potencia Actual</div>'+
-      '<div class="flex iac g3_">'+
-        '<div style="font-size:32px;font-weight:700;color:var(--purple)">+'+Math.round((getMasteryBonus()-1)*100)+'%</div>'+
-        '<div class="t-sm c-ts">Todas tus habilidades de técnica reciben este multiplicador de daño/curación.</div>'+
-      '</div>'+
-    '</div>'+
-
-    // Skills progression list (like the image reference)
-    '<div class="ct">🔓 Habilidades — Progresión de Maestría</div>'+
-    '<div style="display:flex;flex-direction:column;gap:6px">'+
+    // ── Skills list ──
+    '<div class="ct">⚡ Habilidades</div>'+
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">'+
     tech.skills.map(sk=>{
       const req=sk.masteryReq||1;
       const reached=curLv>=req;
-      const unlocked=p.unlockedSkills.includes(sk.id);
-      const typeColors={attack:'var(--red)',defense:'var(--ok)',heal:'var(--emb)',domain:'var(--gold)',buff:'var(--purple)',debuff:'var(--warn)'};
+      const ul=p.unlockedSkills.includes(sk.id);
       const tc=typeColors[sk.type]||'var(--ts)';
-      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:'+(reached?'rgba(59,124,244,.04)':'var(--bg-el)')+';border:1px solid '+(reached?'rgba(59,124,244,.3)':'var(--bdr)')+';border-radius:var(--r)">'+
-        '<div style="width:36px;height:36px;border-radius:50%;background:'+(reached?tc+'22':'var(--bdr)')+';border:2px solid '+(reached?tc:'var(--tm)')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+sk.icon+'</div>'+
-        '<div style="flex:1">'+
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;'+
+        'background:'+(reached?'rgba(59,124,244,.04)':'var(--bg-el)')+';'+
+        'border:1px solid '+(reached?'rgba(59,124,244,.25)':'var(--bdr)')+';border-radius:var(--r)">'+
+        '<div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;'+
+          'background:'+(reached?tc+'22':'var(--bdr)')+';border:2px solid '+(reached?tc:'var(--tm)')+';'+
+          'display:flex;align-items:center;justify-content:center;font-size:17px">'+sk.icon+'</div>'+
+        '<div style="flex:1;min-width:0">'+
           '<div class="flex iac jb">'+
             '<div class="t-sm fw6">'+sk.name+'</div>'+
-            '<div class="mono t-xs" style="color:'+(reached?'var(--ok)':'var(--tm)')+'">'+req+' Maestría</div>'+
+            '<div class="mono t-xs fw7" style="color:'+(reached?'var(--ok)':'var(--tm)')+'">'+req+' Maestría</div>'+
           '</div>'+
-          '<div class="t-xs c-ts mt1">'+sk.desc+'</div>'+
-          '<div class="t-xs mono mt1" style="color:'+tc+'">'+sk.type.toUpperCase()+' · '+( sk.cost===0?'Sin coste':sk.cost+' EM')+(sk.power?' · '+sk.power+' poder':'')+' · +'+sk.cost+' EM</div>'+
+          '<div class="t-xs c-ts">'+sk.desc+'</div>'+
+          '<div class="t-xs mono mt1" style="color:'+tc+'">'+
+            sk.type.toUpperCase()+
+            (sk.cost===0?' · Sin coste':' · '+sk.cost+' EM')+
+            (sk.power?' · '+sk.power+' poder':'')+
+          '</div>'+
         '</div>'+
         (reached?
-          '<div class="badge" style="background:rgba(62,200,106,.12);color:var(--ok);border-color:rgba(62,200,106,.3)">✓ ACTIVA</div>':
-          '<div class="badge" style="background:rgba(50,60,80,.4);color:var(--tm)">🔒 Nv.'+req+'</div>'
+          '<div class="badge" style="background:rgba(62,200,106,.12);color:var(--ok);border-color:rgba(62,200,106,.3);white-space:nowrap">✓ ACTIVA</div>':
+          '<div class="badge" style="background:var(--bg-el);color:var(--tm);white-space:nowrap">🔒 Nv.'+req+'</div>'
         )+
       '</div>';
     }).join('')+
@@ -1901,8 +1925,7 @@ function switchPTab(t,el){
   document.querySelectorAll('[id^=ptab-]').forEach(e=>e.style.display='none');
   document.getElementById('ptab-'+t).style.display='block';
   document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));el?.classList.add('active');
-  if(t==='tecnica')renderTechContent();
-  else if(t==='maestria')renderMaestriaContent();
+  if(t==='maestria')renderMaestriaContent();
   else if(t==='evolucionar')renderTechEvolContent();
   else if(t==='arbol')renderArbolContent();
   else if(t==='evaluaciones')renderEvalContent();
@@ -2202,44 +2225,60 @@ function clearCLog(){const el=document.getElementById('clogBody');if(el)el.inner
 // RAIDS
 // ═══════════════════════════════════════════════════════
 const RAIDS_DATA=[
-  {id:'r1',name:'Raid: Shibuya Urgente',cityId:'tokyo',zoneId:'shibuya',waves:3,boss:'Espíritu de Shibuya',minGrade:4,desc:'3 oleadas en la zona cero de Shibuya.',reward:{xp:200,em:80},emCost:60},
-  {id:'r2',name:'Raid: Gion Nocturna',cityId:'kyoto',zoneId:'gion',waves:5,boss:'Demonio de Gion',minGrade:3,desc:'5 oleadas de demonios ancestrales.',reward:{xp:480,em:160},emCost:100},
-  {id:'r3',name:'Raid: Harajuku Elite',cityId:'tokyo',zoneId:'harajuku',waves:7,boss:'Hanami',minGrade:2,desc:'7 oleadas y jefe semi-especial.',reward:{xp:920,em:290},emCost:180},
-  {id:'r4',name:'Raid: Dotonbori Oscuro',cityId:'osaka',zoneId:'dotonbori',waves:5,boss:'Entidad del Canal',minGrade:1,desc:'5 oleadas en canal maldito.',reward:{xp:700,em:230},emCost:150},
-  {id:'r5',name:'Raid: Miyajima Sagrada',cityId:'hiroshima',zoneId:'miyajima',waves:6,boss:'Demonio del Torii',minGrade:1,desc:'Isla corrupta. 6 oleadas.',reward:{xp:850,em:270},emCost:170},
-  {id:'r6',name:'Raid Élite: Roppongi',cityId:'tokyo',zoneId:'roppongi',waves:10,boss:'Sukuna (Fragmento)',minGrade:'semi',desc:'10 oleadas. El desafío máximo.',reward:{xp:2200,em:620},emCost:360},
+  {id:'r_fukuoka',name:'Raid: Puerto de Fukuoka',cityId:'fukuoka',zoneId:'hakata',waves:3,boss:'Capitán Espectral',minGrade:5,desc:'3 oleadas de espíritus marineros. Raid para novatos G-5.',reward:{xp:150,em:70}},
+  {id:'r_sapporo',name:'Raid: Tundra Maldita',cityId:'sapporo',zoneId:'sapporo_tundra',waves:4,boss:'Bestia del Hielo',minGrade:4,desc:'4 oleadas de maldiciones gélidas en la tundra de Hokkaido.',reward:{xp:320,em:130}},
+  {id:'r_hiroshima',name:'Raid: Miyajima',cityId:'hiroshima',zoneId:'miyajima',waves:4,boss:'Guardián del Torii',minGrade:4,desc:'4 oleadas en la isla sagrada corrompida.',reward:{xp:360,em:150}},
+  {id:'r_sendai',name:'Raid: Costa del Pacífico',cityId:'sendai',zoneId:'sendai_costa',waves:5,boss:'Entidad Marina',minGrade:3,desc:'5 oleadas de entidades de la costa. Zona de G-3.',reward:{xp:500,em:190}},
+  {id:'r_osaka_namba',name:'Raid: Namba Nocturna',cityId:'osaka',zoneId:'namba',waves:5,boss:'Señor de Namba',minGrade:2,desc:'5 oleadas en el corazón de Osaka. G-2.',reward:{xp:720,em:250}},
+  {id:'r_osaka_bahia',name:'Raid: Bahía de Osaka',cityId:'osaka',zoneId:'osaka_bahia',waves:6,boss:'Entidad del Fondo',minGrade:'sg1',desc:'6 oleadas marinas de Semi-Grado 1.',reward:{xp:980,em:340}},
+  {id:'r_kyoto_gion',name:'Raid: Gion Nocturna',cityId:'kyoto',zoneId:'gion',waves:6,boss:'Demonio de Gion',minGrade:1,desc:'6 oleadas de demonios G-1 en Kioto.',reward:{xp:1300,em:450}},
+  {id:'r_kyoto_kinkaku',name:'Raid: Kinkaku-ji',cityId:'kyoto',zoneId:'kyoto_kinkakuji',waves:7,boss:'Espíritu del Oro',minGrade:'semi',desc:'7 oleadas de entidades Semi-Especiales.',reward:{xp:1800,em:600}},
+  {id:'r_tokyo_shibuya',name:'Raid: Operación Shibuya',cityId:'tokyo',zoneId:'shibuya',waves:8,boss:'Mahito',minGrade:'special',desc:'8 oleadas. El incidente de Shibuya. Solo Grado Especial.',reward:{xp:3000,em:900}},
+  {id:'r_tokyo_roppongi',name:'Raid Élite: Roppongi',cityId:'tokyo',zoneId:'roppongi',waves:10,boss:'Ryomen Sukuna (Fragmento)',minGrade:'special',desc:'10 oleadas. El desafío máximo del sistema.',reward:{xp:5000,em:1400}},
 ];
 let activeRaid=null;
 let raidCombatActive=false;
 
 function renderRaids(){
-  const ra=document.getElementById('raidActive');
-  if(activeRaid){ra.style.display='block';renderActiveRaid();}else{ra.style.display='none';}
-  const go=[4,3,2,1,'semi','special'],ci=go.indexOf(S.player.grade);
+  const go=[5,4,3,2,'sg1',1,'semi','special'];
+  const ci=go.indexOf(S.player.grade);
   document.getElementById('raidList').innerHTML=RAIDS_DATA.map(r=>{
-    const city=CITIES[r.cityId];const locked=ci<go.indexOf(r.minGrade);
+    const city=CITIES[r.cityId];
+    const locked=ci<go.indexOf(r.minGrade);
     const isActive=activeRaid?.id===r.id;
+    const gradeInfo=GRADES.find(g=>g.id===r.minGrade)||GRADES[0];
     return '<div class="raid-c '+(locked?'lk':'')+(isActive?' accepted':'')+'">'+
       '<div class="rn">'+r.name+'</div>'+
       '<div class="rd">'+r.desc+'</div>'+
-      '<div class="rm"><span class="rtag">🌊 '+r.waves+' oleadas</span><span class="rtag">💀 Jefe: '+r.boss+'</span><span class="rtag">⚡+'+r.reward.em+' EM</span><span class="rtag">Coste: '+r.emCost+' EM</span>'+(city?'<span class="rtag">📍'+city.name+'</span>':'')+'</div>'+
-      (locked?'<div class="t-xs c-muted mono">🔒 '+GRADES.find(g=>g.id===r.minGrade)?.label+'</div>':
-       isActive?'<button class="btn btn-p btn-sm" onclick="nav(\'raids\')">▶ Ver Raid activa</button>':
+      '<div class="rm">'+
+        '<span class="rtag">🌊 '+r.waves+' oleadas</span>'+
+        '<span class="rtag">💀 '+r.boss+'</span>'+
+        '<span class="rtag" style="color:'+gradeInfo.color+'">'+gradeInfo.short+'+</span>'+
+        '<span class="rtag">⭐ +'+r.reward.xp+' XP</span>'+
+        '<span class="rtag">⚡ +'+r.reward.em+' EM</span>'+
+        (city?'<span class="rtag">📍'+city.name+'</span>':'')+
+      '</div>'+
+      (locked?'<div class="t-xs mono c-muted">🔒 Requiere '+gradeInfo.label+'</div>':
+       isActive?'<button class="btn btn-p btn-sm" onclick="nav(\'raid-combat\')">▶ Continuar Raid</button>':
        '<button class="btn btn-d btn-sm" onclick="startRaid(\''+r.id+'\')">⚔️ Iniciar Raid</button>')+
     '</div>';
   }).join('');
 }
 
 function startRaid(id){
-  if(activeRaid)return toast('Ya hay una raid activa','error');
+  if(activeRaid)return toast('Ya hay una raid activa. Termínala primero.','error');
   const r=RAIDS_DATA.find(r=>r.id===id);if(!r)return;
-  if(!useEM(r.emCost))return toast('Necesitas '+r.emCost+' EM','error');
   activeRaid={...r,currentWave:1,paused:false,completedWaves:0};
   saveS();toast('🌀 Raid iniciada: '+r.name,'em');
   log_('Raid iniciada: '+r.name);
-  nav('raids');
+  nav('raid-combat');
 }
 
+function renderRaidCombatPage(){
+  if(!activeRaid){nav('raids');return;}
+  document.getElementById('raidCombatHeader').innerHTML='<h1>⚔️ '+activeRaid.name+'</h1>';
+  renderActiveRaid();
+}
 function renderActiveRaid(){
   if(!activeRaid)return;
   const r=activeRaid;
@@ -2488,10 +2527,10 @@ function raidWaveDefeat(){
 function continueRaidWave(){document.getElementById('rbResOverlay').innerHTML='';BD.ended=false;raidCombatActive=false;fightRaidWave();}
 function pauseRaidFromCombat(){clearInterval(raidTimerInt);BD.ended=true;activeRaid.paused=true;S.player.hp=BD.playerHP;saveS();raidCombatActive=false;renderActiveRaid();toast('⏸ Raid pausada','em');}
 function pauseRaidFromResult(){BD.ended=true;activeRaid.paused=true;saveS();raidCombatActive=false;renderActiveRaid();}
-function finishRaid(){raidCombatActive=false;renderRaids();}
+function finishRaid(){raidCombatActive=false;activeRaid=null;saveS();nav('raids');}
 function pauseRaid(){if(!activeRaid)return;activeRaid.paused=true;saveS();renderActiveRaid();}
-function resumeRaid(){if(!activeRaid)return;if(!useEM(50))return toast('50 EM para reanudar','error');activeRaid.paused=false;saveS();renderActiveRaid();}
-function abandonRaid(){if(!activeRaid)return;if(confirm('¿Abandonar raid? Perderás el progreso.')){clearInterval(raidTimerInt);activeRaid=null;raidCombatActive=false;saveS();renderRaids();}}
+function resumeRaid(){if(!activeRaid)return;activeRaid.paused=false;saveS();renderActiveRaid();}
+function abandonRaid(){if(!activeRaid)return;if(confirm('¿Abandonar raid? Perderás el progreso.')){clearInterval(raidTimerInt);activeRaid=null;raidCombatActive=false;saveS();nav('raids');}}
 
 // ═══════════════════════════════════════════════════════
 // BOSSES
@@ -2570,7 +2609,23 @@ function renderTaskList(){
   if(!tasks.length){el.innerHTML='<div class="c-muted t-sm" style="padding:14px 0">Sin tareas.</div>';return;}
   el.innerHTML=tasks.map(t=>{const od=isOD(t);return '<div class="tcard '+(od?'overdue':'')+(t.completed?' done-t':'')+'"><button class="tck '+(t.completed?'done':'')+'" onclick="toggleTask(\''+t.id+'\')">✓</button><div class="tb"><div class="tn">'+t.name+'</div><div class="tm-"><span class="badge '+(t.priority==='alta'?'b-alta':t.priority==='media'?'b-media':'b-baja')+'">'+t.priority+'</span><span class="td- '+(od?'ov':'')+'">'+(t.endDate?'⏰ '+t.endDate:'')+'</span>'+(t.completed?'':'<span class="ter">⚡'+calcEM(t)+'</span>')+'</div></div><div class="ta-">'+(od&&!t.completed?'<button class="tab-" onclick="openForgive(\''+t.id+'\')">⚖️</button>':'')+'<button class="tab-" onclick="openTaskModal(\''+t.id+'\')">✏️</button><button class="tab- del" onclick="delTask(\''+t.id+'\')">🗑</button></div></div>';}).join('');
 }
-function toggleTask(id){const t=S.tasks.find(t=>t.id===id);if(!t)return;if(t.completed){t.completed=false;saveS();renderMissions();return;}t.completed=true;S.player.failStreak=0;const em=calcEM(t),xp=calcXP(t);addEM(em,'Tarea: "'+t.name+'"');addXP(xp);toast('✅ +'+em+' EM +'+xp+' XP','success');log_('Tarea: "'+t.name+'"');saveS();renderMissions();renderDash();}
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  if(t.completed){
+    // Uncomplete — just toggle state, never refund/re-grant EM
+    t.completed=false;saveS();renderMissions();return;
+  }
+  if(t.emClaimed){
+    // Already claimed EM once — just mark done without reward
+    t.completed=true;saveS();renderMissions();return;
+  }
+  t.completed=true;t.emClaimed=true;S.player.failStreak=0;
+  const em=calcEM(t),xp=calcXP(t);
+  addEM(em,'Tarea: "'+t.name+'"');addXP(xp);
+  toast('✅ +'+em+' EM +'+xp+' XP','success');
+  log_('Tarea: "'+t.name+'"');
+  saveS();renderMissions();renderDash();
+}
 function qComplete(id){toggleTask(id);}
 function delTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);saveS();renderMissions();renderDash();}
 function openForgive(id){forgPendId=id;const t=S.tasks.find(t=>t.id===id);document.getElementById('fgName').textContent=t.name;document.getElementById('fgReason').value='';document.getElementById('forgiveMo').classList.add('open');}
@@ -2634,6 +2689,62 @@ function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'applica
 function importTrigger(){document.getElementById('impInput').click();}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{Object.assign(S,JSON.parse(ev.target.result));saveS();uiAll();nav('dashboard');toast('Importado','success');}catch{toast('Error','error');}};r.readAsText(f);}
 function resetAll(){if(confirm('¿Resetear TODO el progreso?')){localStorage.removeItem('jjk_v4');S=JSON.parse(JSON.stringify(DFLT));saveS();uiAll();nav('dashboard');toast('Reseteado','em');}}
+
+// ═══════════════════════════════════════════════════════
+// TEST MODE
+// ═══════════════════════════════════════════════════════
+function testUnlockAll(){
+  S.player.em=S.player.maxEm=9999;
+  S.player.statPoints=999;
+  S.player.level=Math.max(S.player.level,50);
+  S.player.xp=0;S.player.xpNext=99999;
+  saveS();uiAll();toast('⚡ EM ilimitada + puntos de stat maximos','gold');
+}
+function testMaxMastery(){
+  const tech=TECHNIQUES[S.player.technique];if(!tech)return toast('Elige técnica primero','error');
+  const maxLv=getTechMaxMastery();
+  S.player.techMasteryXP=xpForLevel(maxLv)+1;
+  // Unlock all skills
+  tech.skills.forEach(sk=>{
+    if(!S.player.unlockedSkills.includes(sk.id)){S.player.unlockedSkills.push(sk.id);S.player.skillMastery[sk.id]=0;}
+  });
+  saveS();uiAll();toast('🌟 Maestría al máximo + todas las habilidades desbloqueadas','gold');
+  if(document.getElementById('ptab-maestria').style.display!=='none')renderMaestriaContent();
+}
+function testUnlockTechs(){
+  // Unlock all techniques by showing the picker with all options
+  const allTechs=Object.values(TECHNIQUES);
+  document.getElementById('techPickOpts').innerHTML=allTechs.map(t=>'<button class="forg-btn" onclick="selectTech(\''+t.id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:11px"><span style="font-size:22px;flex-shrink:0">'+t.emoji+'</span><div style="text-align:left"><div style="font-size:13px;font-weight:700;color:'+t.rc+'">'+t.name+'</div><div class="t-xs mono c-muted mb1">'+t.rarity+' · Tier '+t.tier+'</div><div class="t-sm" style="color:var(--ts)">'+t.desc+'</div></div></button>').join('');
+  document.getElementById('techPickMo').classList.add('open');
+  toast('🔓 Todas las técnicas disponibles','gold');
+}
+function testUnlockStatTree(){
+  Object.values(STAT_TREE).forEach(pillar=>{
+    pillar.nodes.forEach(node=>{
+      if(!S.player.statTreeNodes.includes(node.id)){
+        S.player.statTreeNodes.push(node.id);
+        const e=node.effect;
+        if(e.maxHp){S.player.maxHp+=e.maxHp;S.player.hp=Math.min(S.player.hp+e.maxHp,S.player.maxHp);}
+        if(e.maxEm)S.player.maxEm+=e.maxEm;
+        if(e.fuerza)S.player.stats.fuerza+=e.fuerza;
+        if(e.maldicion)S.player.stats.maldicion+=e.maldicion;
+        if(e.dominio)S.player.stats.dominio+=e.dominio;
+        if(e.inteligencia)S.player.stats.inteligencia+=e.inteligencia;
+        if(e.allStats)Object.keys(S.player.stats).forEach(k=>S.player.stats[k]+=e.allStats);
+      }
+    });
+  });
+  saveS();uiAll();toast('🌳 Árbol de stats completamente desbloqueado','gold');
+  if(document.getElementById('ptab-arbol').style.display!=='none')renderArbolContent();
+}
+function testMaxGrade(){
+  S.player.grade='special';S.player.level=100;
+  S.player.xp=0;S.player.xpNext=99999;
+  saveS();uiAll();toast('⬆️ Grado Especial alcanzado','gold');
+}
+function testAddXP(){
+  addXP(5000);toast('📈 +5000 XP añadidos','gold');
+}
 
 // ═══════════════════════════════════════════════════════
 // INIT
