@@ -542,8 +542,116 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div id="japanOverviewMap">
     <div class="japan-map-wrap" id="japanMapWrap">
       <div class="map-img-container" id="mapImgContainer">
-        <img id="japanMapImg" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Regions_and_Prefectures_of_Japan_2.svg/800px-Regions_and_Prefectures_of_Japan_2.svg.png" alt="Japan" onerror="this.style.display='none';document.getElementById('mapFallbackBg').style.display='block'">
-        <div id="mapFallbackBg" style="display:none;width:100%;height:460px;background:#080c18"></div>
+        <!-- Self-contained SVG political map of Japan -->
+        <svg id="japanMapSVG" viewBox="0 0 600 820" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;opacity:.85">
+          <defs>
+            <style>
+              .jp-region{stroke:#2a3850;stroke-width:1.2;fill-opacity:1}
+              .jp-hokkaido{fill:#0e1e2e}
+              .jp-tohoku{fill:#0c1a28}
+              .jp-kanto{fill:#0f2030}
+              .jp-chubu{fill:#0d1c2a}
+              .jp-kansai{fill:#0b1826}
+              .jp-chugoku{fill:#0c1a28}
+              .jp-shikoku{fill:#0a1622}
+              .jp-kyushu{fill:#0e1c2c}
+              .jp-sea{fill:#050a12}
+              .jp-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;fill:#2a4060;letter-spacing:.08em;text-transform:uppercase;pointer-events:none;user-select:none}
+              .jp-lbl-sm{font-family:'Share Tech Mono',monospace;font-size:8px;fill:#1e3050;letter-spacing:.06em;pointer-events:none;user-select:none}
+              .jp-border{stroke:#1a3050;stroke-width:.6;fill:none}
+            </style>
+          </defs>
+          <!-- Sea background -->
+          <rect width="600" height="820" fill="#050a12"/>
+          <!-- Subtle grid -->
+          <g opacity=".04" stroke="#3b7cf4" stroke-width=".4">
+            <line x1="0" y1="100" x2="600" y2="100"/><line x1="0" y1="200" x2="600" y2="200"/>
+            <line x1="0" y1="300" x2="600" y2="300"/><line x1="0" y1="400" x2="600" y2="400"/>
+            <line x1="0" y1="500" x2="600" y2="500"/><line x1="0" y1="600" x2="600" y2="600"/>
+            <line x1="0" y1="700" x2="600" y2="700"/>
+            <line x1="100" y1="0" x2="100" y2="820"/><line x1="200" y1="0" x2="200" y2="820"/>
+            <line x1="300" y1="0" x2="300" y2="820"/><line x1="400" y1="0" x2="400" y2="820"/>
+            <line x1="500" y1="0" x2="500" y2="820"/>
+          </g>
+
+          <!-- ── HOKKAIDO ── -->
+          <path class="jp-region jp-hokkaido" d="M340,40 Q380,30 430,45 Q480,60 510,90 Q540,120 530,155 Q515,185 490,195 Q460,205 430,195 Q400,185 375,165 Q348,142 338,115 Q328,88 340,40Z"/>
+          <path class="jp-region jp-hokkaido" d="M340,40 Q330,55 325,75 Q320,95 330,115 Q338,142 348,165 Q360,188 340,195 Q318,200 305,185 Q292,168 298,148 Q304,128 315,112 Q326,96 330,78Z" opacity=".7"/>
+          <text class="jp-lbl" x="415" y="130" text-anchor="middle">HOKKAIDO</text>
+
+          <!-- ── TOHOKU ── -->
+          <path class="jp-region jp-tohoku" d="M385,210 Q405,200 430,205 Q455,212 465,235 Q472,258 462,278 Q450,298 430,308 Q408,316 388,305 Q368,292 362,268 Q356,244 368,225Z"/>
+          <path class="jp-region jp-tohoku" d="M365,225 Q355,240 350,262 Q345,285 355,305 Q365,322 350,330 Q334,336 322,320 Q310,302 316,280 Q322,258 335,242 Q348,226 365,225Z" opacity=".8"/>
+          <text class="jp-lbl-sm" x="410" y="265" text-anchor="middle">TOHOKU</text>
+
+          <!-- ── KANTO ── -->
+          <path class="jp-region jp-kanto" d="M360,320 Q385,312 410,320 Q432,330 438,352 Q443,374 432,392 Q418,408 396,412 Q372,415 354,400 Q336,384 336,362 Q336,340 360,320Z"/>
+          <!-- Tokyo Bay area -->
+          <path class="jp-region jp-kanto" d="M398,392 Q418,388 432,400 Q444,413 438,430 Q430,445 415,448 Q400,450 390,438 Q378,424 382,408Z" opacity=".75"/>
+          <text class="jp-lbl" x="388" y="368" text-anchor="middle">KANTO</text>
+
+          <!-- ── CHUBU (includes Nagano, Aichi, etc.) ── -->
+          <path class="jp-region jp-chubu" d="M305,350 Q330,338 358,348 Q370,362 368,382 Q365,400 348,412 Q328,422 308,414 Q288,404 282,385 Q276,364 292,353Z"/>
+          <path class="jp-region jp-chubu" d="M280,388 Q295,378 310,385 Q324,394 322,410 Q318,425 305,432 Q290,438 278,428 Q264,416 268,402Z" opacity=".8"/>
+          <text class="jp-lbl-sm" x="318" y="390" text-anchor="middle">CHUBU</text>
+
+          <!-- ── KANSAI ── -->
+          <path class="jp-region jp-kansai" d="M240,420 Q268,410 295,418 Q315,428 318,448 Q320,468 306,480 Q290,490 268,486 Q245,480 234,462 Q222,443 240,420Z"/>
+          <text class="jp-lbl" x="276" y="454" text-anchor="middle">KANSAI</text>
+
+          <!-- ── CHUGOKU ── -->
+          <path class="jp-region jp-chugoku" d="M175,470 Q205,458 235,465 Q255,474 258,494 Q260,514 244,524 Q226,532 205,526 Q182,518 170,500 Q158,480 175,470Z"/>
+          <text class="jp-lbl-sm" x="212" y="500" text-anchor="middle">CHUGOKU</text>
+
+          <!-- ── SHIKOKU ── -->
+          <path class="jp-region jp-shikoku" d="M220,530 Q248,522 270,532 Q285,543 282,558 Q278,572 262,578 Q244,582 228,572 Q210,560 212,544Z"/>
+          <text class="jp-lbl-sm" x="248" y="556" text-anchor="middle">SHIKOKU</text>
+
+          <!-- ── KYUSHU ── -->
+          <path class="jp-region jp-kyushu" d="M130,530 Q158,518 182,528 Q200,540 200,562 Q198,585 180,598 Q160,610 138,600 Q114,588 108,565 Q102,540 130,530Z"/>
+          <path class="jp-region jp-kyushu" d="M155,598 Q170,592 178,604 Q184,618 174,628 Q162,636 148,628 Q134,618 138,605Z" opacity=".8"/>
+          <text class="jp-lbl" x="155" y="570" text-anchor="middle">KYUSHU</text>
+
+          <!-- ── OKINAWA ── -->
+          <ellipse class="jp-region jp-kyushu" cx="120" cy="760" rx="28" ry="12" opacity=".7"/>
+          <text class="jp-lbl-sm" x="120" y="764" text-anchor="middle">OKI</text>
+
+          <!-- Prefecture border lines (suggest internal divisions) -->
+          <g class="jp-border">
+            <!-- Hokkaido internal -->
+            <line x1="390" y1="60" x2="420" y2="120"/><line x1="450" y1="80" x2="460" y2="150"/>
+            <!-- Tohoku internal -->
+            <line x1="390" y1="220" x2="400" y2="280"/><line x1="420" y1="215" x2="435" y2="270"/>
+            <!-- Kanto internal -->
+            <line x1="365" y1="335" x2="375" y2="390"/><line x1="395" y1="325" x2="405" y2="385"/>
+            <!-- Kansai internal -->
+            <line x1="252" y1="428" x2="262" y2="478"/><line x1="278" y1="422" x2="285" y2="475"/>
+            <!-- Chubu internal -->
+            <line x1="295" y1="358" x2="305" y2="408"/><line x1="322" y1="352" x2="330" y2="405"/>
+          </g>
+
+          <!-- Coastal glow effect -->
+          <path d="M340,40 Q380,30 430,45 Q480,60 510,90 Q540,120 530,155 Q515,185 490,195 Q460,205 430,195 Q400,185 375,165 Q348,142 338,115 Q328,88 340,40Z" fill="none" stroke="#1a4070" stroke-width="2" opacity=".4"/>
+          <path d="M360,320 Q385,312 410,320 Q432,330 438,352 Q443,374 432,392 Q418,408 396,412 Q372,415 354,400 Q336,384 336,362 Q336,340 360,320Z" fill="none" stroke="#1a4070" stroke-width="2" opacity=".4"/>
+          <path d="M240,420 Q268,410 295,418 Q315,428 318,448 Q320,468 306,480 Q290,490 268,486 Q245,480 234,462 Q222,443 240,420Z" fill="none" stroke="#1a4070" stroke-width="2" opacity=".4"/>
+
+          <!-- Connection lines between regions (suggest continuity of island) -->
+          <g stroke="#1a3050" stroke-width="1" stroke-dasharray="4,4" fill="none" opacity=".5">
+            <line x1="365" y1="195" x2="368" y2="210"/>
+            <line x1="355" y1="308" x2="358" y2="320"/>
+            <line x1="295" y1="415" x2="290" y2="420"/>
+            <line x1="234" y1="462" x2="215" y2="468"/>
+            <line x1="175" y1="525" x2="165" y2="533"/>
+            <line x1="220" y1="528" x2="235" y2="534"/>
+          </g>
+
+          <!-- Sea labels -->
+          <text class="jp-lbl-sm" x="80" y="350" text-anchor="middle" opacity=".5">MAR DEL</text>
+          <text class="jp-lbl-sm" x="80" y="362" text-anchor="middle" opacity=".5">JAPÓN</text>
+          <text class="jp-lbl-sm" x="530" y="400" text-anchor="middle" opacity=".5">OCÉANO</text>
+          <text class="jp-lbl-sm" x="530" y="412" text-anchor="middle" opacity=".5">PACÍFICO</text>
+        </svg>
+        <!-- Zone nodes overlay (JS injected) -->
         <div class="map-zones-overlay" id="mapZones"></div>
         <div class="map-legend">
           <div class="mli"><div class="mld" style="background:var(--red)"></div> Peligrosa</div>
@@ -1471,84 +1579,215 @@ function selectTech(id){
 // Clicking a city shows a city-specific map with zone nodes
 // ═══════════════════════════════════════════════════════
 
-// Positions as % of image width/height — calibrated to Japan political map
-// The Wikipedia SVG map has Japan roughly like: Hokkaido top-right, Kyushu bottom-left
+// Positions as % of SVG viewBox 600x820
+// Calibrated to the SVG regions above
 const CITY_MAP_POS={
-  sapporo:  {x:'76%',y:'10%'},
-  sendai:   {x:'72%',y:'34%'},
-  tokyo:    {x:'71%',y:'52%'},
-  hiroshima:{x:'32%',y:'66%'},
-  kyoto:    {x:'42%',y:'62%'},
-  osaka:    {x:'40%',y:'65%'},
-  fukuoka:  {x:'20%',y:'76%'},
+  sapporo:  {x:'68%',y:'16%'},   // Hokkaido
+  sendai:   {x:'65%',y:'34%'},   // Tohoku
+  tokyo:    {x:'66%',y:'46%'},   // Kanto
+  kyoto:    {x:'46%',y:'56%'},   // Kansai
+  osaka:    {x:'44%',y:'59%'},   // Kansai
+  hiroshima:{x:'31%',y:'62%'},   // Chugoku
+  fukuoka:  {x:'22%',y:'68%'},   // Kyushu
 };
 
-// City-specific map images and zone positions within that city map
-const CITY_MAP_DATA={
+// City-specific SVG maps with zone positions
+// Each city has an SVG background + zone % positions
+const CITY_SVG={
   tokyo:{
-    // OpenStreetMap static tiles / Wikimedia commons Tokyo map
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Tokyo_Metropolitan_area_map.svg/800px-Tokyo_Metropolitan_area_map.svg.png',
-    // Zone positions as % of city map image
+    vb:'0 0 500 400',
+    bg:`<rect width="500" height="400" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="50" x2="500" y2="50"/><line x1="0" y1="100" x2="500" y2="100"/><line x1="0" y1="150" x2="500" y2="150"/><line x1="0" y1="200" x2="500" y2="200"/><line x1="0" y1="250" x2="500" y2="250"/><line x1="0" y1="300" x2="500" y2="300"/><line x1="0" y1="350" x2="500" y2="350"/>
+      <line x1="62" y1="0" x2="62" y2="400"/><line x1="125" y1="0" x2="125" y2="400"/><line x1="187" y1="0" x2="187" y2="400"/><line x1="250" y1="0" x2="250" y2="400"/><line x1="312" y1="0" x2="312" y2="400"/><line x1="375" y1="0" x2="375" y2="400"/><line x1="437" y1="0" x2="437" y2="400"/>
+    </g>
+    <!-- Ward blocks -->
+    <rect x="80" y="60" width="95" height="80" rx="4" fill="#0a1828" stroke="#162238" stroke-width="1"/>
+    <rect x="185" y="55" width="80" height="70" rx="4" fill="#0c1e30" stroke="#162238" stroke-width="1"/>
+    <rect x="80" y="150" width="85" height="75" rx="4" fill="#0a1a28" stroke="#162238" stroke-width="1"/>
+    <rect x="175" y="135" width="95" height="90" rx="4" fill="#0e2235" stroke="#172540" stroke-width="1"/>
+    <rect x="280" y="130" width="75" height="70" rx="4" fill="#0c1c2c" stroke="#162238" stroke-width="1"/>
+    <rect x="165" y="235" width="90" height="70" rx="4" fill="#0a1826" stroke="#152035" stroke-width="1"/>
+    <rect x="265" y="210" width="80" height="80" rx="4" fill="#0b1a2a" stroke="#152035" stroke-width="1"/>
+    <!-- Tokyo Bay -->
+    <path d="M300,280 Q340,270 380,280 Q420,295 430,330 Q435,360 410,375 Q380,385 350,375 Q315,362 305,335 Q295,308 300,280Z" fill="#040c18" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="9" fill="#0c2040" x="365" y="330" text-anchor="middle">BAHÍA DE TOKIO</text>
+    <!-- Ward labels -->
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="127" y="103" text-anchor="middle">NERIMA</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="225" y="93" text-anchor="middle">TOSHIMA</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="122" y="190" text-anchor="middle">NAKANO</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="222" y="183" text-anchor="middle">SHIBUYA-KU</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="318" y="168" text-anchor="middle">CHIYODA</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="210" y="273" text-anchor="middle">MINATO-KU</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="305" y="253" text-anchor="middle">KOTO-KU</text>
+    <!-- Roads -->
+    <g stroke="#0e2040" stroke-width=".8" fill="none" opacity=".6">
+      <line x1="80" y1="200" x2="420" y2="200"/><line x1="220" y1="60" x2="220" y2="380"/>
+      <line x1="80" y1="150" x2="420" y2="150"/><line x1="280" y1="60" x2="280" y2="380"/>
+    </g>`,
     zonePos:{
-      jujutsu_high: {x:'48%',y:'45%'},
-      shibuya:      {x:'44%',y:'52%'},
-      shinjuku:     {x:'40%',y:'46%'},
-      akihabara:    {x:'55%',y:'44%'},
-      harajuku:     {x:'42%',y:'55%'},
-      roppongi:     {x:'47%',y:'57%'},
+      jujutsu_high: {x:'37%',y:'32%'},
+      shibuya:      {x:'42%',y:'52%'},
+      shinjuku:     {x:'34%',y:'42%'},
+      akihabara:    {x:'58%',y:'36%'},
+      harajuku:     {x:'40%',y:'58%'},
+      roppongi:     {x:'50%',y:'62%'},
     }
   },
   kyoto:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Kyoto_city_center_map.png/800px-Kyoto_city_center_map.png',
+    vb:'0 0 500 380',
+    bg:`<rect width="500" height="380" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="75" x2="500" y2="75"/><line x1="0" y1="150" x2="500" y2="150"/><line x1="0" y1="225" x2="500" y2="225"/><line x1="0" y1="300" x2="500" y2="300"/>
+      <line x1="100" y1="0" x2="100" y2="380"/><line x1="200" y1="0" x2="200" y2="380"/><line x1="300" y1="0" x2="300" y2="380"/><line x1="400" y1="0" x2="400" y2="380"/>
+    </g>
+    <rect x="60" y="50" width="380" height="280" rx="6" fill="#080f1c" stroke="#12203a" stroke-width="1"/>
+    <!-- River Kamo -->
+    <path d="M255,40 Q258,120 260,200 Q262,280 258,360" stroke="#0a1e38" stroke-width="8" fill="none" opacity=".8"/>
+    <path d="M255,40 Q258,120 260,200 Q262,280 258,360" stroke="#0d2848" stroke-width="3" fill="none"/>
+    <!-- Mountains hint west -->
+    <path d="M60,80 Q80,60 100,80 Q120,100 140,80 Q160,60 180,80 Q200,100 220,80" stroke="#0e2038" stroke-width="2" fill="none" opacity=".5"/>
+    <!-- Streets grid -->
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="120" y1="60" x2="120" y2="330"/><line x1="180" y1="60" x2="180" y2="330"/>
+      <line x1="80" y1="120" x2="440" y2="120"/><line x1="80" y1="200" x2="440" y2="200"/><line x1="80" y1="270" x2="440" y2="270"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="175" y="185" text-anchor="middle">NAKAGYO-KU</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="320" y="230" text-anchor="middle">HIGASHIYAMA</text>
+    <text font-family="Share Tech Mono" font-size="6" fill="#0c2040" x="262" y="240" text-anchor="middle">RÍO KAMO</text>`,
     zonePos:{
-      gion:         {x:'58%',y:'55%'},
-      arashiyama:   {x:'22%',y:'52%'},
-      fushimi:      {x:'55%',y:'72%'},
+      gion:       {x:'65%',y:'55%'},
+      arashiyama: {x:'22%',y:'52%'},
+      fushimi:    {x:'55%',y:'76%'},
     }
   },
   osaka:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Osaka_map.png/800px-Osaka_map.png',
+    vb:'0 0 500 380',
+    bg:`<rect width="500" height="380" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="75" x2="500" y2="75"/><line x1="0" y1="150" x2="500" y2="150"/><line x1="0" y1="225" x2="500" y2="225"/><line x1="0" y1="300" x2="500" y2="300"/>
+      <line x1="100" y1="0" x2="100" y2="380"/><line x1="200" y1="0" x2="200" y2="380"/><line x1="300" y1="0" x2="300" y2="380"/><line x1="400" y1="0" x2="400" y2="380"/>
+    </g>
+    <!-- Osaka Bay -->
+    <path d="M180,300 Q250,290 310,300 Q380,315 400,360 L180,360Z" fill="#040c18" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="8" fill="#0c2040" x="290" y="340" text-anchor="middle">BAHÍA DE OSAKA</text>
+    <!-- City blocks -->
+    <rect x="100" y="80" width="280" height="200" rx="4" fill="#08101e" stroke="#122030" stroke-width="1"/>
+    <!-- Dotonbori canal -->
+    <path d="M120,220 Q200,215 280,220 Q320,222 340,230" stroke="#0a1e38" stroke-width="6" fill="none" opacity=".8"/>
+    <path d="M120,220 Q200,215 280,220 Q320,222 340,230" stroke="#0d2848" stroke-width="2" fill="none"/>
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="160" y1="80" x2="160" y2="300"/><line x1="240" y1="80" x2="240" y2="300"/><line x1="320" y1="80" x2="320" y2="300"/>
+      <line x1="100" y1="140" x2="380" y2="140"/><line x1="100" y1="200" x2="380" y2="200"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="200" y="165" text-anchor="middle">UMEDA</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="200" y="245" text-anchor="middle">NAMBA</text>
+    <text font-family="Share Tech Mono" font-size="6" fill="#0c2040" x="230" y="225" text-anchor="middle">DOTONBORI</text>`,
     zonePos:{
-      namba:        {x:'45%',y:'62%'},
-      umeda:        {x:'42%',y:'38%'},
-      dotonbori:    {x:'46%',y:'66%'},
+      namba:      {x:'44%',y:'64%'},
+      umeda:      {x:'40%',y:'36%'},
+      dotonbori:  {x:'50%',y:'60%'},
     }
   },
   sendai:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Sendai_map.png/800px-Sendai_map.png',
+    vb:'0 0 500 360',
+    bg:`<rect width="500" height="360" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="90" x2="500" y2="90"/><line x1="0" y1="180" x2="500" y2="180"/><line x1="0" y1="270" x2="500" y2="270"/>
+      <line x1="125" y1="0" x2="125" y2="360"/><line x1="250" y1="0" x2="250" y2="360"/><line x1="375" y1="0" x2="375" y2="360"/>
+    </g>
+    <!-- Pacific coast east -->
+    <path d="M420,60 Q450,100 460,160 Q468,220 455,280 Q440,340 420,360 L500,360 L500,0Z" fill="#040c18" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="7" fill="#0c2040" x="462" y="200" text-anchor="middle">OCÉANO</text>
+    <!-- Matsushima bay -->
+    <path d="M350,60 Q390,70 420,90 Q440,110 430,135 Q415,155 390,148 Q365,140 355,118 Q345,95 350,60Z" fill="#040c18" stroke="#0e2040" stroke-width="1"/>
+    <text font-family="Share Tech Mono" font-size="6" fill="#0c2040" x="390" y="112" text-anchor="middle">MATSUSHIMA</text>
+    <rect x="60" y="80" width="280" height="200" rx="4" fill="#08101e" stroke="#122030" stroke-width="1"/>
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="120" y1="80" x2="120" y2="280"/><line x1="200" y1="80" x2="200" y2="280"/>
+      <line x1="60" y1="150" x2="340" y2="150"/><line x1="60" y1="220" x2="340" y2="220"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="190" y="175" text-anchor="middle">SENDAI-SHI</text>`,
     zonePos:{
-      sendai_city:  {x:'48%',y:'45%'},
-      matsushima:   {x:'68%',y:'35%'},
+      sendai_city:{x:'40%',y:'52%'},
+      matsushima: {x:'72%',y:'30%'},
     }
   },
   sapporo:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Sapporo_map.png/800px-Sapporo_map.png',
+    vb:'0 0 500 360',
+    bg:`<rect width="500" height="360" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="90" x2="500" y2="90"/><line x1="0" y1="180" x2="500" y2="180"/><line x1="0" y1="270" x2="500" y2="270"/>
+      <line x1="125" y1="0" x2="125" y2="360"/><line x1="250" y1="0" x2="250" y2="360"/><line x1="375" y1="0" x2="375" y2="360"/>
+    </g>
+    <!-- Mountains east -->
+    <path d="M320,40 Q360,20 400,40 Q440,65 460,100 Q480,140 470,180 Q455,215 430,220 Q400,224 375,200 Q348,175 345,140 Q342,105 360,75Z" fill="#080f1c" stroke="#122030" stroke-width="1"/>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="405" y="138" text-anchor="middle">DAISETSUZAN</text>
+    <!-- City grid -->
+    <rect x="60" y="120" width="240" height="180" rx="4" fill="#08101e" stroke="#122030" stroke-width="1"/>
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="100" y1="120" x2="100" y2="300"/><line x1="160" y1="120" x2="160" y2="300"/><line x1="220" y1="120" x2="220" y2="300"/>
+      <line x1="60" y1="170" x2="300" y2="170"/><line x1="60" y1="230" x2="300" y2="230"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="175" y="205" text-anchor="middle">SAPPORO-SHI</text>`,
     zonePos:{
-      sapporo_city: {x:'48%',y:'52%'},
-      daisetsuzan:  {x:'72%',y:'38%'},
+      sapporo_city:{x:'35%',y:'55%'},
+      daisetsuzan: {x:'74%',y:'40%'},
     }
   },
   hiroshima:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Hiroshima_map.png/800px-Hiroshima_map.png',
+    vb:'0 0 500 380',
+    bg:`<rect width="500" height="380" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="75" x2="500" y2="75"/><line x1="0" y1="150" x2="500" y2="150"/><line x1="0" y1="225" x2="500" y2="225"/><line x1="0" y1="300" x2="500" y2="300"/>
+      <line x1="100" y1="0" x2="100" y2="380"/><line x1="200" y1="0" x2="200" y2="380"/><line x1="300" y1="0" x2="300" y2="380"/><line x1="400" y1="0" x2="400" y2="380"/>
+    </g>
+    <!-- Hiroshima Bay / Seto Sea -->
+    <path d="M60,300 Q150,285 240,295 Q310,305 380,290 Q430,280 480,290 L480,380 L60,380Z" fill="#040c18" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="7" fill="#0c2040" x="270" y="345" text-anchor="middle">MAR INTERIOR DE SETO</text>
+    <!-- Miyajima island -->
+    <ellipse cx="130" cy="330" rx="40" ry="20" fill="#06101e" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="6" fill="#0c2040" x="130" y="334" text-anchor="middle">MIYAJIMA</text>
+    <rect x="160" y="80" width="240" height="200" rx="4" fill="#08101e" stroke="#122030" stroke-width="1"/>
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="220" y1="80" x2="220" y2="290"/><line x1="300" y1="80" x2="300" y2="290"/>
+      <line x1="160" y1="160" x2="400" y2="160"/><line x1="160" y1="230" x2="400" y2="230"/>
+    </g>
+    <!-- Ota river delta -->
+    <g stroke="#0a1e38" stroke-width="3" fill="none" opacity=".7">
+      <line x1="260" y1="80" x2="240" y2="300"/><line x1="275" y1="80" x2="265" y2="300"/><line x1="290" y1="80" x2="290" y2="300"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="280" y="175" text-anchor="middle">HIROSHIMA-SHI</text>`,
     zonePos:{
-      hiroshima_city:{x:'45%',y:'52%'},
-      miyajima:     {x:'28%',y:'65%'},
+      hiroshima_city:{x:'52%',y:'55%'},
+      miyajima:      {x:'26%',y:'87%'},
     }
   },
   fukuoka:{
-    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Fukuoka_map.png/800px-Fukuoka_map.png',
+    vb:'0 0 500 360',
+    bg:`<rect width="500" height="360" fill="#04080e"/>
+    <g opacity=".05" stroke="#3b7cf4" stroke-width=".4">
+      <line x1="0" y1="90" x2="500" y2="90"/><line x1="0" y1="180" x2="500" y2="180"/><line x1="0" y1="270" x2="500" y2="270"/>
+      <line x1="125" y1="0" x2="125" y2="360"/><line x1="250" y1="0" x2="250" y2="360"/><line x1="375" y1="0" x2="375" y2="360"/>
+    </g>
+    <!-- Hakata Bay -->
+    <path d="M120,60 Q200,50 280,65 Q330,80 340,110 Q345,135 320,148 Q290,158 255,148 Q215,136 190,112 Q165,88 140,85Z" fill="#040c18" stroke="#0e2040" stroke-width="1.5"/>
+    <text font-family="Share Tech Mono" font-size="7" fill="#0c2040" x="228" y="110" text-anchor="middle">BAHÍA DE HAKATA</text>
+    <rect x="80" y="140" width="300" height="180" rx="4" fill="#08101e" stroke="#122030" stroke-width="1"/>
+    <g stroke="#101e34" stroke-width=".7" fill="none" opacity=".7">
+      <line x1="150" y1="140" x2="150" y2="320"/><line x1="230" y1="140" x2="230" y2="320"/><line x1="310" y1="140" x2="310" y2="320"/>
+      <line x1="80" y1="200" x2="380" y2="200"/><line x1="80" y1="260" x2="380" y2="260"/>
+    </g>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="180" y="228" text-anchor="middle">FUKUOKA-SHI</text>
+    <text font-family="Share Tech Mono" font-size="7" fill="#1a3055" x="270" y="175" text-anchor="middle">HAKATA-KU</text>`,
     zonePos:{
-      fukuoka_city: {x:'42%',y:'48%'},
-      hakata:       {x:'52%',y:'55%'},
+      fukuoka_city:{x:'37%',y:'62%'},
+      hakata:      {x:'56%',y:'46%'},
     }
   },
 };
 
-// Fallback colors per city (for when map image fails to load)
-const CITY_MAP_FALLBACK_COLOR={
-  tokyo:'#080e1c',kyoto:'#0a0812',osaka:'#0c0a10',
-  sendai:'#080c10',sapporo:'#060a12',hiroshima:'#0a0810',fukuoka:'#08100a',
-};
+// (city fallback colors no longer needed — SVG maps used)
 
 let selectedCityId=null;
 
@@ -1610,8 +1849,7 @@ function renderCityDetail(cityId){
   const zones=city.zones;
   const hasRaids=zones.some(z=>z.raidAvail);
   const gradeC=gd(city.unlockGrade).color;
-  const cityMapData=CITY_MAP_DATA[cityId]||{img:'',zonePos:{}};
-  const fallbackBg=CITY_MAP_FALLBACK_COLOR[cityId]||'#080c18';
+  const cityMapData=CITY_SVG[cityId]||{vb:'0 0 500 360',bg:'',zonePos:{}};
 
   // Build zone node HTML for the city map
   const zoneNodesHtml=zones.map(zone=>{
@@ -1647,15 +1885,14 @@ function renderCityDetail(cityId){
         '</div>'+
       '</div>'+
 
-      // City map with zone nodes
-      '<div class="city-map-wrap" style="background:'+fallbackBg+'">'+
-        '<img src="'+cityMapData.img+'" alt="'+city.name+' map" '+
-          'style="min-height:300px;object-fit:cover" '+
-          'onerror="this.style.display=\'none\'">'+
+      // City SVG map with zone nodes
+      '<div class="city-map-wrap">'+
+        '<svg viewBox="'+cityMapData.vb+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">'+
+          cityMapData.bg+
+        '</svg>'+
         '<div class="city-map-overlay" id="cityMapOverlay_'+cityId+'">'+
           zoneNodesHtml+
         '</div>'+
-        // mini legend
         '<div class="map-legend">'+
           '<div class="mli"><div class="mld" style="background:var(--red)"></div> Peligrosa</div>'+
           '<div class="mli"><div class="mld" style="background:var(--emb)"></div> Activa</div>'+
@@ -1931,10 +2168,11 @@ function combatVictory(){
 
 function combatDefeat(){
   if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
-  S.player.hp=Math.max(1,Math.round(BD.playerMaxHP*.08));
+  // Reset HP to full — player recovers after defeat
+  S.player.hp=S.player.maxHp;
   const el=Math.round(S.player.em*.12);S.player.em=Math.max(0,S.player.em-el);
   saveS();log_('Derrota vs '+BD.enemy.name);
-  showCombatResult(false,0,-el);clog('💀 Derrota. −'+el+' EM','cl-dmg');
+  showCombatResult(false,0,-el);clog('💀 Derrota. HP recuperado. −'+el+' EM','cl-dmg');
 }
 
 function showCombatResult(win,xp,em){
