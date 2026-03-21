@@ -3602,7 +3602,11 @@ function buildBossEnemy(bd){
 }
 
 function startBossCombat(enemy,bossId){
-  // Use the main battle arena but tag it as a boss fight
+  // Navigate to battle page without calling renderBattlePage (it would reset the arena)
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-battle')?.classList.add('active');
+  document.querySelectorAll('.ni')[3]?.classList.add('active');
+  // Show the combat arena, hide the mission board
   document.getElementById('missionBoardSel').style.display='none';
   document.getElementById('battleMain').style.display='block';
   const p=S.player;
