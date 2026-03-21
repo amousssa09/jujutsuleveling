@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jujutsu Kaisen — Sistema del Hechicero v4</title>
+<title>Jujutsu Kaisen — Sistema del Hechicero v5</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -90,7 +90,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .md.wide{width:640px}.md.xl{width:800px}
 @keyframes mIn{from{transform:scale(.94) translateY(8px);opacity:0}to{transform:scale(1);opacity:1}}
 .mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.mt-{font-family:var(--fd);font-size:15px;letter-spacing:.06em}
+.modal-title{font-family:var(--fd);font-size:15px;letter-spacing:.06em}
 .mc{width:24px;height:24px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tm);font-size:11px}
 .mc:hover{color:var(--tp)}
 /* Toast */
@@ -119,7 +119,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 /* ─── CITY MENU ─── */
 .city-menu-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:var(--tr)}
-.city-menu-card:hover:not(.cm-locked){border-color:var(--bdr-g);border-color:var(--bdr-g)}
+.city-menu-card:hover:not(.cm-locked){border-color:var(--bdr-g)}
 .city-menu-card.cm-locked{opacity:.5;cursor:not-allowed}
 .city-menu-card.cm-selected{border-color:var(--emb)}
 .cm-header{padding:13px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)}
@@ -491,7 +491,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 <div class="shell">
 <aside class="sidebar">
-  <div class="sb-logo"><div class="lt">Jujutsu Kaisen</div><div class="ls">// Sistema del Hechicero v4</div></div>
+  <div class="sb-logo"><div class="lt">Jujutsu Kaisen</div><div class="ls">// Sistema del Hechicero v5</div></div>
   <div class="em-mini">
     <label>Energía Maldita</label>
     <div class="emv" id="sbEM">0</div>
@@ -632,19 +632,26 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 </div>
 <!-- BATTLE -->
 <div class="page" id="page-battle">
-  <div class="page-h"><h1>Misiones de Limpieza</h1><p>Genera misiones basadas en tu nivel y las zonas desbloqueadas</p></div>
+  <div class="page-h"><h1>Misiones de Limpieza</h1><p>Selecciona una zona activa y genera 3 misiones aleatorias. Completa todas para obtener recompensas.</p></div>
   <div id="missionBoardSel">
-    <div class="flex iac jb mb3">
-      <div class="stabs" style="margin-bottom:0">
-        <div class="stab active" onclick="switchBoardTab('disponibles',this)">Disponibles</div>
-        <div class="stab" onclick="switchBoardTab('aceptadas',this)">Aceptadas</div>
-        <div class="stab" onclick="switchBoardTab('historial',this)">Historial</div>
+    <!-- Zone selector -->
+    <div class="card mb3" id="cleaningZonePicker">
+      <div class="ct">🗺 Zona de Misión</div>
+      <div id="cleaningZoneSelect">
+        <div class="c-muted t-sm">Selecciona una ciudad y zona para asignar misiones de limpieza.</div>
+        <div id="cleaningCityList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px"></div>
       </div>
-      <button class="btn btn-p" onclick="generateMissions()">🎲 Generar Misiones</button>
+      <div id="cleaningZoneInfo" style="display:none"></div>
     </div>
-    <div id="boardTab-disponibles"><div class="mboard" id="missionBoardAvail"><div class="c-muted t-sm">Pulsa "Generar Misiones" para crear misiones ajustadas a tu nivel.</div></div></div>
-    <div id="boardTab-aceptadas" style="display:none"><div class="mboard" id="missionBoardAccepted"></div></div>
-    <div id="boardTab-historial" style="display:none"><div class="mboard" id="missionBoardDone"></div></div>
+    <!-- Progress bar -->
+    <div class="card mb3" id="cleaningProgressCard" style="display:none">
+      <div class="ct">📊 Progreso de Limpieza</div>
+      <div id="cleaningProgressBar"></div>
+    </div>
+    <!-- Mission board -->
+    <div id="cleaningMissions">
+      <div class="c-muted t-sm">Selecciona una zona para generar misiones.</div>
+    </div>
   </div>
   <div id="battleMain" style="display:none">
     <div id="zoneProg"></div>
@@ -806,7 +813,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 <!-- MODALS -->
 <div class="mo" id="taskMo"><div class="md">
-  <div class="mh"><div class="mt-" id="taskMoT">Nueva Tarea</div><div class="mc" onclick="cm('taskMo')">✕</div></div>
+  <div class="mh"><div class="modal-title" id="taskMoT">Nueva Tarea</div><div class="mc" onclick="cm('taskMo')">✕</div></div>
   <div class="fg"><label>Nombre *</label><input class="fi" id="tkName" placeholder="¿Qué tienes que hacer?"></div>
   <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="tkPri"><option value="alta">🔴 Alta (+80 EM)</option><option value="media" selected>🟡 Media (+50 EM)</option><option value="baja">🟢 Baja (+25 EM)</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="tkDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
   <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="tkS"></div><div class="fg"><label>Deadline *</label><input type="date" class="fi" id="tkE"></div></div>
@@ -815,22 +822,26 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 </div></div>
 
 <div class="mo" id="habitMo"><div class="md">
-  <div class="mh"><div class="mt-">Nuevo Hábito</div><div class="mc" onclick="cm('habitMo')">✕</div></div>
+  <div class="mh"><div class="modal-title" id="habitMoT">Nuevo Hábito</div><div class="mc" onclick="cm('habitMo')">✕</div></div>
   <div class="fg"><label>Nombre *</label><input class="fi" id="hbName"></div>
+  <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="hbPri"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="hbDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
   <div class="g2"><div class="fg"><label>Frecuencia</label><select class="fs" id="hbFreq"><option value="daily">Diario</option><option value="weekly">Semanal</option></select></div><div class="fg"><label>EM por vez</label><input type="number" class="fi" id="hbEM" value="20" min="5" max="150"></div></div>
+  <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="hbS"></div><div class="fg"><label>Fin (opcional)</label><input type="date" class="fi" id="hbE"></div></div>
   <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('habitMo')">Cancelar</button><button class="btn btn-p" onclick="saveHabit()">✓ Guardar</button></div>
 </div></div>
 
 <div class="mo" id="goalMo"><div class="md">
-  <div class="mh"><div class="mt-">Nuevo Objetivo</div><div class="mc" onclick="cm('goalMo')">✕</div></div>
+  <div class="mh"><div class="modal-title" id="goalMoT">Nuevo Objetivo</div><div class="mc" onclick="cm('goalMo')">✕</div></div>
   <div class="fg"><label>Nombre *</label><input class="fi" id="glName"></div>
   <div class="fg"><label>Descripción</label><textarea class="fta" id="glDesc"></textarea></div>
-  <div class="g2"><div class="fg"><label>Deadline</label><input type="date" class="fi" id="glE"></div><div class="fg"><label>Recompensa EM</label><input type="number" class="fi" id="glEM" value="200" min="50"></div></div>
+  <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="glPri"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="glDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
+  <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="glS"></div><div class="fg"><label>Deadline</label><input type="date" class="fi" id="glE"></div></div>
+  <div class="fg"><label>Recompensa EM</label><input type="number" class="fi" id="glEM" value="200" min="50"></div>
   <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('goalMo')">Cancelar</button><button class="btn btn-p" onclick="saveGoal()">✓ Guardar</button></div>
 </div></div>
 
 <div class="mo" id="forgiveMo"><div class="md">
-  <div class="mh"><div class="mt-">⚖️ Sistema de Perdón</div><div class="mc" onclick="cm('forgiveMo')">✕</div></div>
+  <div class="mh"><div class="modal-title">⚖️ Sistema de Perdón</div><div class="mc" onclick="cm('forgiveMo')">✕</div></div>
   <p class="t-sm mb3" style="color:var(--ts);line-height:1.7">No completaste <strong id="fgName">"..."</strong> antes del deadline.<br>¿Tienes una razón válida?</p>
   <div class="fg"><label>Motivo</label><textarea class="fta" id="fgReason"></textarea></div>
   <button class="forg-btn par" onclick="forgive(true)">✅ Razón válida — Sin penalización</button>
@@ -838,18 +849,18 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 </div></div>
 
 <div class="mo" id="techPickMo"><div class="md wide">
-  <div class="mh"><div class="mt-">⚡ Elige tu Técnica Innata</div></div>
+  <div class="mh"><div class="modal-title">⚡ Elige tu Técnica Innata</div></div>
   <p class="t-sm mb3" style="color:var(--ts);line-height:1.6">Como nuevo hechicero, el mundo maldito te otorga tres posibles técnicas. Una vez elegida, es permanente hasta la evolución.</p>
   <div id="techPickOpts" style="display:flex;flex-direction:column;gap:8px"></div>
 </div></div>
 
 <div class="mo" id="zoneMo"><div class="md">
-  <div class="mh"><div class="mt-" id="zoneMoT">Zona</div><div class="mc" onclick="cm('zoneMo')">✕</div></div>
+  <div class="mh"><div class="modal-title" id="zoneMoT">Zona</div><div class="mc" onclick="cm('zoneMo')">✕</div></div>
   <div id="zoneMoBody"></div>
 </div></div>
 
 <div class="mo" id="skInfoMo"><div class="md">
-  <div class="mh"><div class="mt-" id="skInfoT">Habilidad</div><div class="mc" onclick="cm('skInfoMo')">✕</div></div>
+  <div class="mh"><div class="modal-title" id="skInfoT">Habilidad</div><div class="mc" onclick="cm('skInfoMo')">✕</div></div>
   <div id="skInfoBody"></div>
 </div></div>
 
@@ -865,7 +876,7 @@ const TECHNIQUES={
     desc:'Golpe físico con EM retrasada. La EM se libera en el instante del impacto, amplificando el daño.',
     evolInto:['discurso_maldito','boogie_woogie','muneco_paja'],
     skills:[
-      {id:'div_hit',    name:'Golpe Divergente',   icon:'👊',type:'attack', cost:0,  power:38, masteryReq:1,   statusEffect:null,     desc:'Golpe físico básico con EM retrasada. Sin coste de EM.'},
+      {id:'div_hit',    name:'Golpe Divergente',   icon:'👊',type:'attack', cost:30, power:38, masteryReq:1,   statusEffect:null,     desc:'Golpe físico con EM retrasada. La energía se libera en el impacto, amplificando el daño.'},
       {id:'rush',       name:'Combo Acelerado',     icon:'⚡',type:'attack', cost:28, power:65, masteryReq:25,  statusEffect:null,     desc:'Tres golpes rápidos consecutivos. Daño distribuido.'},
       {id:'black_flash',name:'Destello Negro',      icon:'⚫',type:'attack', cost:55, power:130,masteryReq:60,  statusEffect:null,     desc:'Concentración máxima: EM en la cuarta dimensión. Daño ×2.5 pero difícil de ejecutar.'},
       {id:'kuugeki',    name:'Impacto Vacío',       icon:'💨',type:'attack', cost:40, power:85, masteryReq:90,  statusEffect:'paralyze',desc:'Golpe que distorsiona el espacio inmediato. Puede paralizar.'},
@@ -947,7 +958,7 @@ const TECHNIQUES={
       {id:'analisis',   name:'Análisis 7:3',         icon:'🔍',type:'buff',   cost:18, power:0,  masteryReq:1,   statusEffect:'boost',  desc:'Identifica el punto débil. El siguiente ataque hace +60% de daño.'},
       {id:'punto_crit', name:'Golpe al Punto Débil', icon:'💥',type:'attack', cost:48, power:95, masteryReq:30,  statusEffect:null,     desc:'Ataca directamente la proporción 7:3. Ignora parcialmente la defensa.'},
       {id:'blade_ext',  name:'Extensión de Hoja',    icon:'⚔️',type:'attack', cost:60, power:110,masteryReq:60,  statusEffect:'bleed',  desc:'Extiende el filo de la EM por el cuerpo del arma. Mayor alcance y daño.'},
-      {id:'ratio_total','name':'Ratio Total',         icon:'⚖️',type:'attack', cost:85, power:140,masteryReq:90,  statusEffect:null,     desc:'Aplica la proporción a todo el cuerpo del enemigo. Máximo daño posible.'},
+      {id:'ratio_total',name:'Ratio Total',         icon:'⚖️',type:'attack', cost:85, power:140,masteryReq:90,  statusEffect:null,     desc:'Aplica la proporción a todo el cuerpo del enemigo. Máximo daño posible.'},
       {id:'overtime',   name:'Hora Extra',            icon:'⏰',type:'buff',   cost:65, power:0,  masteryReq:120, statusEffect:'boost',  desc:'Nanami activa su modo fuera de horario. Stats aumentados significativamente.'},
       {id:'domain_ratio',name:'Mundo sin Salida',    icon:'⬡',type:'domain',  cost:280,power:230,masteryReq:160, statusEffect:'bleed',  desc:'Dominio informal donde el punto débil 7:3 se vuelve ineludible en cada ataque.'},
     ]},
@@ -1640,6 +1651,8 @@ const DFLT={
   activeBosses:[],
   log:[],activeMissions:[],completedMissions:[],
   generatedMissions:[],
+  cleaningMissions:{},   // zoneId -> {missions[], progress, total, completedAt, claimed}
+  cleaningCooldowns:{},  // zoneId -> expiry timestamp
   dynamicEvents:[],lastEventTick:0,
   calDate:new Date().toISOString().slice(0,10),
 };
@@ -1691,6 +1704,8 @@ function loadS(){
       if(!d.activeMissions)d.activeMissions=[];
       if(!d.completedMissions)d.completedMissions=[];
       if(!d.generatedMissions)d.generatedMissions=[];
+      if(!d.cleaningMissions)d.cleaningMissions={};
+      if(!d.cleaningCooldowns)d.cleaningCooldowns={};
       if(!d.dynamicEvents)d.dynamicEvents=[];
       if(!d.zoneStatus)d.zoneStatus={};
       if(!d.player.missionsCompleted)d.player.missionsCompleted=0;
@@ -1850,7 +1865,6 @@ function getMasteryBonus(){
   const lv=Math.min(getTechMasteryLevel(S.player.techMasteryXP||0),getTechMaxMastery());
   return 1+(lv*0.02); // +2% per level
 }
-function gainMastery(_skillId,amt=2){gainTechMastery(amt);}
 function gainMastery(skillId,amt=2){gainTechMastery(amt);saveS();}
 function log_(txt){S.log.unshift({text:txt,time:Date.now()});if(S.log.length>60)S.log.pop();}
 
@@ -1914,86 +1928,274 @@ function genDynamicEvents(){
 }
 
 // ═══════════════════════════════════════════════════════
-// MISSION GENERATION
+// CLEANING MISSIONS — New system
+// 3 random missions per zone. Progress bar. 30min cooldown. XP+Mastery reward only.
 // ═══════════════════════════════════════════════════════
-const MISSION_TYPES=['kill','protect','curse','boss_curse'];
-const MISSION_NAMES={
-  kill:['Limpieza de {zone}','Erradicación en {zone}','Patrulla {zone}','Incidente de {zone}','Operación {zone}'],
-  protect:['Proteger {zone}','Defensa de {zone}','Guardia en {zone}','Escudo de {zone}'],
-  curse:['Usuario Maldito en {zone}','Hechicero Renegado: {zone}','Caza al Usuario: {zone}'],
-  boss_curse:['Jefe con Escolta en {zone}','El Señor de {zone}','La Gran Maldición de {zone}'],
-};
-const DIFF_TABLE=['facil','normal','dificil','extreme'];
+const CLEANING_NAMES=[
+  'Limpieza de {zone}','Erradicación en {zone}','Patrulla {zone}',
+  'Incidente de {zone}','Operación {zone}','Amenaza en {zone}',
+  'Purga de {zone}','Infiltración en {zone}','Caza en {zone}',
+];
+const CLEANING_TYPES=['kill','kill','kill','protect','curse'];
 
-function generateMissions(){
-  const p=S.player;
-  const avMissions=[];
-  // Get all unlocked zones
-  const unlockedZones=[];
-  Object.values(CITIES).forEach(city=>{
-    if(!isGradeGte(p.grade,city.unlockGrade))return;
-    city.zones.forEach(zone=>{
-      if(isZoneUnlocked(zone,city))unlockedZones.push({zone,city});
-    });
-  });
-  if(!unlockedZones.length){toast('No hay zonas desbloqueadas','error');return;}
+let cleaningSelectedZone=null; // {city, zone}
 
-  const count=5+Math.floor(p.level/5);
-  for(let i=0;i<count;i++){
-    const {zone,city}=unlockedZones[Math.floor(Math.random()*unlockedZones.length)];
-    // Determine available mission types for this zone
-    const availTypes=MISSION_TYPES.filter(t=>{
-      if(t==='boss_curse')return isGradeGte(p.grade,3)&&Math.random()<.3;
-      if(t==='curse')return isGradeGte(p.grade,3);
-      if(t==='protect')return true;
-      return true;
-    });
-    const type=availTypes[Math.floor(Math.random()*availTypes.length)];
-    // Scale difficulty to level
-    const diffIdx=Math.min(3,Math.max(0,Math.floor((p.level-1)/10)+Math.floor(Math.random()*2)));
-    const diff=DIFF_TABLE[diffIdx];
-    const diffMult={facil:1,normal:1.5,dificil:2.2,extreme:3.5}[diff];
-    const baseName=MISSION_NAMES[type][Math.floor(Math.random()*MISSION_NAMES[type].length)].replace('{zone}',zone.name);
-    // Build mission
-    const m={
-      id:'gm_'+Date.now()+'_'+i,
-      type,title:baseName,
-      cityId:city.id,cityName:city.name,
-      zoneId:zone.id,zoneName:zone.name,
-      zoneGrade:zone.grade,  // used for enemy grade selection
-      difficulty:diff,
-      generatedAt:Date.now(),
-    };
-    if(type==='kill'){
-      m.killCount=Math.round((3+p.level*0.8)*diffMult);
-      m.desc='Elimina '+m.killCount+' maldiciones en '+zone.name+', '+city.name+'. Zona de amenaza '+zone.threat+'.';
-      m.reward={xp:Math.round(80*diffMult*p.level*.5+50),em:Math.round(40*diffMult*p.level*.3+20)};
-      m.progress=0;m.target=m.killCount;
-    } else if(type==='protect'){
-      m.emRequired=Math.round(80*diffMult);
-      // facil=60s, normal=120s, dificil=180s, extreme=240s
-      const baseTimes={facil:60,normal:120,dificil:180,extreme:240};
-      m.timeSec=baseTimes[diff]||120;
-      m.desc='Protege '+zone.name+' durante '+m.timeSec+'s. Necesitas '+m.emRequired+' EM mínimo activo.';
-      m.reward={xp:Math.round(100*diffMult*p.level*.4+60),em:Math.round(50*diffMult*p.level*.3+25)};
-    } else if(type==='curse'){
-      const userTier=p.level<10?'user_basic':p.level<25?'user_mid':'user_elite';
-      m.enemyPool=userTier;
-      m.desc='Un usuario maldito renegado opera en '+zone.name+'. Derrótalo.';
-      m.reward={xp:Math.round(120*diffMult*p.level*.5+80),em:Math.round(60*diffMult*p.level*.3+30)};
-      m.progress=0;m.target=1;
-    } else if(type==='boss_curse'){
-      m.guardCount=Math.round(3*diffMult);
-      m.progress=0;m.target=m.guardCount+1; // guards + boss
-      m.desc='Una gran maldición con '+m.guardCount+' escolta de guardias en '+zone.name+'. Derrota a todos.';
-      m.reward={xp:Math.round(200*diffMult*p.level*.5+100),em:Math.round(100*diffMult*p.level*.3+50)};
-    }
-    avMissions.push(m);
-  }
-  S.generatedMissions=avMissions;
-  saveS();toast('🎲 '+count+' misiones generadas para tu nivel ('+p.level+')','em');
-  renderBoardTab('disponibles');
+function renderBattlePage(){
+  document.getElementById('missionBoardSel').style.display='block';
+  document.getElementById('battleMain').style.display='none';
+  renderCleaningZonePicker();
+  renderCleaningProgress();
+  renderCleaningMissions();
 }
+
+function renderCleaningZonePicker(){
+  const list=document.getElementById('cleaningCityList');if(!list)return;
+  const p=S.player;
+  list.innerHTML=Object.values(CITIES).map(city=>{
+    if(!isGradeGte(p.grade,city.unlockGrade))return '';
+    const zones=city.zones.filter(z=>isZoneUnlocked(z,city));
+    if(!zones.length)return '';
+    return '<div style="background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 11px">'+
+      '<div style="font-size:12px;font-weight:700;margin-bottom:6px">'+city.emoji+' '+city.name+'</div>'+
+      zones.map(z=>{
+        const zst=getZoneStatus(z.id,z);
+        const cd=S.cleaningCooldowns?.[z.id];
+        const onCd=cd&&Date.now()<cd;
+        const cdMin=onCd?Math.ceil((cd-Date.now())/60000):0;
+        const isSel=cleaningSelectedZone?.zone.id===z.id;
+        const sc=onCd?'var(--tm)':zst.remaining===0?'var(--ok)':'var(--emb)';
+        return '<div onclick="selectCleaningZone(\''+city.id+'\',\''+z.id+'\')" '+
+          'style="display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;cursor:'+(onCd?'not-allowed':'pointer')+';'+
+          'background:'+(isSel?'rgba(59,124,244,.12)':'transparent')+';'+
+          'border:1px solid '+(isSel?'var(--emb)':'transparent')+';margin-bottom:3px;opacity:'+(onCd?'.45':'1')+'">'+
+          '<div style="width:7px;height:7px;border-radius:50%;background:'+sc+';flex-shrink:0"></div>'+
+          '<span style="font-size:12px;flex:1">'+z.emoji+' '+z.name+'</span>'+
+          (onCd?'<span style="font-size:10px;font-family:var(--fm);color:var(--tm)">⏰'+cdMin+'min</span>':
+            zst.remaining>0?'<span style="font-size:10px;font-family:var(--fm);color:var(--red)">'+zst.remaining+'⚔</span>':
+            '<span style="font-size:10px;font-family:var(--fm);color:var(--ok)">✓</span>')+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+}
+
+function selectCleaningZone(cityId,zoneId){
+  const city=CITIES[cityId];if(!city)return;
+  const zone=city.zones.find(z=>z.id===zoneId);if(!zone)return;
+  const cd=S.cleaningCooldowns?.[zoneId];
+  if(cd&&Date.now()<cd)return toast('Zona en cooldown. Espera '+Math.ceil((cd-Date.now())/60000)+' min.','error');
+  cleaningSelectedZone={city,zone};
+  // Show zone info
+  const zst=getZoneStatus(zone.id,zone);
+  const info=document.getElementById('cleaningZoneInfo');
+  const sel=document.getElementById('cleaningZoneSelect');
+  sel.style.display='none';info.style.display='block';
+  info.innerHTML=
+    '<div class="flex iac jb mb2">'+
+      '<div>'+
+        '<div style="font-size:14px;font-weight:700">'+zone.emoji+' '+zone.name+
+          '<span class="t-xs mono c-muted" style="margin-left:8px">'+city.name+'</span></div>'+
+        '<div class="t-xs mono" style="color:var(--warn);margin-top:2px">'+zone.threat.toUpperCase()+' · '+gd(zone.grade).short+'</div>'+
+      '</div>'+
+      '<button class="btn btn-g btn-sm" onclick="clearCleaningZone()">✕ Cambiar</button>'+
+    '</div>'+
+    '<div class="flex iac g3_">'+
+      '<span class="t-xs mono c-muted">Maldiciones activas:</span>'+
+      '<span class="mono fw6" style="color:var(--red)">'+zst.remaining+'/'+zst.max+'</span>'+
+      '<button class="btn btn-p btn-sm" onclick="generateCleaningMissions()">🎲 Generar 3 Misiones</button>'+
+    '</div>';
+  renderCleaningProgress();
+  renderCleaningMissions();
+}
+
+function clearCleaningZone(){
+  cleaningSelectedZone=null;
+  document.getElementById('cleaningZoneInfo').style.display='none';
+  document.getElementById('cleaningZoneSelect').style.display='block';
+  renderCleaningProgress();
+  renderCleaningMissions();
+}
+
+function generateCleaningMissions(){
+  if(!cleaningSelectedZone)return toast('Selecciona una zona primero','error');
+  const {city,zone}=cleaningSelectedZone;
+  const p=S.player;
+  // Clear existing cleaning missions for this zone
+  if(!S.cleaningMissions)S.cleaningMissions={};
+  const diffIdx=Math.min(3,Math.max(0,Math.floor((p.level-1)/10)));
+  const diffTable=['facil','normal','dificil','extreme'];
+  const diffMult={facil:1,normal:1.5,dificil:2.2,extreme:3.5};
+  // Pick 3 distinct types, varying from available
+  const typePool=[...CLEANING_TYPES];
+  const missions=[];
+  for(let i=0;i<3;i++){
+    const type=typePool[Math.floor(Math.random()*typePool.length)];
+    // Vary difficulty slightly per mission
+    const varIdx=Math.max(0,Math.min(3,diffIdx+(Math.random()<.3?1:0)));
+    const diff=diffTable[varIdx];
+    const dm=diffMult[diff];
+    const title=CLEANING_NAMES[Math.floor(Math.random()*CLEANING_NAMES.length)].replace('{zone}',zone.name);
+    const m={
+      id:'cm_'+Date.now()+'_'+i,
+      type,title,diff,
+      cityId:city.id,cityName:city.name,zoneId:zone.id,zoneName:zone.name,zoneGrade:zone.grade,
+      progress:0,target:type==='kill'?Math.round((2+p.level*0.5)*dm):1,
+      reward:{xp:Math.round(60*dm*p.level*0.4+40)},
+      desc:type==='kill'?'Elimina maldiciones en '+zone.name+'.':
+           type==='protect'?'Protege '+zone.name+' durante el combate.':
+           'Neutraliza al usuario maldito en '+zone.name+'.',
+      completed:false,
+    };
+    missions.push(m);
+  }
+  S.cleaningMissions[zone.id]={missions,progress:0,total:3,completedAt:null,generatedAt:Date.now()};
+  saveS();toast('⚔️ 3 misiones generadas para '+zone.name,'em');
+  renderCleaningProgress();
+  renderCleaningMissions();
+}
+
+function renderCleaningProgress(){
+  const card=document.getElementById('cleaningProgressCard');if(!card)return;
+  if(!cleaningSelectedZone){card.style.display='none';return;}
+  const zoneId=cleaningSelectedZone.zone.id;
+  const cm=S.cleaningMissions?.[zoneId];
+  if(!cm){card.style.display='none';return;}
+  card.style.display='block';
+  const done=cm.missions.filter(m=>m.completed).length;
+  const pct=Math.round(done/3*100);
+  const bar=document.getElementById('cleaningProgressBar');
+  bar.innerHTML=
+    '<div class="flex iac jb mb2">'+
+      '<span class="t-sm fw6">'+done+'/3 misiones completadas</span>'+
+      '<span class="t-xs mono c-em">'+pct+'%</span>'+
+    '</div>'+
+    '<div class="pw mb2" style="height:8px"><div class="pf p-em" style="width:'+pct+'%"></div></div>'+
+    '<div class="flex iac g3_" style="flex-wrap:wrap">'+
+      cm.missions.map((m,i)=>'<span class="t-xs mono" style="color:'+(m.completed?'var(--ok)':'var(--tm)')+'">'+
+        (m.completed?'✓':'○')+' Misión '+(i+1)+'</span>').join('')+
+    '</div>'+
+    (done===3?'<div style="margin-top:10px;padding:9px 12px;background:rgba(240,192,48,.08);border:1px solid rgba(240,192,48,.3);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between">'+
+      '<div class="t-sm fw6 c-gold">🏆 ¡Zona completada!</div>'+
+      '<button class="btn btn-gold btn-sm" onclick="claimCleaningReward()">Reclamar Recompensa</button>'+
+    '</div>':'');
+}
+
+function claimCleaningReward(){
+  if(!cleaningSelectedZone)return;
+  const zoneId=cleaningSelectedZone.zone.id;
+  const cm=S.cleaningMissions?.[zoneId];
+  if(!cm||cm.missions.filter(m=>m.completed).length<3)return;
+  if(cm.claimed)return toast('Ya reclamaste esta recompensa','error');
+  // Compute reward: sum of all mission XP + mastery bonus
+  const totalXP=cm.missions.reduce((a,m)=>a+m.reward.xp,0);
+  const masteryGain=8;
+  addXP(totalXP);
+  gainMastery(null,masteryGain);
+  cm.claimed=true;
+  cm.completedAt=Date.now();
+  // Set 30 min cooldown on this zone
+  if(!S.cleaningCooldowns)S.cleaningCooldowns={};
+  S.cleaningCooldowns[zoneId]=Date.now()+30*60*1000;
+  // Mark zone as safe
+  const zst=S.zoneStatus[zoneId];if(zst)zst.remaining=0;
+  saveS();
+  toast('🏆 +'+totalXP+' XP + Maestría ×'+masteryGain+' — Zona limpia por 30 min','gold');
+  log_('Zona limpiada: '+cleaningSelectedZone.zone.name);
+  cleaningSelectedZone=null;
+  clearCleaningZone();
+  renderCleaningProgress();
+  renderCleaningMissions();
+  renderCleaningZonePicker();
+}
+
+function updateCleaningProgress(zoneId){
+  if(!zoneId||!S.cleaningMissions?.[zoneId])return;
+  const cm=S.cleaningMissions[zoneId];
+  // Find the active cleaning mission being fought and advance it
+  const active=cm.missions.find(m=>!m.completed&&m.id===activeMissionId);
+  if(active){
+    active.progress=(active.progress||0)+1;
+    if(active.progress>=active.target){
+      active.completed=true;
+      toast('✅ Misión de limpieza completada','success');
+    }
+  }
+  renderCleaningProgress();
+  renderCleaningMissions();
+}
+
+function renderCleaningMissions(){
+  const el=document.getElementById('cleaningMissions');if(!el)return;
+  if(!cleaningSelectedZone){el.innerHTML='<div class="c-muted t-sm">Selecciona una zona para ver misiones.</div>';return;}
+  const zoneId=cleaningSelectedZone.zone.id;
+  const cm=S.cleaningMissions?.[zoneId];
+  if(!cm){el.innerHTML='<div class="c-muted t-sm">Pulsa "Generar 3 Misiones" para empezar.</div>';return;}
+  const typeLabel={kill:'⚔️ Eliminación',protect:'🛡 Proteger',curse:'🧙 Usuario Maldito'}
+  el.innerHTML='<div class="mboard">'+cm.missions.map((m,i)=>{
+    const pct=m.target>0?Math.round((m.progress||0)/m.target*100):0;
+    return '<div class="mbc mt-'+m.type+' '+(m.completed?'accepted':'')+'">'+
+      '<div class="mb-hdr">'+
+        '<div>'+
+          '<div class="mb-title">'+(m.completed?'✅ ':'')+m.title+'</div>'+
+          '<div class="mb-tags mt1">'+
+            '<span class="mb-tag tt-'+m.type+'">'+typeLabel[m.type]+'</span>'+
+            '<span class="mb-tag diff-'+m.diff+'">'+m.diff.toUpperCase()+'</span>'+
+            '<span class="mb-tag">📍'+m.zoneName+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<span class="t-xs mono c-muted fw6">#'+(i+1)+'</span>'+
+      '</div>'+
+      '<div class="mb-desc">'+m.desc+'</div>'+
+      (!m.completed&&m.target>1?'<div class="mb-prog-row"><span>Progreso</span><span>'+((m.progress||0)+'/'+m.target)+'</span></div>'+
+        '<div class="pw mb3" style="height:4px"><div class="pf p-em" style="width:'+pct+'%"></div></div>':'')+
+      '<div class="flex iac jb">'+
+        '<div class="flex g2_"><span class="mb-tag">⭐+'+m.reward.xp+' XP</span></div>'+
+        (m.completed?'<span class="t-xs c-ok mono fw7">COMPLETADA</span>':
+          '<button class="btn btn-d btn-sm" onclick="startCleaningCombat(\''+m.id+'\')">⚔️ Combatir</button>')+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function startCleaningCombat(mId){
+  if(!cleaningSelectedZone)return;
+  const zoneId=cleaningSelectedZone.zone.id;
+  const cm=S.cleaningMissions?.[zoneId];if(!cm)return;
+  const m=cm.missions.find(x=>x.id===mId);if(!m||m.completed)return;
+  activeMissionId=mId;
+  // Build the enemy from zone grade
+  let enemy;
+  if(m.type==='curse'){
+    const poolKey=S.player.level<10?3:S.player.level<25?1:'special';
+    enemy=pickEnemyForZone(poolKey);enemy.isCurseUser=true;
+  } else {
+    enemy=pickEnemyForZone(m.zoneGrade||3);
+  }
+  const lvMult=1+Math.max(0,(S.player.level-1)*0.015);
+  enemy.hp=Math.round(enemy.hp*lvMult);enemy.maxHp=enemy.hp;enemy.atk=Math.round(enemy.atk*lvMult);
+  const p=S.player;
+  // Use a fake mission object compatible with battle system
+  BD={
+    missionId:mId,
+    mission:{...m,id:mId,target:1,progress:0}, // each fight = 1 kill
+    enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,
+    isCleaningMission:true,cleaningZoneId:zoneId,
+  };
+  document.getElementById('missionBoardSel').style.display='none';
+  document.getElementById('battleMain').style.display='block';
+  updateCombat();buildBActions();clearCLog();
+  const gradeLabel={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[enemy.grade]||'';
+  clog('⚔️ '+m.title+' — '+m.zoneName,'cl-info');
+  clog('Enemigo: '+enemy.emoji+' '+enemy.name+' ['+gradeLabel+']','cl-log');
+  if(enemy.domain)clog('⚠️ Puede activar Dominio: '+enemy.domain.name,'cl-info');
+  document.getElementById('bResOverlay').innerHTML='';startTimer();
+  document.getElementById('bTopZone').textContent=m.cityName+' · '+m.zoneName;
+}
+
+// Override endCombat to also handle cleaning missions
+// (already handled via BD.isCleaningMission flag in combatVictory/endCombat)
+
 
 // ═══════════════════════════════════════════════════════
 // TOAST / NAV
@@ -2185,7 +2387,7 @@ function renderTechEvolContent(){
 function unlockSkill(id){
   const tech=TECHNIQUES[S.player.technique];if(!tech)return;
   const sk=tech.skills.find(s=>s.id===id);if(!sk)return;
-  if(S.player.level<sk.lvlReq)return toast('Nivel insuficiente','error');
+  if(getTechMasteryLevel(S.player.techMasteryXP||0)<(sk.masteryReq||1))return toast('Maestría insuficiente (requiere Nv.'+sk.masteryReq+')','error');
   if(S.player.unlockedSkills.includes(id))return;
   S.player.unlockedSkills.push(id);if(S.player.skillMastery[id]===undefined)S.player.skillMastery[id]=0;
   saveS();toast('⚡ Habilidad: '+sk.name,'gold');renderTechContent();
@@ -2193,8 +2395,26 @@ function unlockSkill(id){
 function showSkillInfo(techId,skId){
   const tech=TECHNIQUES[techId];if(!tech)return;const sk=tech.skills.find(s=>s.id===skId);if(!sk)return;
   const ul=S.player.unlockedSkills.includes(sk.id);const ms=S.player.skillMastery[sk.id]||0;
+  const masteryReq=sk.masteryReq||1;
   document.getElementById('skInfoT').textContent=sk.name;
-  document.getElementById('skInfoBody').innerHTML='<div class="flex iac g3_ mb3"><span style="font-size:28px">'+sk.icon+'</span><div><div style="font-size:14px;font-weight:700">'+sk.name+'</div><div class="t-xs mono c-muted">{'+sk.type+'} · Nivel '+sk.lvlReq+'</div></div></div><div class="t-sm mb3" style="color:var(--ts);line-height:1.5">'+sk.desc+'</div>'+( sk.statusEffect?'<div class="mb3 t-xs">Estado: <span class="status-pip sp-'+sk.statusEffect+'">'+sk.statusEffect.toUpperCase()+'</span></div>':'')+' <div class="g2 mb3"><div class="sc" style="padding:8px"><div class="sl">Coste EM</div><div class="sv c-em" style="font-size:16px">'+(sk.cost===0?'Gratis':sk.cost)+'</div></div>'+(sk.power?'<div class="sc" style="padding:8px"><div class="sl">Poder</div><div class="sv" style="font-size:16px;color:var(--red)">'+sk.power+'</div></div>':'')+'</div>'+(ul?'<div class="mb3"><div class="flex iac jb mb1 t-xs mono c-muted"><span>Maestría</span><span>'+ms+'%'+(ms>0?' (+'+Math.round(ms/100*50)+'% poder)':'')+'</span></div><div class="pw" style="height:5px"><div class="pf p-mastery" style="width:'+ms+'%"></div></div></div>':'<button class="btn btn-p" style="width:100%" onclick="unlockSkill(\''+sk.id+'\');cm(\'skInfoMo\')">⚡ Desbloquear (Nivel '+sk.lvlReq+')</button>');
+  document.getElementById('skInfoBody').innerHTML=
+    '<div class="flex iac g3_ mb3"><span style="font-size:28px">'+sk.icon+'</span><div>'+
+      '<div style="font-size:14px;font-weight:700">'+sk.name+'</div>'+
+      '<div class="t-xs mono c-muted">{'+sk.type+'} · Maestría Nv.'+masteryReq+'</div>'+
+    '</div></div>'+
+    '<div class="t-sm mb3" style="color:var(--ts);line-height:1.5">'+sk.desc+'</div>'+
+    (sk.statusEffect?'<div class="mb3 t-xs">Estado: <span class="status-pip sp-'+sk.statusEffect+'">'+sk.statusEffect.toUpperCase()+'</span></div>':'')+
+    '<div class="g2 mb3">'+
+      '<div class="sc" style="padding:8px"><div class="sl">Coste EM</div><div class="sv c-em" style="font-size:16px">'+(sk.cost===0?'Gratis':sk.cost)+'</div></div>'+
+      (sk.power?'<div class="sc" style="padding:8px"><div class="sl">Poder</div><div class="sv" style="font-size:16px;color:var(--red)">'+sk.power+'</div></div>':'')+
+    '</div>'+
+    (ul?
+      '<div class="mb3">'+
+        '<div class="flex iac jb mb1 t-xs mono c-muted"><span>Maestría</span><span>'+ms+'%'+(ms>0?' (+'+Math.round(ms/100*50)+'% poder)':'')+'</span></div>'+
+        '<div class="pw" style="height:5px"><div class="pf p-mastery" style="width:'+ms+'%"></div></div>'+
+      '</div>':
+      '<button class="btn btn-p" style="width:100%" onclick="unlockSkill(\''+sk.id+'\');cm(\'skInfoMo\')">⚡ Desbloquear (Maestría Nv.'+masteryReq+')</button>'
+    );
   document.getElementById('skInfoMo').classList.add('open');
 }
 
@@ -2583,54 +2803,16 @@ function openZoneModal(cityId,zoneId){
 // ═══════════════════════════════════════════════════════
 // MISSION BOARD
 // ═══════════════════════════════════════════════════════
-function renderBattlePage(){
-  document.getElementById('missionBoardSel').style.display='block';
-  document.getElementById('battleMain').style.display='none';
-  renderBoardTab('disponibles');renderBoardTab('aceptadas');renderBoardTab('historial');
-}
-function switchBoardTab(tab,el){
-  document.querySelectorAll('[id^=boardTab-]').forEach(e=>e.style.display='none');
-  document.getElementById('boardTab-'+tab).style.display='block';
-  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('active'));el?.classList.add('active');
-}
-function renderBoardTab(tab){
-  if(tab==='disponibles'){
-    const avail=S.generatedMissions||[];
-    const accepted_ids=(S.activeMissions||[]).map(m=>m.id);
-    const displayable=avail.filter(m=>!accepted_ids.includes(m.id));
-    document.getElementById('missionBoardAvail').innerHTML=displayable.length?displayable.map(m=>missionCardHtml(m)).join(''):'<div class="c-muted t-sm">Pulsa "Generar Misiones" para crear nuevas misiones ajustadas a tu nivel.</div>';
-  } else if(tab==='aceptadas'){
-    const acc=S.activeMissions||[];
-    document.getElementById('missionBoardAccepted').innerHTML=acc.length?acc.map(m=>missionCardHtml(m,true)).join(''):'<div class="c-muted t-sm">Sin misiones aceptadas.</div>';
-  } else if(tab==='historial'){
-    const done=S.completedMissions||[];
-    document.getElementById('missionBoardDone').innerHTML=done.slice(0,20).map(m=>missionCardHtml(m,false,true)).join('')||'<div class="c-muted t-sm">Sin historial.</div>';
-  }
-}
-function missionCardHtml(m,accepted=false,completed=false){
-  const typeLabel={kill:'⚔️ Eliminación',protect:'🛡 Proteger',curse:'🧙 Usuario Maldito',boss_curse:'💀 Jefe con Escolta'}[m.type]||'📋 Misión';
-  const progress=accepted&&m.target?((m.progress||0)+'/'+m.target):null;
-  const pct=m.target>0?Math.round(((m.progress||0)/m.target)*100):0;
-  return '<div class="mbc mt-'+m.type+' '+(accepted?'accepted':'')+'"><div class="mb-hdr"><div><div class="mb-title">'+m.title+'</div><div class="mb-tags mt1"><span class="mb-tag tt-'+m.type+'">'+typeLabel+'</span><span class="mb-tag diff-'+m.difficulty+'">'+m.difficulty.toUpperCase()+'</span><span class="mb-tag">📍'+m.cityName+'</span><span class="mb-tag">🗺'+m.zoneName+'</span></div></div>'+(completed?'<span class="t-xs c-ok mono fw7">✓ COMPLETADA</span>':'')+'</div><div class="mb-desc">'+m.desc+'</div>'+(accepted&&progress?'<div class="mb-prog-row"><span>Progreso</span><span>'+progress+'</span></div><div class="pw mb3" style="height:4px"><div class="pf p-em" style="width:'+pct+'%"></div></div>':'')+'<div class="flex iac jb"><div class="flex g2_"><span class="mb-tag">⭐+'+m.reward.xp+'</span><span class="mb-tag">⚡+'+m.reward.em+'</span>'+(m.type==='protect'?'<span class="mb-tag tt-protect">'+m.emRequired+' EM min</span>':'')+'</div>'+(completed?'':accepted?'<button class="btn btn-d btn-sm" onclick="startMissionCombat(\''+m.id+'\')">⚔️ Combatir</button>':'<button class="btn btn-p btn-sm" onclick="acceptMission(\''+m.id+'\')">✓ Aceptar</button>')+'</div></div>';
-}
-function acceptMission(id){
-  const m=(S.generatedMissions||[]).find(m=>m.id===id);if(!m)return;
-  if(!S.activeMissions)S.activeMissions=[];
-  if(S.activeMissions.find(am=>am.id===id))return toast('Ya aceptada','em');
-  S.activeMissions.push({...m,progress:0,acceptedAt:Date.now()});
-  saveS();toast('📋 Misión aceptada: '+m.title,'em');
-  renderBoardTab('disponibles');renderBoardTab('aceptadas');renderDash();
-}
+// Legacy: completeMission still used by raid system
 function completeMission(id){
   const m=S.activeMissions?.find(m=>m.id===id);if(!m)return;
   S.activeMissions=S.activeMissions.filter(x=>x.id!==id);
   if(!S.completedMissions)S.completedMissions=[];
   S.completedMissions.unshift({...m,completedAt:Date.now()});
   S.player.missionsCompleted=(S.player.missionsCompleted||0)+1;
-  addEM(m.reward.em,'Misión: '+m.title);addXP(m.reward.xp);
-  toast('🏆 MISIÓN COMPLETADA: '+m.title+' +'+m.reward.xp+'XP +'+m.reward.em+'EM','gold');
+  addXP(m.reward.xp);
+  toast('🏆 MISIÓN COMPLETADA: '+m.title+' +'+m.reward.xp+'XP','gold');
   log_('Misión completada: '+m.title);
-  // Remove from generated pool
   S.generatedMissions=(S.generatedMissions||[]).filter(gm=>gm.id!==id);
   saveS();
 }
@@ -2786,7 +2968,7 @@ function bAction(type,skillId){
       dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);
       if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);clog('⬡ DOMINIO: '+sk.name,'cl-domain');}
       if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);clog(sd.icon+' '+sd.label+' al '+enemy.name,'cl-status');}}
-    } else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.defensa*1.5)*mb);}
+    } else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
     else if(sk.type==='defense'){applyStatus(BD.playerStatus,'barrier',1);clog('🛡 Barrera activada.','cl-def');}
     else if(sk.type==='buff'){if(sk.statusEffect)applyStatus(BD.playerStatus,sk.statusEffect,2);clog('⚡ '+sk.name+' activado.','cl-info');}
     else if(sk.type==='debuff'){dmg=Math.round((sk.power||0)*mb);if(sk.statusEffect){const sd=STATUS_DEFS[sk.statusEffect];if(sd){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
@@ -2907,7 +3089,7 @@ function enemyTurn(){
     if(boost)dmg=Math.round(dmg*1.25);
     const barrier=BD.playerStatus.find(s=>s.type==='barrier');
     if(barrier){const bp=STATUS_DEFS.barrier.blockPct||.7;dmg=Math.round(dmg*(1-bp));BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);clog('🛡 Barrera absorbe (−'+Math.round(bp*100)+'%)','cl-def');}
-    dmg=Math.max(1,dmg-Math.round(p.stats.defensa*1.1));
+    dmg=Math.max(1,dmg-Math.round(p.stats.dominio*0.8));
     if(Math.random()<0.06){clog('✨ MISS — '+enemy.name,'cl-info');floatDmg('MISS','ms');}
     else{BD.playerHP=Math.max(0,BD.playerHP-dmg);clog('🔴 −'+dmg+' HP','cl-dmg');floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');}
   }
@@ -2925,12 +3107,49 @@ function enemyTurn(){
 function combatVictory(){
   if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
   const enemy=BD.enemy,m=BD.mission;
-  addXP(enemy.xp||30);addEM(enemy.em||15,'Victoria vs '+enemy.name);
   S.player.hp=BD.playerHP;
-  // Update zone
-  const zst=S.zoneStatus[m.zoneId];if(zst&&zst.remaining>0){zst.remaining--;if(zst.remaining===0)zst.status='safe';}
-  // Update mission progress
-  if(m.target>0){
+
+  if(BD.isBossFight){
+    // Boss fight victory
+    const bossId=BD.bossId;
+    addXP(enemy.xp||600);
+    // No EM reward from bosses — only XP and mastery (via gainMastery below)
+    gainMastery(null,15);
+    S.activeBosses=S.activeBosses.filter(x=>x.id!==bossId);
+    if(!S.player.bossesKilled)S.player.bossesKilled={};
+    S.player.bossesKilled[bossId]=(S.player.bossesKilled[bossId]||0)+1;
+    saveS();log_('Jefe derrotado: '+enemy.name);
+    showBossResult(true,enemy.xp);
+    clog('🏆 ¡'+enemy.name+' DERROTADO!','cl-special');
+    return;
+  }
+
+  addXP(enemy.xp||30);addEM(enemy.em||15,'Victoria vs '+enemy.name);
+  // Update zone curse count
+  const zst=S.zoneStatus[m?.zoneId];if(zst&&zst.remaining>0){zst.remaining--;if(zst.remaining===0)zst.status='safe';}
+
+  if(BD.isCleaningMission){
+    // Advance the cleaning mission progress
+    const zoneId=BD.cleaningZoneId;
+    const cm=S.cleaningMissions?.[zoneId];
+    if(cm){
+      const mission=cm.missions.find(x=>x.id===activeMissionId);
+      if(mission&&!mission.completed){
+        mission.progress=(mission.progress||0)+1;
+        if(mission.progress>=mission.target){
+          mission.completed=true;
+          toast('✅ Misión de limpieza completada!','success');
+        }
+      }
+    }
+    saveS();log_('Victoria vs '+enemy.name);
+    showCombatResult(true,enemy.xp,0);
+    clog('🏆 ¡Victoria!','cl-special');
+    return;
+  }
+
+  // Update old mission system progress (raids, etc.)
+  if(m?.target>0){
     const am=S.activeMissions?.find(x=>x.id===activeMissionId);
     if(am){am.progress=(am.progress||0)+1;if(am.progress>=am.target)completeMission(am.id);}
   }
@@ -2941,21 +3160,57 @@ function combatVictory(){
 
 function combatDefeat(){
   if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
-  // Reset HP to full — player recovers after defeat
   S.player.hp=S.player.maxHp;
   const el=Math.round(S.player.em*.12);S.player.em=Math.max(0,S.player.em-el);
   saveS();log_('Derrota vs '+BD.enemy.name);
-  showCombatResult(false,0,-el);clog('💀 Derrota. HP recuperado. −'+el+' EM','cl-dmg');
+  if(BD.isBossFight){showBossResult(false,0);clog('💀 Derrota. El jefe te expulsó.','cl-dmg');}
+  else{showCombatResult(false,0,-el);clog('💀 Derrota. HP recuperado. −'+el+' EM','cl-dmg');}
+}
+
+function showBossResult(win,xp){
+  const o=document.getElementById('bResOverlay');
+  o.innerHTML='<div class="bres">'+
+    '<div class="bres-title '+(win?'win':'lose')+'">'+(win?'💀 ¡JEFE DERROTADO!':'💀 DERROTA')+'</div>'+
+    (win?'<div class="bres-rwds">'+
+      '<div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div>'+
+      '<div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+15</div></div>'+
+    '</div>':'<div class="t-sm c-muted">El jefe fue demasiado poderoso. Entrena más.</div>')+
+    '<button class="btn btn-g" onclick="endCombat('+win+')">← Volver a Jefes</button>'+
+  '</div>';
+}
+
+function endCombat(success){
+  clearInterval(timerInt);BD.ended=true;
+  document.getElementById('battleMain').style.display='none';
+  if(BD.isBossFight){
+    BD={};activeMissionId=null;
+    nav('bosses');
+  } else {
+    document.getElementById('missionBoardSel').style.display='block';
+    const wasClean=BD.isCleaningMission;
+    BD={};activeMissionId=null;
+    if(wasClean){renderBattlePage();}
+    else{renderBattlePage();}
+  }
+  uiAll();
 }
 
 function showCombatResult(win,xp,em){
   const am=S.activeMissions?.find(x=>x.id===activeMissionId);
   const missionDone=am&&am.progress>=am.target;
   const o=document.getElementById('bResOverlay');
-  o.innerHTML='<div class="bres"><div class="bres-title '+(win?'win':'lose')+'">'+(win?'⚔️ VICTORIA':'💀 DERROTA')+'</div>'+(win?'<div class="bres-rwds"><div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div><div><div class="t-xs c-muted">EM</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+em+'</div></div></div>':'<div class="t-sm c-muted">Recupera energía.</div>')+(win&&am&&!missionDone?'<button class="btn btn-d" onclick="continueCombat()">⚔️ Continuar ('+((am.progress||0)+'/'+am.target)+')</button>':'')+(missionDone?'<div class="t-sm c-ok">🏆 ¡Misión completada!</div>':'')+'<button class="btn btn-g" onclick="endCombat('+win+')">← Volver al tablero</button></div>';
+  o.innerHTML='<div class="bres">'+
+    '<div class="bres-title '+(win?'win':'lose')+'">'+(win?'⚔️ VICTORIA':'💀 DERROTA')+'</div>'+
+    (win?'<div class="bres-rwds">'+
+      '<div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div>'+
+      '<div><div class="t-xs c-muted">EM</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+em+'</div></div>'+
+    '</div>':'<div class="t-sm c-muted">Recupera energía.</div>')+
+    (win&&am&&!missionDone?'<button class="btn btn-d" onclick="continueCombat()">⚔️ Continuar ('+((am.progress||0)+'/'+am.target)+')</button>':'')+
+    (missionDone?'<div class="t-sm c-ok">🏆 ¡Misión completada!</div>':'')+
+    '<button class="btn btn-g" onclick="endCombat('+win+')">← Volver al tablero</button>'+
+  '</div>';
 }
 function continueCombat(){document.getElementById('bResOverlay').innerHTML='';startMissionCombat(activeMissionId);}
-function endCombat(success){clearInterval(timerInt);BD.ended=true;document.getElementById('battleMain').style.display='none';document.getElementById('missionBoardSel').style.display='block';activeMissionId=null;renderBattlePage();uiAll();}
 
 function triggerDomainAnim(name){
   const el=document.getElementById('domainOverlay');
@@ -3206,7 +3461,7 @@ function raidAction(type,skillId){
     if(sk.cost>0)useEM(sk.cost);
     const mb=getMasteryBonus(sk.id);
     if(sk.type==='attack'||sk.type==='domain'){dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);}if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
-    else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.defensa*1.5)*mb);}
+    else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
     else if(sk.type==='defense'){applyStatus(BD.playerStatus,'barrier',1);}
     else if(sk.type==='buff'){if(sk.statusEffect)applyStatus(BD.playerStatus,sk.statusEffect,2);}
     else if(sk.type==='debuff'){dmg=Math.round((sk.power||0)*mb);if(sk.statusEffect){const sd=STATUS_DEFS[sk.statusEffect];if(sd)applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}
@@ -3228,7 +3483,7 @@ function raidEnemyTurn(){
   let dmg=(enemy.atk||12)+Math.round(Math.random()*6);
   const barrier=BD.playerStatus.find(s=>s.type==='barrier');
   if(barrier){dmg=Math.round(dmg*.3);BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);}
-  dmg=Math.max(1,dmg-Math.round(p.stats.defensa*1.1));
+  dmg=Math.max(1,dmg-Math.round(p.stats.dominio*0.8));
   BD.playerHP=Math.max(0,BD.playerHP-dmg);
   rbClog('🔴 '+enemy.name+': −'+dmg+' HP','cl-dmg');
   const eStDmg=processStatus(BD.enemyStatus,enemy.name);if(eStDmg>0)BD.enemy.hp=Math.max(0,BD.enemy.hp-eStDmg);
@@ -3310,19 +3565,65 @@ function forceSpawnEvents(){S.lastEventTick=0;genDynamicEvents();renderBosses();
 function fightBoss(id){
   const b=S.activeBosses?.find(x=>x.id===id);if(!b)return;
   if(!useEM(80))return toast('80 EM requeridos','error');
+  // Build a full combat-compatible enemy from CURSE_CATALOG or BOSSES data
   const bd=BOSSES.find(x=>x.id===id)||b;
-  const power=S.player.stats.fuerza+S.player.stats.maldicion+S.player.stats.dominio;
-  const chance=Math.min(.85,Math.max(.12,power/60));
-  if(Math.random()<chance){
-    addXP(bd.xp);addEM(bd.em,'Jefe: '+b.name);
-    S.activeBosses=S.activeBosses.filter(x=>x.id!==id);
-    if(!S.player.bossesKilled)S.player.bossesKilled={};S.player.bossesKilled[id]=(S.player.bossesKilled[id]||0)+1;
-    saveS();toast('🏆 ¡'+b.name+' derrotado!','gold');log_('Jefe: '+b.name);
-  } else {
-    S.player.hp=Math.max(1,Math.round(S.player.hp*.25));const el=60;S.player.em=Math.max(0,S.player.em-el);saveS();toast('💀 '+b.name+' te derrotó. −'+el+' EM','error');
-  }
-  renderBosses();uiAll();
+  // Match to a CURSE_CATALOG special enemy if available, else build from BOSSES entry
+  const catalogMatch=Object.values(CURSE_CATALOG).flat().find(e=>e.id==='csp_'+id||e.id==='css_'+id);
+  let enemy=catalogMatch?JSON.parse(JSON.stringify(catalogMatch)):buildBossEnemy(bd);
+  // Scale to player level
+  const lvMult=1+Math.max(0,(S.player.level-1)*0.018);
+  enemy.hp=Math.round(enemy.hp*lvMult);enemy.maxHp=enemy.hp;
+  enemy.atk=Math.round(enemy.atk*lvMult);
+  // Store boss id and which activeBoss entry this fight is for
+  enemy._bossId=id;
+  startBossCombat(enemy,id);
 }
+
+function buildBossEnemy(bd){
+  // Fallback: construct a full enemy from BOSSES data entry
+  return {
+    id:'boss_'+bd.id,name:bd.name,emoji:bd.emoji,
+    hp:bd.hp,maxHp:bd.hp,atk:bd.atk,def:Math.round(bd.atk*0.25),
+    xp:bd.xp,em:bd.em,grade:'special',
+    tags:['JEFE','ESPECIAL'],
+    innate:'Técnica de Jefe',
+    skills:[
+      es(bd.name+': Golpe Letal',Math.round(bd.atk*1.1),'bleed','¡Golpe devastador del jefe!'),
+      es('Rugido Maldito',0,'paralyze','¡El rugido paraliza tu cuerpo!'),
+      es('Embestida Total',Math.round(bd.atk*1.25),null,'¡Embestida colosal sin defensa posible!'),
+      es('Regeneración del Jefe',0,null,'¡El jefe se regenera! (+'+Math.round(bd.hp*0.15)+' HP)'),
+    ],
+    domain:{name:'Dominio de '+bd.name,power:Math.round(bd.atk*2.2),statusEffect:'bleed',
+      desc:'El dominio del jefe activa ataques inevitables en el área.'},
+    sa:['bleed','paralyze'],
+    inversa:true,
+    isBoss:true
+  };
+}
+
+function startBossCombat(enemy,bossId){
+  // Use the main battle arena but tag it as a boss fight
+  document.getElementById('missionBoardSel').style.display='none';
+  document.getElementById('battleMain').style.display='block';
+  const p=S.player;
+  BD={
+    isBossFight:true,bossId:bossId,
+    enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,
+    // Fake mission for zone progress display
+    mission:{id:'boss_'+bossId,title:'⚔️ Jefe: '+enemy.name,type:'kill',target:1,progress:0,zoneId:'boss',cityName:'Jefe',zoneName:enemy.name,reward:{xp:enemy.xp,em:0}}
+  };
+  activeMissionId='boss_'+bossId;
+  updateCombat();buildBActions();clearCLog();
+  clog('💀 ¡COMBATE DE JEFE: '+enemy.name+'!','cl-domain');
+  clog('⚠️ Enemigo con técnica innata y dominio expandido.','cl-info');
+  if(enemy.domain)clog('⬡ Dominio disponible: '+enemy.domain.name,'cl-info');
+  if(enemy.inversa)clog('💚 Puede usar energía inversa.','cl-info');
+  document.getElementById('bResOverlay').innerHTML='';
+  document.getElementById('bTopZone').textContent='💀 COMBATE DE JEFE';
+  startTimer();
+}
+
 
 // ═══════════════════════════════════════════════════════
 // TASKS / HABITS / GOALS
@@ -3380,14 +3681,143 @@ function forgive(pardon){
   else{t.failed=true;S.player.failStreak=(S.player.failStreak||0)+1;const sk=S.player.failStreak;if(sk>=3){const pen=sk*12;S.player.em=Math.max(0,S.player.em-pen);toast('❌ Fallo #'+sk+'. −'+pen+' EM','error');}else toast('❌ Fallo #'+sk,'error');}
   saveS();cm('forgiveMo');renderMissions();
 }
-function openHabitModal(){document.getElementById('habitMo').classList.add('open');}
-function saveHabit(){const n=document.getElementById('hbName').value.trim();if(!n)return toast('Nombre obligatorio','error');S.habits.push({id:'h_'+Date.now(),name:n,freq:document.getElementById('hbFreq').value,emReward:parseInt(document.getElementById('hbEM').value)||20,streak:0,lastDone:null});saveS();cm('habitMo');renderMissions();toast('Hábito creado','success');}
-function renderHabitList(){const el=document.getElementById('habitList');if(!el)return;if(!S.habits.length){el.innerHTML='<div class="c-muted t-sm">Sin hábitos.</div>';return;}const today=new Date().toISOString().slice(0,10);el.innerHTML=S.habits.map(h=>{const dt=h.lastDone===today;return '<div class="hc"><button class="hchk '+(dt?'done-t':'')+'" onclick="checkHabit(\''+h.id+'\')" '+(dt?'disabled':'')+'>✓</button><div style="flex:1"><div style="font-size:13px;font-weight:600">'+h.name+'</div><div class="t-xs c-muted">'+( h.freq==='daily'?'Diario':'Semanal')+' · '+h.emReward+' EM/vez</div></div><div class="mono t-xs" style="color:var(--warn)">🔥 '+h.streak+'</div><button class="tab- del" onclick="delHabit(\''+h.id+'\')">🗑</button></div>';}).join('');}
+function openHabitModal(id=null){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('habitMoT').textContent=id?'Editar Hábito':'Nuevo Hábito';
+  if(id){
+    const h=S.habits.find(h=>h.id===id);
+    document.getElementById('hbName').value=h.name;
+    document.getElementById('hbPri').value=h.priority||'media';
+    document.getElementById('hbDif').value=h.difficulty||'normal';
+    document.getElementById('hbFreq').value=h.freq;
+    document.getElementById('hbEM').value=h.emReward;
+    document.getElementById('hbS').value=h.startDate||today;
+    document.getElementById('hbE').value=h.endDate||'';
+    document.getElementById('habitMo').dataset.editId=id;
+  } else {
+    ['hbName'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('hbPri').value='media';
+    document.getElementById('hbDif').value='normal';
+    document.getElementById('hbFreq').value='daily';
+    document.getElementById('hbEM').value=20;
+    document.getElementById('hbS').value=today;
+    document.getElementById('hbE').value='';
+    delete document.getElementById('habitMo').dataset.editId;
+  }
+  document.getElementById('habitMo').classList.add('open');
+}
+function saveHabit(){
+  const n=document.getElementById('hbName').value.trim();if(!n)return toast('Nombre obligatorio','error');
+  const editId=document.getElementById('habitMo').dataset.editId;
+  const h={
+    id:editId||'h_'+Date.now(),name:n,
+    priority:document.getElementById('hbPri').value,
+    difficulty:document.getElementById('hbDif').value,
+    freq:document.getElementById('hbFreq').value,
+    emReward:parseInt(document.getElementById('hbEM').value)||20,
+    startDate:document.getElementById('hbS').value,
+    endDate:document.getElementById('hbE').value||null,
+    streak:0,lastDone:null
+  };
+  if(editId){const i=S.habits.findIndex(x=>x.id===editId);if(i>=0)S.habits[i]={...S.habits[i],...h,id:editId,streak:S.habits[i].streak,lastDone:S.habits[i].lastDone};}
+  else S.habits.push(h);
+  saveS();cm('habitMo');renderMissions();toast(editId?'Hábito actualizado':'Hábito creado','success');
+}
+function renderHabitList(){
+  const el=document.getElementById('habitList');if(!el)return;
+  if(!S.habits.length){el.innerHTML='<div class="c-muted t-sm">Sin hábitos.</div>';return;}
+  const today=new Date().toISOString().slice(0,10);
+  el.innerHTML=S.habits.map(h=>{
+    const dt=h.lastDone===today;
+    const od=h.endDate&&h.endDate<today&&!dt;
+    const priC={alta:'var(--red)',media:'var(--warn)',baja:'var(--ok)'}[h.priority||'media'];
+    return '<div class="tcard '+(od?'overdue':'')+'">'+
+      '<button class="tck '+(dt?'done':'')+'" onclick="checkHabit(\''+h.id+'\')" '+(dt?'disabled':'')+'>✓</button>'+
+      '<div class="tb">'+
+        '<div class="tn">'+h.name+'</div>'+
+        '<div class="tm-">'+
+          '<span class="badge" style="background:'+priC+'22;color:'+priC+';border-color:'+priC+'44">'+h.priority+'</span>'+
+          '<span class="td-">'+(h.freq==='daily'?'Diario':'Semanal')+' · '+h.emReward+' EM</span>'+
+          (h.endDate?'<span class="td- '+(od?'ov':'')+'">⏰ '+h.endDate+'</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<div class="mono t-xs" style="color:var(--warn)">🔥 '+h.streak+'</div>'+
+      '<div class="ta-">'+
+        '<button class="tab-" onclick="openHabitModal(\''+h.id+'\')">✏️</button>'+
+        '<button class="tab- del" onclick="delHabit(\''+h.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
 function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);if(h.lastDone===today)return;h.lastDone=today;h.streak++;addEM(h.emReward,'Hábito: "'+h.name+'"');addXP(10);toast('✅ +'+h.emReward+' EM — Hábito','success');saveS();renderHabitList();}
 function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);saveS();renderHabitList();}
-function openGoalModal(){document.getElementById('goalMo').classList.add('open');}
-function saveGoal(){const n=document.getElementById('glName').value.trim();if(!n)return toast('Nombre obligatorio','error');S.goals.push({id:'g_'+Date.now(),name:n,desc:document.getElementById('glDesc').value,endDate:document.getElementById('glE').value,emReward:parseInt(document.getElementById('glEM').value)||200,completed:false});saveS();cm('goalMo');renderMissions();toast('Objetivo creado','success');}
-function renderGoalList(){const el=document.getElementById('goalList');if(!el)return;if(!S.goals.length){el.innerHTML='<div class="c-muted t-sm">Sin objetivos.</div>';return;}el.innerHTML=S.goals.map(g=>'<div class="tcard '+(g.completed?'done-t':'')+'"><button class="tck '+(g.completed?'done':'')+'" onclick="toggleGoal(\''+g.id+'\')">✓</button><div class="tb"><div class="tn">'+g.name+'</div><div class="tm-"><span class="td-">'+(g.endDate||'')+'</span><span class="ter">⚡'+g.emReward+'</span></div></div><div class="ta-"><button class="tab- del" onclick="delGoal(\''+g.id+'\')">🗑</button></div></div>').join('');}
+function openGoalModal(id=null){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('goalMoT').textContent=id?'Editar Objetivo':'Nuevo Objetivo';
+  if(id){
+    const g=S.goals.find(g=>g.id===id);
+    document.getElementById('glName').value=g.name;
+    document.getElementById('glDesc').value=g.desc||'';
+    document.getElementById('glPri').value=g.priority||'media';
+    document.getElementById('glDif').value=g.difficulty||'normal';
+    document.getElementById('glS').value=g.startDate||today;
+    document.getElementById('glE').value=g.endDate||'';
+    document.getElementById('glEM').value=g.emReward;
+    document.getElementById('goalMo').dataset.editId=id;
+  } else {
+    ['glName','glDesc'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('glPri').value='media';
+    document.getElementById('glDif').value='normal';
+    document.getElementById('glS').value=today;
+    document.getElementById('glE').value='';
+    document.getElementById('glEM').value=200;
+    delete document.getElementById('goalMo').dataset.editId;
+  }
+  document.getElementById('goalMo').classList.add('open');
+}
+function saveGoal(){
+  const n=document.getElementById('glName').value.trim();if(!n)return toast('Nombre obligatorio','error');
+  const editId=document.getElementById('goalMo').dataset.editId;
+  const g={
+    id:editId||'g_'+Date.now(),name:n,
+    desc:document.getElementById('glDesc').value,
+    priority:document.getElementById('glPri').value,
+    difficulty:document.getElementById('glDif').value,
+    startDate:document.getElementById('glS').value,
+    endDate:document.getElementById('glE').value||null,
+    emReward:parseInt(document.getElementById('glEM').value)||200,
+    completed:false
+  };
+  if(editId){const i=S.goals.findIndex(x=>x.id===editId);if(i>=0)S.goals[i]={...S.goals[i],...g,id:editId,completed:S.goals[i].completed};}
+  else S.goals.push(g);
+  saveS();cm('goalMo');renderMissions();toast(editId?'Objetivo actualizado':'Objetivo creado','success');
+}
+function renderGoalList(){
+  const el=document.getElementById('goalList');if(!el)return;
+  if(!S.goals.length){el.innerHTML='<div class="c-muted t-sm">Sin objetivos.</div>';return;}
+  const today=new Date().toISOString().slice(0,10);
+  el.innerHTML=S.goals.map(g=>{
+    const od=g.endDate&&g.endDate<today&&!g.completed;
+    const priC={alta:'var(--red)',media:'var(--warn)',baja:'var(--ok)'}[g.priority||'media'];
+    return '<div class="tcard '+(od?'overdue':'')+(g.completed?' done-t':'')+'">'+
+      '<button class="tck '+(g.completed?'done':'')+'" onclick="toggleGoal(\''+g.id+'\')">✓</button>'+
+      '<div class="tb">'+
+        '<div class="tn">'+g.name+'</div>'+
+        '<div class="tm-">'+
+          '<span class="badge" style="background:'+priC+'22;color:'+priC+';border-color:'+priC+'44">'+g.priority+'</span>'+
+          (g.difficulty?'<span class="td-">'+g.difficulty+'</span>':'')+
+          (g.endDate?'<span class="td- '+(od?'ov':'')+'">⏰ '+g.endDate+'</span>':'')+
+          '<span class="ter">⚡'+g.emReward+'</span>'+
+        '</div>'+
+        (g.desc?'<div class="t-xs c-muted mt1">'+g.desc+'</div>':'')+
+      '</div>'+
+      '<div class="ta-">'+
+        (!g.completed?'<button class="tab-" onclick="openGoalModal(\''+g.id+'\')">✏️</button>':'')+
+        '<button class="tab- del" onclick="delGoal(\''+g.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
 function toggleGoal(id){const g=S.goals.find(g=>g.id===id);if(!g||g.completed)return;g.completed=true;addEM(g.emReward,'Objetivo: "'+g.name+'"');addXP(g.emReward);toast('🏆 +'+g.emReward+' EM','gold');saveS();renderMissions();}
 function delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);saveS();renderGoalList();}
 function renderMissions(){renderTaskList();renderHabitList();renderGoalList();}
@@ -3729,7 +4159,7 @@ function resetAll(){
 }
 
 // ═══════════════════════════════════════════════════════
-// TEST MODE
+// HERRAMIENTAS DE DESARROLLO
 // ═══════════════════════════════════════════════════════
 function testUnlockAll(){
   S.player.em=S.player.maxEm=9999;
@@ -3742,7 +4172,6 @@ function testMaxMastery(){
   const tech=TECHNIQUES[S.player.technique];if(!tech)return toast('Elige técnica primero','error');
   const maxLv=getTechMaxMastery();
   S.player.techMasteryXP=xpForLevel(maxLv)+1;
-  // Unlock all skills
   tech.skills.forEach(sk=>{
     if(!S.player.unlockedSkills.includes(sk.id)){S.player.unlockedSkills.push(sk.id);S.player.skillMastery[sk.id]=0;}
   });
@@ -3750,7 +4179,6 @@ function testMaxMastery(){
   if(document.getElementById('ptab-maestria').style.display!=='none')renderMaestriaContent();
 }
 function testUnlockTechs(){
-  // Unlock all techniques by showing the picker with all options
   const allTechs=Object.values(TECHNIQUES);
   document.getElementById('techPickOpts').innerHTML=allTechs.map(t=>'<button class="forg-btn" onclick="selectTech(\''+t.id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:11px"><span style="font-size:22px;flex-shrink:0">'+t.emoji+'</span><div style="text-align:left"><div style="font-size:13px;font-weight:700;color:'+t.rc+'">'+t.name+'</div><div class="t-xs mono c-muted mb1">'+t.rarity+' · Tier '+t.tier+'</div><div class="t-sm" style="color:var(--ts)">'+t.desc+'</div></div></button>').join('');
   document.getElementById('techPickMo').classList.add('open');
