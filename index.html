@@ -31,12 +31,12 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .em-mini label{font-size:9px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;font-family:var(--fm)}
 .emv{font-size:16px;font-weight:700;color:var(--emb);font-family:var(--fm);line-height:1;margin-top:2px}
 .emt{height:3px;background:var(--bdr);border-radius:2px;margin-top:4px;overflow:hidden}
-.emf{height:100%;background:linear-gradient(90deg,var(--em),var(--emb));border-radius:2px;transition:width .4s;box-shadow:0 0 8px var(--emglow)}
+.emf{height:100%;background:linear-gradient(90deg,var(--em),var(--emb));border-radius:2px;transition:width .4s;}
 .nav-sec{padding:4px 0;border-bottom:1px solid var(--bdr)}
 .nav-sec-lbl{font-size:9px;letter-spacing:.2em;color:var(--tm);text-transform:uppercase;padding:4px 13px 2px;font-family:var(--fm)}
 .ni{display:flex;align-items:center;gap:7px;padding:7px 13px;cursor:pointer;color:var(--ts);font-size:13px;font-weight:500;transition:var(--tr);position:relative}
 .ni:hover{background:var(--bg-hov);color:var(--tp)}.ni.active{background:rgba(59,124,244,.08);color:var(--emb)}
-.ni.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--em);box-shadow:0 0 8px var(--em)}
+.ni.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--em);}
 .ni .ico{font-size:14px;width:16px;text-align:center}
 .ni-sub{display:flex;align-items:center;gap:7px;padding:5px 13px 5px 34px;cursor:pointer;color:var(--tm);font-size:12px;transition:var(--tr)}
 .ni-sub:hover{color:var(--ts);background:var(--bg-hov)}.ni-sub.active{color:var(--emb)}
@@ -71,7 +71,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 /* Progress */
 .pw{background:var(--bdr);border-radius:4px;overflow:hidden;height:5px}
 .pf{height:100%;border-radius:4px;transition:width .5s}
-.p-em{background:linear-gradient(90deg,var(--em),var(--emb));box-shadow:0 0 6px var(--emglow)}
+.p-em{background:linear-gradient(90deg,var(--em),var(--emb))}
 .p-xp{background:linear-gradient(90deg,#6030b0,#9060e0)}
 .p-hp{background:linear-gradient(90deg,#880010,var(--red))}
 .p-perf{background:linear-gradient(90deg,var(--gold),#ffd040)}
@@ -81,7 +81,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .fg{margin-bottom:10px}
 .fg label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:3px;font-family:var(--fm)}
 .fi,.fs,.fta{width:100%;background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 9px;color:var(--tp);font-family:var(--fb);font-size:13px;outline:none;transition:var(--tr)}
-.fi:focus,.fs:focus,.fta:focus{border-color:var(--em);box-shadow:0 0 0 2px var(--emglow)}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--em)}
 .fs option{background:var(--bg-card)}.fta{resize:vertical;min-height:60px}
 /* Modal */
 .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(5px);z-index:1000;align-items:center;justify-content:center}
@@ -102,7 +102,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 /* Dash */
 .dash-top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:11px;margin-bottom:14px}
 .dem{background:linear-gradient(135deg,#080f20,#060c1a);border:1px solid rgba(59,124,244,.28);border-radius:var(--rl);padding:14px;position:relative;overflow:hidden}
-.dem::before{content:'';position:absolute;top:-25px;right:-25px;width:80px;height:80px;background:radial-gradient(circle,rgba(59,124,244,.1),transparent 70%)}
+.dem::before{display:none}
 .dem .el{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--em);text-transform:uppercase}
 .dem .eb{font-family:var(--fm);font-size:28px;font-weight:700;color:var(--emb);line-height:1.1;margin:3px 0}
 .sc{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:12px}
@@ -119,9 +119,9 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 /* ─── CITY MENU ─── */
 .city-menu-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:var(--tr)}
-.city-menu-card:hover:not(.cm-locked){border-color:var(--bdr-g);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.city-menu-card:hover:not(.cm-locked){border-color:var(--bdr-g);border-color:var(--bdr-g)}
 .city-menu-card.cm-locked{opacity:.5;cursor:not-allowed}
-.city-menu-card.cm-selected{border-color:var(--emb);box-shadow:0 0 0 1px var(--emb)}
+.city-menu-card.cm-selected{border-color:var(--emb)}
 .cm-header{padding:13px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)}
 .cm-emoji{font-size:24px;flex-shrink:0}
 .cm-name{font-family:var(--fd);font-size:14px;letter-spacing:.05em}
@@ -131,7 +131,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .zone-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--r);transition:var(--tr);cursor:pointer;margin-bottom:3px}
 .zone-row:hover{background:var(--bg-el)}.zone-row.zr-locked{opacity:.42;cursor:not-allowed}
 .zr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.zr-danger{background:var(--red);box-shadow:0 0 5px var(--red)}.zr-active{background:var(--emb)}.zr-safe{background:var(--ok)}.zr-lk{background:var(--tm)}
+.zr-danger{background:var(--red)}.zr-active{background:var(--emb)}.zr-safe{background:var(--ok)}.zr-lk{background:var(--tm)}
 .zr-name{font-size:13px;font-weight:600;flex:1}
 .zr-meta{font-size:10px;font-family:var(--fm);color:var(--tm)}
 .zr-icons{font-size:11px;display:flex;gap:3px}
@@ -166,12 +166,27 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .skt-btn.unlocked.active-skill{border-color:rgba(160,112,240,.5);background:rgba(160,112,240,.05)}
 .skt-btn.max-node{border-color:var(--gold)!important;background:rgba(240,192,48,.06)!important}
 .skt-btn.locked-node{opacity:.35;cursor:not-allowed}
-.skt-btn:hover:not(.locked-node){border-color:var(--emb);transform:translateY(-1px);box-shadow:0 3px 10px var(--emglow)}
+.skt-btn:hover:not(.locked-node){border-color:var(--emb);transform:translateY(-1px);}
 .skt-ico{font-size:16px;margin-bottom:2px}
 .skt-name{font-size:11px;font-weight:700;line-height:1.3}
 .skt-cost{font-size:9px;font-family:var(--fm);color:var(--tm);margin-top:1px}
 .skt-desc{font-size:9px;color:var(--ts);margin-top:2px;line-height:1.4}
-.stat-pts-banner{background:rgba(240,192,48,.08);border:1px solid rgba(240,192,48,.25);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.stat-pts-banner{background:rgba(240,192,48,.06);border:1px solid rgba(240,192,48,.2);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+/* ── Technique & Mastery tab ── */
+.tech-skill-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);transition:var(--tr)}
+.tech-skill-row.active{background:rgba(59,124,244,.04);border-color:rgba(59,124,244,.2)}
+.tech-skill-row.domain-row{background:rgba(160,112,240,.04);border-color:rgba(160,112,240,.18)}
+.tech-skill-row.domain-row.active{background:rgba(160,112,240,.07);border-color:rgba(160,112,240,.3)}
+.tsr-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1px solid var(--bdr)}
+.tsr-icon.active{border-color:rgba(59,124,244,.3);background:rgba(59,124,244,.08)}
+.tsr-icon.domain{border-color:rgba(160,112,240,.3);background:rgba(160,112,240,.08)}
+.tsr-icon.locked{background:var(--bdr);opacity:.5}
+.tsr-body{flex:1;min-width:0}
+.tsr-name{font-size:13px;font-weight:700;margin-bottom:1px}
+.tsr-desc{font-size:11px;color:var(--ts);line-height:1.45}
+.tsr-meta{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.tsr-tag{font-size:10px;font-family:var(--fm);padding:1px 6px;border-radius:3px;background:var(--bg-card);border:1px solid var(--bdr);color:var(--tm)}
+.tsr-req{font-size:10px;font-family:var(--fm);color:var(--tm);white-space:nowrap;align-self:center;text-align:right;min-width:70px}
 .japan-map-wrap{position:relative;margin-bottom:14px;background:#080c14;border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
 .map-img-container{position:relative;width:100%;user-select:none}
 .map-img-container img{width:100%;height:auto;display:block;opacity:.72;filter:saturate(.18) brightness(.55) hue-rotate(200deg)}
@@ -188,8 +203,8 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .zp.danger::after,.zp.active::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid;border-color:inherit;opacity:0;animation:znpulse 2.2s ease-in-out infinite}
 @keyframes znpulse{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(1.7)}}
 .zp-badge{position:absolute;top:-4px;right:-4px;min-width:14px;height:14px;border-radius:7px;background:var(--red);color:#fff;font-size:8px;font-family:var(--fm);font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 2px;border:1px solid var(--bg-deep)}
-.zn-name{font-size:9px;margin-top:3px;font-family:var(--fm);color:var(--ts);white-space:nowrap;text-shadow:0 0 8px #000,0 0 8px #000,0 0 4px #000}
-.zn-sub{font-size:8px;color:var(--tm);text-shadow:0 0 6px #000}
+.zn-name{font-size:9px;margin-top:3px;font-family:var(--fm);color:var(--ts);white-space:nowrap;}
+.zn-sub{font-size:8px;color:var(--tm);}
 .map-legend{position:absolute;bottom:10px;right:12px;background:rgba(4,6,12,.94);border:1px solid var(--bdr);border-radius:var(--r);padding:6px 10px;font-size:10px;font-family:var(--fm)}
 .mli{display:flex;align-items:center;gap:5px;margin-bottom:2px;color:var(--ts)}
 .mld{width:7px;height:7px;border-radius:50%}
@@ -205,8 +220,8 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .czp.safe{background:rgba(62,200,106,.22);border-color:rgba(62,200,106,.7)}
 .czp.lk{background:rgba(40,45,65,.2);border-color:rgba(50,60,90,.5)}
 .czp.danger::after,.czp.active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid;border-color:inherit;opacity:0;animation:znpulse 2s ease infinite}
-.czn-name{font-size:9px;margin-top:2px;font-family:var(--fm);color:var(--ts);white-space:nowrap;text-shadow:0 0 8px #000,0 0 8px #000}
-.czn-sub{font-size:8px;color:var(--tm);text-shadow:0 0 6px #000}
+.czn-name{font-size:9px;margin-top:2px;font-family:var(--fm);color:var(--ts);white-space:nowrap;}
+.czn-sub{font-size:8px;color:var(--tm);}
 .czp-badge{position:absolute;top:-3px;right:-3px;min-width:13px;height:13px;border-radius:7px;background:var(--red);color:#fff;font-size:7px;font-family:var(--fm);font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 2px;border:1px solid var(--bg-deep)}
 /* City detail panel */
 .city-detail{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px;margin-bottom:14px}
@@ -418,6 +433,21 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .spr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
 .spr-slot{aspect-ratio:1;background:var(--bg-el);border:1px dashed var(--bdr);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);font-size:10px;color:var(--tm);gap:3px;padding:5px;text-align:center;overflow:hidden}
 .spr-slot:hover{border-color:var(--em)}.spr-slot img{width:100%;height:78%;object-fit:contain}
+/* ─── SPRITE SYSTEM ─── */
+.spr-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);min-height:64px;align-items:flex-start;align-content:flex-start}
+.spr-pool-empty{color:var(--tm);font-size:12px;font-family:var(--fm)}
+.spr-thumb{position:relative;width:60px;height:60px;border-radius:var(--r);overflow:hidden;border:2px solid var(--bdr);cursor:default;flex-shrink:0}
+.spr-thumb img{width:100%;height:100%;object-fit:cover}
+.spr-thumb .spr-name{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.82);font-size:8px;font-family:var(--fm);color:#fff;padding:2px 3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spr-thumb .spr-del{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;display:none;align-items:center;justify-content:center;cursor:pointer;border:none;line-height:1}
+.spr-thumb:hover .spr-del{display:flex}
+.enemy-spr-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);background:var(--bg-el);border:1px solid var(--bdr);margin-bottom:5px}
+.enemy-spr-preview{width:40px;height:40px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0}
+.enemy-spr-preview img{width:100%;height:100%;object-fit:cover}
+.enemy-spr-info{flex:1;min-width:0}
+.enemy-spr-name{font-size:12px;font-weight:700;margin-bottom:1px}
+.enemy-spr-grade{font-size:10px;font-family:var(--fm);color:var(--tm)}
+.spr-grade-hdr{font-family:var(--fd);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm);padding:8px 0 4px;border-bottom:1px solid var(--bdr);margin-bottom:6px}
 /* Forgive */
 .forg-btn{padding:9px 12px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--bg-el);color:var(--tp);font-family:var(--fb);font-size:13px;cursor:pointer;text-align:left;transition:var(--tr);width:100%;margin-bottom:6px}
 .forg-btn:hover{border-color:var(--em)}.forg-btn.par:hover{border-color:var(--ok)}.forg-btn.pen:hover{border-color:var(--red)}
@@ -692,25 +722,82 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 <!-- CONFIG -->
 <div class="page" id="page-config">
   <div class="page-h"><h1>Configuración</h1></div>
-  <div class="cfg-sec"><h3>👤 Perfil</h3>
-    <div class="g2"><div class="fg"><label>Nombre</label><input class="fi" id="cfgName" oninput="saveCfgName()"></div><div class="fg"><label>Avatar</label><button class="btn btn-g" onclick="triggerAvatarUpload()">📷 Subir</button></div></div>
-    <div class="fg"><label>Sprite (combate)</label><button class="btn btn-g btn-sm" onclick="triggerSpriteUpload('player')">📷 Subir sprite</button> <span id="pSpritePrev" class="t-xs c-muted"></span></div>
+
+  <!-- PROFILE -->
+  <div class="cfg-sec">
+    <h3>👤 Perfil</h3>
+    <div class="g2">
+      <div class="fg"><label>Nombre</label><input class="fi" id="cfgName" oninput="saveCfgName()"></div>
+      <div class="fg"><label>Avatar</label><button class="btn btn-g" onclick="triggerAvatarUpload()">📷 Subir</button></div>
+    </div>
+    <div class="fg"><label>Sprite del jugador (combate)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-g btn-sm" onclick="triggerSpriteUpload('player')">📷 Subir sprite</button>
+        <span id="pSpritePrev" class="t-xs c-muted"></span>
+      </div>
+    </div>
   </div>
-  <div class="cfg-sec"><h3>🖼 Sprites de Enemigos</h3><div class="spr-grid" id="sprGrid"></div></div>
+
+  <!-- ENEMY SPRITES — bulk upload + assignment -->
+  <div class="cfg-sec">
+    <h3>🖼 Sprites de Enemigos</h3>
+    <p class="t-sm c-muted mb3">Sube todos tus sprites de golpe y asígnalos a cada enemigo.</p>
+
+    <!-- Upload zone -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button class="btn btn-p" onclick="triggerBulkSpriteUpload()">📂 Subir Sprites</button>
+      <input type="file" id="bulkSprInput" accept="image/*" multiple style="display:none" onchange="handleBulkSprites(event)">
+      <button class="btn btn-g btn-sm" onclick="clearUploadedSprites()">🗑 Limpiar subidos</button>
+      <span class="t-xs mono c-muted" id="uploadCount"></span>
+    </div>
+
+    <!-- Uploaded sprites staging pool -->
+    <div id="uploadedSprPool"></div>
+
+    <!-- Enemy assignment list -->
+    <div id="enemySprAssign"></div>
+  </div>
+
+  <!-- GENERIC ENEMY SPRITES (fallback) -->
+  <div class="cfg-sec">
+    <h3>🎭 Sprites Genéricos (fallback)</h3>
+    <p class="t-sm c-muted mb3">Se usan si el enemigo no tiene sprite asignado.</p>
+    <div class="spr-grid" id="sprGrid"></div>
+  </div>
+
+  <!-- TEST MODE -->
   <div class="cfg-sec" style="border-color:rgba(240,192,48,.3)">
     <h3>🧪 Modo de Testeo</h3>
-    <p class="t-sm c-muted mb3">Herramientas de desarrollo para probar el sistema sin grinding.</p>
+    <p class="t-sm c-muted mb2">Herramientas para probar sin grinding.</p>
+    <!-- Level editor -->
+    <div style="background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div class="t-xs mono c-muted mb2">EDITAR NIVEL DEL JUGADOR</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="number" id="testLvInput" min="1" max="200" style="width:80px" class="fi" placeholder="Nivel">
+        <button class="btn btn-gold btn-sm" onclick="testSetLevel()">✓ Aplicar Nivel</button>
+        <button class="btn btn-g btn-sm" onclick="testLvInput.value=S.player.level">← Actual (Nv.<span id="cfgCurLv">1</span>)</button>
+      </div>
+      <div class="t-xs c-muted mt2">Al cambiar el nivel se recalculan XP necesario, HP máximo y EM máximo. Las misiones de limpieza se generan siempre a tu nivel actual.</div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn btn-gold" onclick="testUnlockAll()">⚡ EM Ilimitada + Max Stats</button>
+      <button class="btn btn-gold" onclick="testUnlockAll()">⚡ EM Ilimitada + Puntos</button>
       <button class="btn btn-gold" onclick="testMaxMastery()">🌟 Maestría al Máximo</button>
       <button class="btn btn-gold" onclick="testUnlockTechs()">🔓 Todas las Técnicas</button>
-      <button class="btn btn-gold" onclick="testUnlockStatTree()">🌳 Árbol de Stats Completo</button>
-      <button class="btn btn-gold" onclick="testMaxGrade()">⬆️ Subir al Grado Especial</button>
+      <button class="btn btn-gold" onclick="testUnlockStatTree()">🌳 Árbol Completo</button>
+      <button class="btn btn-gold" onclick="testMaxGrade()">⬆️ Grado Especial</button>
       <button class="btn btn-gold" onclick="testAddXP()">📈 +5000 XP</button>
     </div>
   </div>
-  <div class="cfg-sec"><h3>💾 Datos</h3>
-    <div class="flex g3_"><button class="btn btn-g" onclick="exportData()">📤 Exportar</button><button class="btn btn-g" onclick="importTrigger()">📥 Importar</button><input type="file" id="impInput" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-d btn-sm" onclick="resetAll()">🗑 Resetear</button></div>
+
+  <!-- DATA -->
+  <div class="cfg-sec">
+    <h3>💾 Datos</h3>
+    <div class="flex g3_">
+      <button class="btn btn-g" onclick="exportData()">📤 Exportar</button>
+      <button class="btn btn-g" onclick="importTrigger()">📥 Importar</button>
+      <input type="file" id="impInput" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-d btn-sm" onclick="resetAll()">🗑 Resetear todo</button>
+    </div>
   </div>
 </div>
 
@@ -773,130 +860,184 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 // evolFrom: which techs can evolve into this one
 // ═══════════════════════════════════════════════════════
 const TECHNIQUES={
-  puño_divergente:{id:'puño_divergente',name:'Puño Divergente',user:'Yuji Itadori',tier:0,rarity:'Común',rc:'var(--g4)',emoji:'👊',desc:'Golpe físico con EM retrasada. Técnica de origen.',
+  // ── TIER 0: Starter ──────────────────────────────────────────
+  puño_divergente:{id:'puño_divergente',name:'Puño Divergente',user:'Yuji Itadori',tier:0,rarity:'Común',rc:'var(--g4)',emoji:'👊',
+    desc:'Golpe físico con EM retrasada. La EM se libera en el instante del impacto, amplificando el daño.',
     evolInto:['discurso_maldito','boogie_woogie','muneco_paja'],
     skills:[
-      {id:'div_hit',name:'Golpe Divergente',icon:'👊',type:'attack',cost:18,power:42,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Golpe base con EM retrasada.'},
-      {id:'rush',name:'Combo Acelerado',icon:'⚡',type:'attack',cost:35,power:70,lvlReq:4,masteryReq:30,statusEffect:null,desc:'Serie de golpes rápidos.'},
-      {id:'black_flash',name:'Destello Negro',icon:'⚫',type:'attack',cost:55,power:115,lvlReq:9,masteryReq:70,statusEffect:null,desc:'Concentración máxima. Daño x2.5.'},
-      {id:'sukuna_boost',name:'Instante de Sukuna',icon:'👹',type:'buff',cost:75,power:0,lvlReq:16,masteryReq:120,statusEffect:'boost',desc:'+70% daño por 2 turnos.'},
+      {id:'div_hit',    name:'Golpe Divergente',   icon:'👊',type:'attack', cost:0,  power:38, masteryReq:1,   statusEffect:null,     desc:'Golpe físico básico con EM retrasada. Sin coste de EM.'},
+      {id:'rush',       name:'Combo Acelerado',     icon:'⚡',type:'attack', cost:28, power:65, masteryReq:25,  statusEffect:null,     desc:'Tres golpes rápidos consecutivos. Daño distribuido.'},
+      {id:'black_flash',name:'Destello Negro',      icon:'⚫',type:'attack', cost:55, power:130,masteryReq:60,  statusEffect:null,     desc:'Concentración máxima: EM en la cuarta dimensión. Daño ×2.5 pero difícil de ejecutar.'},
+      {id:'kuugeki',    name:'Impacto Vacío',       icon:'💨',type:'attack', cost:40, power:85, masteryReq:90,  statusEffect:'paralyze',desc:'Golpe que distorsiona el espacio inmediato. Puede paralizar.'},
+      {id:'divergente_domain',name:'Mundo de Matanza',icon:'⬡',type:'domain',cost:300,power:260,masteryReq:140,statusEffect:'bleed',  desc:'El dominio de Sukuna manifestado brevemente. Lluvia de cortes inevitables.'},
     ]},
-  discurso_maldito:{id:'discurso_maldito',name:'Discurso Maldito',user:'Toge Inumaki',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'📢',desc:'Palabras que afectan literalmente al objetivo.',
+
+  // ── TIER 1: Basic ─────────────────────────────────────────────
+  discurso_maldito:{id:'discurso_maldito',name:'Discurso Maldito',user:'Toge Inumaki',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'📢',
+    desc:'Palabras del clan Inumaki que afectan literalmente al objetivo. Gran coste en voz y cuerpo del usuario.',
     evolInto:['manipulacion_sangre','muneco_paja','boogie_woogie'],
     evolFrom:['puño_divergente'],
     skills:[
-      {id:'no_muevas',name:'No te muevas',icon:'🛑',type:'debuff',cost:30,power:0,lvlReq:1,masteryReq:1,statusEffect:'paralyze',desc:'Paraliza al enemigo.'},
-      {id:'explota',name:'Explota',icon:'💥',type:'attack',cost:55,power:95,lvlReq:5,masteryReq:25,statusEffect:null,desc:'El enemigo explota.'},
-      {id:'regresa',name:'Regresa',icon:'🔙',type:'heal',cost:40,power:60,lvlReq:8,masteryReq:55,statusEffect:null,desc:'Tu cuerpo vuelve a estado óptimo.'},
-      {id:'arrancat',name:'Arráncate',icon:'✂️',type:'attack',cost:70,power:110,lvlReq:10,masteryReq:85,statusEffect:'bleed',desc:'Daño masivo con sangrado.'},
-      {id:'atomize',name:'Vuélvete Polvo',icon:'🌫️',type:'attack',cost:150,power:220,lvlReq:22,masteryReq:130,statusEffect:null,desc:'Desintegración total.'},
+      {id:'no_muevas',  name:'No te muevas',       icon:'🛑',type:'debuff', cost:25, power:0,  masteryReq:1,   statusEffect:'paralyze',desc:'Paraliza completamente al objetivo durante 2 turnos.'},
+      {id:'duermete',   name:'Duérmete',            icon:'😴',type:'debuff', cost:35, power:0,  masteryReq:20,  statusEffect:'freeze',  desc:'Hace dormir al enemigo. Salta su próximo turno con seguridad.'},
+      {id:'explota',    name:'Explota',             icon:'💥',type:'attack', cost:60, power:110,masteryReq:45,  statusEffect:null,     desc:'El cuerpo del objetivo explota desde dentro. Daño masivo.'},
+      {id:'retrocede',  name:'Retrocede',           icon:'↩️',type:'debuff', cost:40, power:0,  masteryReq:70,  statusEffect:'paralyze',desc:'Obliga al enemigo a retroceder, anulando su ataque.'},
+      {id:'arrancat',   name:'Arráncate',           icon:'✂️',type:'attack', cost:75, power:135,masteryReq:100, statusEffect:'bleed',  desc:'Daño brutal con hemorragia interna sostenida.'},
+      {id:'atomize',    name:'Vuélvete Polvo',      icon:'🌫️',type:'attack', cost:160,power:240,masteryReq:140, statusEffect:null,     desc:'Desintegración total a nivel celular. El ataque definitivo del discurso.'},
     ]},
-  boogie_woogie:{id:'boogie_woogie',name:'Boogie Woogie',user:'Aoi Todo',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'👏',desc:'Intercambia posiciones con un palmotazo.',
+
+  boogie_woogie:{id:'boogie_woogie',name:'Boogie Woogie',user:'Aoi Todo',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'👏',
+    desc:'Intercambia posiciones de cualquier ser con carga de EM con un simple palmotazo. Requiere gran inteligencia táctica.',
     evolInto:['sombras_diez','manipulacion_sangre'],
     evolFrom:['puño_divergente','discurso_maldito'],
     skills:[
-      {id:'clap_swap',name:'Palmada',icon:'🔄',type:'debuff',cost:25,power:30,lvlReq:1,masteryReq:1,statusEffect:'paralyze',desc:'Confunde al enemigo.'},
-      {id:'boogie_strike',name:'Golpe Woogie',icon:'👊',type:'attack',cost:40,power:75,lvlReq:3,masteryReq:30,statusEffect:null,desc:'Golpe potenciado.'},
-      {id:'inf_swap',name:'Intercambio Infinito',icon:'♾️',type:'attack',cost:85,power:110,lvlReq:10,masteryReq:75,statusEffect:'paralyze',desc:'Múltiples intercambios.'},
-      {id:'great_boogie',name:'Gran Boogie',icon:'💥',type:'attack',cost:130,power:165,lvlReq:20,masteryReq:120,statusEffect:null,desc:'Definitivo combinado.'},
+      {id:'clap_swap',  name:'Intercambio Simple',  icon:'🔄',type:'debuff', cost:20, power:0,  masteryReq:1,   statusEffect:'paralyze',desc:'Intercambia posición propia con la del enemigo. Desorienta al objetivo.'},
+      {id:'boogie_strike',name:'Golpe Post-Swap',   icon:'👊',type:'attack', cost:45, power:85, masteryReq:30,  statusEffect:null,     desc:'Ataque potenciado inmediatamente tras un intercambio.'},
+      {id:'double_swap', name:'Doble Intercambio',  icon:'🔁',type:'attack', cost:65, power:100,masteryReq:60,  statusEffect:'paralyze',desc:'Dos intercambios seguidos que confunden al enemigo. Puede paralizar.'},
+      {id:'inf_swap',   name:'Intercambio Infinito',icon:'♾️',type:'attack', cost:90, power:130,masteryReq:90,  statusEffect:'paralyze',desc:'Cadena de intercambios que imposibilita al enemigo reaccionar.'},
+      {id:'great_boogie',name:'Gran Boogie Woogie', icon:'💥',type:'domain', cost:250,power:200,masteryReq:130, statusEffect:'paralyze',desc:'Dominio informal: intercambio masivo de todo el campo de batalla. Confusión total.'},
     ]},
-  muneco_paja:{id:'muneco_paja',name:'Muñeco de Paja',user:'Nobara Kugisaki',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'🔨',desc:'Clavos y martillo para dañar a distancia.',
+
+  muneco_paja:{id:'muneco_paja',name:'Muñeco de Paja',user:'Nobara Kugisaki',tier:1,rarity:'Poco común',rc:'var(--g3)',emoji:'🔨',
+    desc:'Clavos malditos y martillo. El daño infligido al muñeco se transfiere al objetivo original a través de la conexión maldita.',
     evolInto:['sombras_diez','manipulacion_sangre','proporcion'],
     evolFrom:['puño_divergente','discurso_maldito'],
     skills:[
-      {id:'nail',name:'Clavar',icon:'🔩',type:'attack',cost:22,power:45,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Clava clavo maldito.'},
-      {id:'resonance',name:'Resonancia',icon:'🌀',type:'attack',cost:45,power:75,lvlReq:4,masteryReq:30,statusEffect:'bleed',desc:'Daño con sangrado.'},
-      {id:'hairpin',name:'Horquilla',icon:'⚡',type:'attack',cost:65,power:100,lvlReq:9,masteryReq:70,statusEffect:null,desc:'Explosión de EM.'},
-      {id:'domain_wicker',name:'Dominio Vacío',icon:'⬡',type:'domain',cost:200,power:160,lvlReq:20,masteryReq:120,statusEffect:null,desc:'Daño inevitable.'},
+      {id:'nail',       name:'Clavar',              icon:'🔩',type:'attack', cost:18, power:42, masteryReq:1,   statusEffect:null,     desc:'Clava un clavo maldito. Daño inmediato al objetivo.'},
+      {id:'resonance',  name:'Resonancia Maldita',  icon:'🌀',type:'attack', cost:40, power:75, masteryReq:28,  statusEffect:'bleed',  desc:'Hace resonar los clavos existentes. Daño amplificado y sangrado.'},
+      {id:'hairpin',    name:'Horquilla Maldita',   icon:'⚡',type:'attack', cost:60, power:105,masteryReq:58,  statusEffect:null,     desc:'Disparo de EM explosiva. Destruye defensas.'},
+      {id:'bachi',      name:'Bachi',               icon:'🥁',type:'attack', cost:75, power:125,masteryReq:88,  statusEffect:'bleed',  desc:'Golpe de martillo que amplifica todos los clavos activos simultáneamente.'},
+      {id:'domain_wicker',name:'Dominio Vacío',     icon:'⬡',type:'domain', cost:220,power:180,masteryReq:130, statusEffect:'bleed',  desc:'Dominio donde todos los clavos convergen inevitablemente sobre el objetivo.'},
     ]},
-  sombras_diez:{id:'sombras_diez',name:'Sombras de Diez Tipos',user:'Megumi Fushiguro',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🐉',desc:'Invoca shikigami de las sombras.',
+
+  // ── TIER 2: Intermediate ──────────────────────────────────────
+  sombras_diez:{id:'sombras_diez',name:'Sombras de Diez Tipos',user:'Megumi Fushiguro',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🐉',
+    desc:'Invoca shikigami usando sombra como medio. Cada shikigami tiene habilidades únicas. Técnica hereditaria del clan Zenin.',
     evolInto:['manipulacion_maldiciones','transformacion_inactiva'],
     evolFrom:['boogie_woogie','muneco_paja'],
     skills:[
-      {id:'perros_div',name:'Perros Divinos',icon:'🐕',type:'attack',cost:35,power:60,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Dos perros coordinados.'},
-      {id:'nue',name:'Nue',icon:'🦅',type:'attack',cost:50,power:80,lvlReq:4,masteryReq:25,statusEffect:'paralyze',desc:'Pájaro del trueno.'},
-      {id:'gran_serpiente',name:'Gran Serpiente',icon:'🐍',type:'debuff',cost:45,power:40,lvlReq:7,masteryReq:55,statusEffect:'freeze',desc:'Inmoviliza al enemigo.'},
-      {id:'maxwell',name:'Maxwell',icon:'🐸',type:'heal',cost:40,power:55,lvlReq:11,masteryReq:85,statusEffect:null,desc:'Shikigami sanador.'},
-      {id:'orbe_ocho',name:'Orbe de las Ocho Armas',icon:'⚡',type:'attack',cost:100,power:145,lvlReq:18,masteryReq:120,statusEffect:null,desc:'Shikigami de élite.'},
-      {id:'domain_ten',name:'Templo de las Sombras',icon:'⬡',type:'domain',cost:230,power:190,lvlReq:28,masteryReq:180,statusEffect:null,desc:'Todos los shikigami.'},
+      {id:'perros_div', name:'Perros Divinos',      icon:'🐕',type:'attack', cost:30, power:55, masteryReq:1,   statusEffect:null,     desc:'Dos perros shikigami coordinados. Atacan en formación.'},
+      {id:'nue',        name:'Nue',                 icon:'🦅',type:'attack', cost:50, power:80, masteryReq:22,  statusEffect:'paralyze',desc:'Bestia del trueno. Descarga eléctrica que paraliza.'},
+      {id:'gran_serpiente',name:'Gran Serpiente',   icon:'🐍',type:'debuff', cost:40, power:35, masteryReq:48,  statusEffect:'freeze',  desc:'Serpiente titánica. Inmoviliza al objetivo por las constricciones.'},
+      {id:'toad',       name:'Sapo de Gran Boca',   icon:'🐸',type:'debuff', cost:45, power:30, masteryReq:72,  statusEffect:'paralyze',desc:'Engulle al enemigo temporalmente. Interrumpe ataques y habilidades.'},
+      {id:'maxwell',    name:'Maxwell',              icon:'🦁',type:'heal',   cost:55, power:70, masteryReq:98,  statusEffect:null,     desc:'Shikigami divino de nivel superior. Restaura HP significativamente.'},
+      {id:'orbe_ocho',  name:'Orbe de las Ocho Generaciones',icon:'⚡',type:'attack',cost:110,power:160,masteryReq:130,statusEffect:'bleed',desc:'Shikigami de los ocho clanes. Poder demoledor combinado.'},
+      {id:'mahoraga',   name:'Mahoraga (Invocación)',icon:'👹',type:'attack', cost:200,power:250,masteryReq:170, statusEffect:'bleed',  desc:'El shikigami más poderoso. Incontrolable pero devastador. Riesgo para el propio usuario.'},
+      {id:'domain_ten', name:'Templo de las Sombras',icon:'⬡',type:'domain', cost:260,power:210,masteryReq:200, statusEffect:'bleed',  desc:'Dominio donde todos los shikigami actúan simultáneamente con ataques inevitables.'},
     ]},
-  manipulacion_sangre:{id:'manipulacion_sangre',name:'Manipulación de Sangre',user:'Choso / Clan Kamo',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🩸',desc:'Control absoluto de la sangre.',
+
+  manipulacion_sangre:{id:'manipulacion_sangre',name:'Manipulación de Sangre',user:'Choso / Clan Kamo',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🩸',
+    desc:'Control absoluto de la propia sangre para crear proyectiles, armas y venenos. Técnica hereditaria del clan Kamo.',
     evolInto:['proporcion','transformacion_inactiva'],
     evolFrom:['discurso_maldito','boogie_woogie','muneco_paja'],
     skills:[
-      {id:'piercing',name:'Sangre Perforadora',icon:'💉',type:'attack',cost:30,power:65,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Disparo a velocidad bala.'},
-      {id:'crimson',name:'Ligadura Carmesí',icon:'🔴',type:'debuff',cost:40,power:35,lvlReq:4,masteryReq:30,statusEffect:'bleed',desc:'Enreda al enemigo.'},
-      {id:'blood_edge',name:'Filo de Sangre',icon:'🗡',type:'attack',cost:55,power:90,lvlReq:8,masteryReq:65,statusEffect:'bleed',desc:'Cuchillas endurecidas.'},
-      {id:'supernova',name:'Supernova',icon:'💥',type:'attack',cost:110,power:155,lvlReq:16,masteryReq:105,statusEffect:null,desc:'Explosión de sangre masiva.'},
-      {id:'decay',name:'Putrefacción',icon:'☠️',type:'attack',cost:130,power:180,lvlReq:24,masteryReq:150,statusEffect:'poison',desc:'Envenena la sangre.'},
+      {id:'piercing',   name:'Flecha Perforadora',  icon:'💉',type:'attack', cost:28, power:60, masteryReq:1,   statusEffect:null,     desc:'Proyectil de sangre endurecida a velocidad de bala. Alta penetración.'},
+      {id:'crimson',    name:'Ligadura Carmesí',     icon:'🔴',type:'debuff', cost:38, power:30, masteryReq:25,  statusEffect:'bleed',  desc:'Enreda al enemigo con hilos de sangre. Causa sangrado continuo.'},
+      {id:'blood_edge', name:'Filo de Sangre',       icon:'🗡️',type:'attack', cost:52, power:92, masteryReq:55,  statusEffect:'bleed',  desc:'Crea cuchillas de sangre endurecida. Múltiples cortes simultáneos.'},
+      {id:'flowing_red',name:'Rojo Fluyente',        icon:'🌊',type:'attack', cost:70, power:115,masteryReq:82,  statusEffect:'bleed',  desc:'Oleada de sangre controlada que arrasa el área. Difícil de esquivar.'},
+      {id:'supernova',  name:'Supernova',            icon:'💥',type:'attack', cost:115,power:165,masteryReq:112, statusEffect:'poison', desc:'Concentra sangre en un punto y la hace explotar. Área de efecto masiva.'},
+      {id:'decay',      name:'Putrefacción Sanguínea',icon:'☠️',type:'attack',cost:140,power:190,masteryReq:150, statusEffect:'poison', desc:'Contamina la sangre del objetivo con EM maldita. Veneno que escala.'},
     ]},
-  proporcion:{id:'proporcion',name:'Proporción',user:'Kento Nanami',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🔢',desc:'Identifica el punto débil 7:3.',
+
+  proporcion:{id:'proporcion',name:'Proporción',user:'Kento Nanami',tier:2,rarity:'Rara',rc:'var(--g2)',emoji:'🔢',
+    desc:'Divide cualquier objeto en 10 partes e identifica el punto débil 7:3. El golpe en esa proporción amplifica el daño exponencialmente.',
     evolInto:['manipulacion_maldiciones','maldicion_ilimitada'],
     evolFrom:['muneco_paja','manipulacion_sangre'],
     skills:[
-      {id:'analisis',name:'Análisis 7:3',icon:'🔍',type:'buff',cost:20,power:0,lvlReq:1,masteryReq:1,statusEffect:'boost',desc:'+50% daño próximo.'},
-      {id:'punto_crit',name:'Punto Crítico',icon:'💥',type:'attack',cost:50,power:90,lvlReq:4,masteryReq:35,statusEffect:null,desc:'Golpe al punto débil.'},
-      {id:'ratio_total',name:'Ratio Total',icon:'⚖️',type:'attack',cost:80,power:130,lvlReq:12,masteryReq:75,statusEffect:null,desc:'Maximiza el ratio.'},
-      {id:'overtime',name:'Hora Extra',icon:'⏰',type:'buff',cost:60,power:0,lvlReq:18,masteryReq:120,statusEffect:'boost',desc:'+30% todos los stats.'},
+      {id:'analisis',   name:'Análisis 7:3',         icon:'🔍',type:'buff',   cost:18, power:0,  masteryReq:1,   statusEffect:'boost',  desc:'Identifica el punto débil. El siguiente ataque hace +60% de daño.'},
+      {id:'punto_crit', name:'Golpe al Punto Débil', icon:'💥',type:'attack', cost:48, power:95, masteryReq:30,  statusEffect:null,     desc:'Ataca directamente la proporción 7:3. Ignora parcialmente la defensa.'},
+      {id:'blade_ext',  name:'Extensión de Hoja',    icon:'⚔️',type:'attack', cost:60, power:110,masteryReq:60,  statusEffect:'bleed',  desc:'Extiende el filo de la EM por el cuerpo del arma. Mayor alcance y daño.'},
+      {id:'ratio_total','name':'Ratio Total',         icon:'⚖️',type:'attack', cost:85, power:140,masteryReq:90,  statusEffect:null,     desc:'Aplica la proporción a todo el cuerpo del enemigo. Máximo daño posible.'},
+      {id:'overtime',   name:'Hora Extra',            icon:'⏰',type:'buff',   cost:65, power:0,  masteryReq:120, statusEffect:'boost',  desc:'Nanami activa su modo fuera de horario. Stats aumentados significativamente.'},
+      {id:'domain_ratio',name:'Mundo sin Salida',    icon:'⬡',type:'domain',  cost:280,power:230,masteryReq:160, statusEffect:'bleed',  desc:'Dominio informal donde el punto débil 7:3 se vuelve ineludible en cada ataque.'},
     ]},
-  transformacion_inactiva:{id:'transformacion_inactiva',name:'Transformación Inactiva',user:'Mahito',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'🧬',desc:'Manipula el alma distorsionando cuerpos.',
+
+  // ── TIER 3: Advanced ──────────────────────────────────────────
+  transformacion_inactiva:{id:'transformacion_inactiva',name:'Transformación Inactiva',user:'Mahito',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'🧬',
+    desc:'Manipula directamente el alma humana para distorsionar y transformar cuerpos. La técnica más aterradora para los hechiceros.',
     evolInto:['maldicion_ilimitada','santuario'],
     evolFrom:['sombras_diez','manipulacion_sangre'],
     skills:[
-      {id:'distorsion',name:'Distorsión Corporal',icon:'💀',type:'attack',cost:40,power:70,lvlReq:1,masteryReq:1,statusEffect:'bleed',desc:'Transforma partes del cuerpo.'},
-      {id:'multiples_almas',name:'Múltiples Almas',icon:'👥',type:'buff',cost:50,power:0,lvlReq:5,masteryReq:30,statusEffect:'boost',desc:'Siguiente ataque garantizado.'},
-      {id:'plenitud',name:'Plenitud Corporal',icon:'🔄',type:'heal',cost:55,power:80,lvlReq:10,masteryReq:70,statusEffect:null,desc:'Remoldea tu cuerpo.'},
-      {id:'soul_mult',name:'Multiplicidad del Alma',icon:'🌀',type:'attack',cost:110,power:150,lvlReq:20,masteryReq:115,statusEffect:'bleed',desc:'Daño masivo de almas.'},
-      {id:'domain_self',name:'Dominio Propio',icon:'⬡',type:'domain',cost:240,power:200,lvlReq:32,masteryReq:160,statusEffect:null,desc:'Tu alma ES el dominio.'},
+      {id:'distorsion',    name:'Distorsión Corporal',icon:'💀',type:'attack', cost:38, power:70, masteryReq:1,   statusEffect:'bleed',  desc:'Transforma una parte del cuerpo del objetivo. Daño y sangrado internos.'},
+      {id:'autoreconf',    name:'Autoreinvención',    icon:'🔄',type:'heal',   cost:40, power:65, masteryReq:25,  statusEffect:null,     desc:'Mahito remodela su propio cuerpo para curarse durante el combate.'},
+      {id:'multiples_almas',name:'Múltiples Almas',  icon:'👥',type:'buff',   cost:55, power:0,  masteryReq:55,  statusEffect:'boost',  desc:'Genera copias del alma para potenciar el siguiente ataque garantizando el daño.'},
+      {id:'plenitud',      name:'Plenitud Corporal',  icon:'🌀',type:'heal',   cost:60, power:90, masteryReq:85,  statusEffect:null,     desc:'Remodela completamente el cuerpo dañado. Restaura HP masivamente.'},
+      {id:'idle_max',      name:'Transfiguración Máxima',icon:'🧟',type:'attack',cost:120,power:170,masteryReq:120,statusEffect:'bleed', desc:'Transforma completamente al objetivo en una criatura distorsionada. Daño extremo.'},
+      {id:'soul_mult',     name:'Multiplicidad del Alma',icon:'💠',type:'attack',cost:140,power:195,masteryReq:150,statusEffect:'bleed', desc:'Ataca directamente al alma. Daño que ignora completamente las defensas físicas.'},
+      {id:'domain_self',   name:'Autoembrión Cerrado',icon:'⬡',type:'domain', cost:280,power:230,masteryReq:190, statusEffect:'bleed',  desc:'El dominio de Mahito. El contacto con cualquier superficie transforma al objetivo.'},
     ]},
-  manipulacion_maldiciones:{id:'manipulacion_maldiciones',name:'Manipulación de Maldiciones',user:'Suguru Geto',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'👁',desc:'Absorbe y controla espíritus malditos.',
+
+  manipulacion_maldiciones:{id:'manipulacion_maldiciones',name:'Manipulación de Maldiciones',user:'Suguru Geto',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'👁',
+    desc:'Absorbe y controla espíritus malditos tragándolos. Puede acumular miles y liberarlos a voluntad. Técnica de los Seis Ojos.',
     evolInto:['maldicion_ilimitada','nube_juguetona'],
     evolFrom:['sombras_diez','proporcion'],
     skills:[
-      {id:'absorcion',name:'Absorción',icon:'⬆️',type:'heal',cost:30,power:45,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Absorbe energía del enemigo.'},
-      {id:'liberation',name:'Liberación Maldita',icon:'💣',type:'attack',cost:65,power:100,lvlReq:4,masteryReq:35,statusEffect:null,desc:'Libera espíritu acumulado.'},
-      {id:'max_uzumaki',name:'Máximo Uzumaki',icon:'🌀',type:'attack',cost:120,power:180,lvlReq:12,masteryReq:80,statusEffect:'poison',desc:'Todos los espíritus explotan.'},
-      {id:'domain_prison',name:'Cárcel de Maldiciones',icon:'⬡',type:'domain',cost:260,power:210,lvlReq:28,masteryReq:130,statusEffect:null,desc:'Cárcel de espíritus.'},
+      {id:'absorcion',   name:'Absorción de Espíritu',icon:'⬆️',type:'heal',  cost:28, power:40, masteryReq:1,   statusEffect:null,     desc:'Absorbe la EM del enemigo para restaurar HP propio.'},
+      {id:'liberation',  name:'Liberación Maldita',  icon:'💣',type:'attack', cost:60, power:100,masteryReq:30,  statusEffect:null,     desc:'Libera espíritus acumulados en forma de explosión concentrada.'},
+      {id:'spellmaster', name:'Marioneta Maldita',    icon:'🎭',type:'debuff', cost:55, power:0,  masteryReq:60,  statusEffect:'paralyze',desc:'Controla brevemente al enemigo mediante un espíritu parásito.'},
+      {id:'max_uzumaki', name:'Máximo Uzumaki',       icon:'🌀',type:'attack', cost:130,power:185,masteryReq:95,  statusEffect:'poison', desc:'Todos los espíritus acumulados explotan simultáneamente. Ataque masivo de área.'},
+      {id:'curse_army',  name:'Ejército Maldito',     icon:'👾',type:'attack', cost:160,power:210,masteryReq:130, statusEffect:'poison', desc:'Invoca a todos los espíritus almacenados en avalancha imparable.'},
+      {id:'domain_prison',name:'Cárcel de Maldiciones',icon:'⬡',type:'domain',cost:290,power:230,masteryReq:170, statusEffect:'poison', desc:'Dominio que atrapa al objetivo entre innumerables espíritus malditos sin escape.'},
     ]},
-  nube_juguetona:{id:'nube_juguetona',name:'Nube Juguetona',user:'Toji Fushiguro',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'⛓️',desc:'Cadena maldita. Pura fuerza física.',
+
+  nube_juguetona:{id:'nube_juguetona',name:'Nube Juguetona',user:'Toji Fushiguro',tier:3,rarity:'Épica',rc:'var(--g1)',emoji:'⛓️',
+    desc:'Arma de cadena maldita que actúa como extensión del cuerpo. El usuario carece de técnica innata pero compensa con fuerza física suprema.',
     evolInto:['santuario'],
     evolFrom:['manipulacion_maldiciones'],
     skills:[
-      {id:'chain_hit',name:'Golpe Encadenado',icon:'⛓️',type:'attack',cost:0,power:52,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Sin coste EM.'},
-      {id:'bind',name:'Ligadura',icon:'🔗',type:'debuff',cost:20,power:25,lvlReq:3,masteryReq:30,statusEffect:'freeze',desc:'Inmoviliza brevemente.'},
-      {id:'triple',name:'Triple Golpe',icon:'💫',type:'attack',cost:45,power:95,lvlReq:8,masteryReq:70,statusEffect:null,desc:'Tres golpes consecutivos.'},
-      {id:'penetrate',name:'Penetrar',icon:'⚡',type:'attack',cost:65,power:130,lvlReq:15,masteryReq:120,statusEffect:null,desc:'Atraviesa defensas.'},
+      {id:'chain_hit',  name:'Golpe Encadenado',     icon:'⛓️',type:'attack', cost:0,  power:55, masteryReq:1,   statusEffect:null,     desc:'Golpe con la cadena maldita. Sin coste de EM gracias a la técnica del usuario.'},
+      {id:'bind',       name:'Ligadura de Cadena',   icon:'🔗',type:'debuff', cost:22, power:28, masteryReq:25,  statusEffect:'freeze',  desc:'Enreda al objetivo con la cadena. Inmovilización completa.'},
+      {id:'triple',     name:'Triple Impacto',       icon:'💫',type:'attack', cost:45, power:98, masteryReq:55,  statusEffect:null,     desc:'Tres golpes en ángulos distintos simultáneamente. Difícil de esquivar.'},
+      {id:'throwing',   name:'Lanzamiento Preciso',  icon:'🎯',type:'attack', cost:55, power:115,masteryReq:82,  statusEffect:'bleed',  desc:'Lanza la cadena con precisión letal. Alta probabilidad de causar sangrado.'},
+      {id:'penetrate',  name:'Penetración Absoluta', icon:'⚡',type:'attack', cost:70, power:145,masteryReq:110, statusEffect:null,     desc:'La cadena rompe cualquier defensa. Daño que penetra barreras de EM.'},
+      {id:'toji_rush',  name:'Asalto del Asesino',   icon:'☠️',type:'attack', cost:110,power:200,masteryReq:140, statusEffect:'bleed',  desc:'El ataque definitivo de Toji. Velocidad e impacto imposibles para un humano normal.'},
     ]},
-  maldicion_ilimitada:{id:'maldicion_ilimitada',name:'Maldición Ilimitada',user:'Satoru Gojo',tier:4,rarity:'Legendaria',rc:'var(--gsp)',emoji:'♾️',desc:'Manipulación absoluta del espacio al infinito.',
+
+  // ── TIER 4: Legendary ─────────────────────────────────────────
+  maldicion_ilimitada:{id:'maldicion_ilimitada',name:'Maldición Ilimitada',user:'Satoru Gojo',tier:4,rarity:'Legendaria',rc:'var(--gsp)',emoji:'♾️',
+    desc:'Manipulación del espacio al infinito mediante los Seis Ojos. La técnica más poderosa conocida. Puede generar repulsión, atracción y convergencia espacial.',
     evolInto:[],
     evolFrom:['transformacion_inactiva','proporcion'],
     skills:[
-      {id:'infinito',name:'Infinito',icon:'🔵',type:'defense',cost:0,power:0,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Barrera pasiva.'},
-      {id:'azul',name:'Azul',icon:'💙',type:'attack',cost:45,power:90,lvlReq:3,masteryReq:40,statusEffect:null,desc:'Atracción espacial.'},
-      {id:'rojo',name:'Rojo',icon:'🔴',type:'attack',cost:60,power:110,lvlReq:8,masteryReq:90,statusEffect:null,desc:'Repulsión violenta.'},
-      {id:'violeta',name:'Técnica Hueca Violeta',icon:'🟣',type:'attack',cost:180,power:300,lvlReq:18,masteryReq:150,statusEffect:null,desc:'Técnica definitiva.'},
-      {id:'domain_infinite',name:'Dominio Infinito',icon:'⬡',type:'domain',cost:280,power:280,lvlReq:30,masteryReq:200,statusEffect:null,desc:'Ataques certeros absolutos.'},
+      {id:'infinito',   name:'Infinito Pasivo',      icon:'🔵',type:'defense',cost:0,  power:0,  masteryReq:1,   statusEffect:null,     desc:'Barrera de infinito pasiva. Ralentiza todo lo que se acerca al usuario hasta el absurdo.'},
+      {id:'azul',       name:'Azul — Atracción',     icon:'💙',type:'attack', cost:45, power:95, masteryReq:35,  statusEffect:null,     desc:'Atracción espacial violenta. Todo converge hacia el punto designado.'},
+      {id:'rojo',       name:'Rojo — Repulsión',     icon:'🔴',type:'attack', cost:60, power:120,masteryReq:75,  statusEffect:null,     desc:'Repulsión espacial explosiva. Todo sale disparado desde el punto de origen.'},
+      {id:'infinito_revelado',name:'Infinito Revelado',icon:'🌀',type:'defense',cost:80,power:0, masteryReq:105, statusEffect:null,     desc:'Activa el infinito visible. Bloquea el siguiente ataque completamente.'},
+      {id:'violeta',    name:'Técnica Hueca Violeta',icon:'🟣',type:'attack', cost:190,power:320,masteryReq:145, statusEffect:null,     desc:'Convergencia de azul y rojo. Borra del espacio-tiempo todo lo que toca.'},
+      {id:'prison_realm_escape',name:'Remodelación Espacial',icon:'💠',type:'attack',cost:160,power:250,masteryReq:175,statusEffect:'bleed',desc:'Colapsa el espacio local. Daño masivo de área que no puede esquivarse.'},
+      {id:'domain_infinite',name:'Dominio Infinito', icon:'⬡',type:'domain', cost:350,power:300,masteryReq:220, statusEffect:null,     desc:'El dominio más perfecto. Ataques con certeza absoluta en una esfera de infinito.'},
     ]},
-  maldicion_volcanica:{id:'maldicion_volcanica',name:'Maldición Volcánica',user:'Jogo',tier:4,rarity:'Legendaria',rc:'var(--gse)',emoji:'🌋',desc:'Control del fuego y el magma.',
+
+  maldicion_volcanica:{id:'maldicion_volcanica',name:'Maldición Volcánica',user:'Jogo',tier:4,rarity:'Legendaria',rc:'var(--gse)',emoji:'🌋',
+    desc:'Control del fuego, magma y calor extremo. Jogo como maldición especial encarna la calamidad volcánica. Técnica destructiva de área.',
     evolInto:[],
     evolFrom:['transformacion_inactiva','nube_juguetona'],
     skills:[
-      {id:'bola_fuego',name:'Bola de Fuego',icon:'🔥',type:'attack',cost:30,power:60,lvlReq:1,masteryReq:1,statusEffect:'burn',desc:'Proyectil de fuego.'},
-      {id:'magma',name:'Magma',icon:'🌋',type:'attack',cost:55,power:90,lvlReq:5,masteryReq:40,statusEffect:'burn',desc:'Daño continuo.'},
-      {id:'volcan',name:'Volcán en Erupción',icon:'💥',type:'attack',cost:100,power:150,lvlReq:12,masteryReq:85,statusEffect:'burn',desc:'Erupción total.'},
-      {id:'domain_vol',name:'Dominio Volcánico',icon:'⬡',type:'domain',cost:250,power:230,lvlReq:28,masteryReq:130,statusEffect:null,desc:'El mundo es volcán.'},
+      {id:'bola_fuego', name:'Bola de Fuego',        icon:'🔥',type:'attack', cost:28, power:62, masteryReq:1,   statusEffect:'burn',   desc:'Proyectil de fuego concentrado. Quemadura garantizada.'},
+      {id:'fuego_meteor',name:'Meteoro de Fuego',    icon:'☄️',type:'attack', cost:48, power:90, masteryReq:25,  statusEffect:'burn',   desc:'Meteoro de magma que cae sobre el objetivo. Área de impacto.'},
+      {id:'magma',      name:'Inundación de Magma',  icon:'🌋',type:'attack', cost:65, power:105,masteryReq:55,  statusEffect:'burn',   desc:'Oleada de magma que cubre el suelo. Daño continuo durante 3 turnos.'},
+      {id:'ash_cloud',  name:'Nube de Ceniza',       icon:'💨',type:'debuff', cost:50, power:0,  masteryReq:80,  statusEffect:'paralyze',desc:'Nube de ceniza volcánica que ciega y sofoca al objetivo. Penaliza sus acciones.'},
+      {id:'volcan',     name:'Erupción Volcánica',   icon:'💥',type:'attack', cost:105,power:160,masteryReq:110, statusEffect:'burn',   desc:'Erupción masiva. El suelo estalla en magma desde múltiples puntos.'},
+      {id:'coffin_iron',name:'Ataúd de Hierro Fundido',icon:'⚰️',type:'attack',cost:170,power:250,masteryReq:150,statusEffect:'burn',  desc:'Encierra al objetivo en hierro fundido a miles de grados. Devastador.'},
+      {id:'domain_vol', name:'Dominio del Volcán',   icon:'⬡',type:'domain', cost:320,power:270,masteryReq:190, statusEffect:'burn',   desc:'El mundo se vuelve volcán. Todo el campo es lava. Daño de quemadura inevitable por turno.'},
     ]},
-  santuario:{id:'santuario',name:'Santuario',user:'Ryomen Sukuna',tier:4,rarity:'Legendaria',rc:'var(--gsp)',emoji:'👹',desc:'Técnica del Rey. Desmantelar y Hender.',
+
+  santuario:{id:'santuario',name:'Santuario',user:'Ryomen Sukuna',tier:4,rarity:'Legendaria',rc:'var(--gsp)',emoji:'👹',
+    desc:'La técnica innata del Rey de las Maldiciones. Desmantelar desgasta todo. Hender corta todo. Control absoluto del espacio con katana de EM.',
     evolInto:[],
     evolFrom:['transformacion_inactiva','nube_juguetona'],
     skills:[
-      {id:'desmantelar',name:'Desmantelar',icon:'⚔️',type:'attack',cost:35,power:70,lvlReq:1,masteryReq:1,statusEffect:null,desc:'Corte invisible.'},
-      {id:'hender',name:'Hender',icon:'🔥',type:'attack',cost:55,power:100,lvlReq:6,masteryReq:35,statusEffect:null,desc:'Ignora defensa.'},
-      {id:'inv_sukuna',name:'Técnica Inversa',icon:'💚',type:'heal',cost:50,power:120,lvlReq:12,masteryReq:75,statusEffect:null,desc:'Cura con EM invertida.'},
-      {id:'lluvia_cortes',name:'Lluvia de Cortes',icon:'🌪️',type:'attack',cost:90,power:140,lvlReq:14,masteryReq:120,statusEffect:'bleed',desc:'Cortes en todos los ángulos.'},
-      {id:'domain_sukuna',name:'Altar del Conquistador',icon:'⬡',type:'domain',cost:320,power:320,lvlReq:40,masteryReq:180,statusEffect:null,desc:'El dominio del Rey.'},
+      {id:'desmantelar',name:'Desmantelar',          icon:'⚔️',type:'attack', cost:32, power:72, masteryReq:1,   statusEffect:null,     desc:'Corte invisible que desgasta y destruye. Sin límite de alcance en radio.'},
+      {id:'hender',     name:'Hender',               icon:'🔥',type:'attack', cost:55, power:110,masteryReq:30,  statusEffect:null,     desc:'Corte que todo lo parte. Ignora defensa. La técnica característica de Sukuna.'},
+      {id:'inv_sukuna', name:'Técnica Inversa',      icon:'💚',type:'heal',   cost:50, power:130,masteryReq:65,  statusEffect:null,     desc:'Invierte la EM maldita para curar. Regenera HP masivamente.'},
+      {id:'extension_technique',name:'Extensión de Técnica',icon:'🌐',type:'buff',cost:70,power:0,masteryReq:95,statusEffect:'boost',  desc:'Extiende el alcance de Desmantelar y Hender al área completa. Todo el campo de batalla.'},
+      {id:'lluvia_cortes',name:'Lluvia de Cortes',   icon:'🌪️',type:'attack', cost:95, power:150,masteryReq:125, statusEffect:'bleed',  desc:'Múltiples Desmantelar y Hender en todos los ángulos. Imposible esquivar.'},
+      {id:'grazed',     name:'Katana de EM Pura',    icon:'💎',type:'attack', cost:130,power:200,masteryReq:160, statusEffect:'bleed',  desc:'Sukuna materializa su katana de energía maldita pura. Daño colosal.'},
+      {id:'domain_sukuna',name:'Altar del Conquistador',icon:'⬡',type:'domain',cost:380,power:360,masteryReq:200,statusEffect:'bleed', desc:'El dominio del Rey. Desmantelar y Hender inevitables en toda el área. Nadie sobrevive.'},
     ]},
 };
+
+
 
 // ═══════════════════════════════════════════════════════
 // CITIES & ZONES — re-mapped to new 8-tier grade system
@@ -972,45 +1113,464 @@ const CITIES={
     ]},
 };
 
+
 // ═══════════════════════════════════════════════════════
-// ENEMIES PER ZONE-ID
+// CURSE CATALOG — Por grado, con habilidades propias
+// Cada enemigo tiene:
+//   grade: grado de la maldición
+//   skills: array de habilidades que puede usar en su turno
+//     { name, power, statusEffect, msg, cost } — cost=% de hp propio que pierde (0=gratis)
+//   sa: estado que puede aplicar con ataque básico (legado, usado si no skills)
+//   innate: nombre de técnica innata (grado 1 y especial)
+//   inversa: true = puede curarse con energía inversa (solo grado especial)
+//   domain: objeto de dominio (solo grado especial)
 // ═══════════════════════════════════════════════════════
-const ENEMIES={
-  training:[{name:'Shikigami de Entrenamiento',hp:35,maxHp:35,atk:4,def:0,xp:10,em:5,emoji:'🥋',tags:['ENTRENAMIENTO'],sa:[]}],
-  shibuya:[
-    {name:'Maldición Grado 3',hp:120,maxHp:120,atk:20,def:6,xp:70,em:30,emoji:'👺',tags:['GRADO 3'],sa:['bleed']},
-    {name:'Espíritu Corrupto',hp:100,maxHp:100,atk:17,def:4,xp:60,em:25,emoji:'🔮',tags:['ESPIRITU'],sa:['poison']},
-    {name:'Maldición Flamígera',hp:140,maxHp:140,atk:28,def:9,xp:90,em:40,emoji:'🔥',tags:['FUEGO'],sa:['burn']},
-  ],
-  shinjuku:[
-    {name:'Maldición Urbana',hp:90,maxHp:90,atk:16,def:5,xp:55,em:22,emoji:'🏙',tags:['URBANA'],sa:['bleed']},
-    {name:'Entidad Maldita',hp:110,maxHp:110,atk:19,def:7,xp:65,em:28,emoji:'💀',tags:['ENTIDAD'],sa:['paralyze']},
-  ],
-  akihabara:[{name:'Maldición Tecnológica',hp:80,maxHp:80,atk:15,def:4,xp:50,em:20,emoji:'⚡',tags:['TECH'],sa:['paralyze']}],
-  harajuku:[
-    {name:'Maldición Grado 2',hp:200,maxHp:200,atk:38,def:14,xp:130,em:60,emoji:'🌑',tags:['GRADO 2'],sa:['bleed','poison']},
-    {name:'Entidad Ancestral',hp:180,maxHp:180,atk:32,def:16,xp:110,em:55,emoji:'👁',tags:['ANCESTRAL'],sa:['freeze']},
-  ],
-  roppongi:[{name:'Maldición Grado 1',hp:280,maxHp:280,atk:52,def:18,xp:200,em:90,emoji:'💎',tags:['GRADO 1'],sa:['bleed','burn','paralyze']}],
-  kyoto_gion:[{name:'Demonio de Gion',hp:160,maxHp:160,atk:30,def:12,xp:100,em:45,emoji:'⛩',tags:['DEMONIO'],sa:['poison','bleed']}],
-  kyoto_arashiyama:[{name:'Espíritu del Bosque',hp:90,maxHp:90,atk:18,def:9,xp:58,em:24,emoji:'🌿',tags:['ESPIRITU'],sa:['poison']}],
-  kyoto_fushimi:[{name:'Espíritu del Zorro',hp:130,maxHp:130,atk:24,def:11,xp:85,em:38,emoji:'🦊',tags:['ESPIRITU','SAGRADO'],sa:['paralyze']}],
-  osaka_namba:[{name:'Maldición de Namba',hp:140,maxHp:140,atk:26,def:10,xp:85,em:38,emoji:'🌃',tags:['MALDICION'],sa:['bleed']}],
-  osaka_umeda:[{name:'Espíritu Nocturno',hp:100,maxHp:100,atk:19,def:7,xp:62,em:27,emoji:'🌙',tags:['ESPIRITU'],sa:['freeze']}],
-  osaka_dotonbori:[{name:'Entidad del Canal',hp:180,maxHp:180,atk:35,def:13,xp:115,em:52,emoji:'🌊',tags:['ENTIDAD','AGUA'],sa:['freeze','poison']}],
-  sendai:[{name:'Maldición del Norte',hp:120,maxHp:120,atk:22,def:8,xp:75,em:32,emoji:'🏔',tags:['NORTE'],sa:['freeze']}],
-  sendai_matsushima:[{name:'Entidad Marina',hp:150,maxHp:150,atk:28,def:11,xp:95,em:44,emoji:'🌊',tags:['MARINA'],sa:['poison','freeze']}],
-  sapporo:[{name:'Maldición Gélida',hp:80,maxHp:80,atk:14,def:8,xp:48,em:20,emoji:'❄️',tags:['HIELO'],sa:['freeze']}],
-  sapporo_wild:[{name:'Bestia del Bosque',hp:95,maxHp:95,atk:18,def:10,xp:58,em:24,emoji:'🐺',tags:['BESTIA'],sa:['bleed']}],
-  hiroshima:[{name:'Alma sin Descanso',hp:150,maxHp:150,atk:28,def:11,xp:95,em:42,emoji:'🌸',tags:['ALMA'],sa:['bleed']}],
-  hiroshima_miyajima:[{name:'Espíritu del Torii',hp:200,maxHp:200,atk:38,def:16,xp:130,em:58,emoji:'⛩',tags:['SAGRADO','CORRUPTO'],sa:['bleed','paralyze']}],
-  fukuoka:[{name:'Espíritu Mercader',hp:110,maxHp:110,atk:20,def:7,xp:68,em:30,emoji:'⚓',tags:['ESPIRITU'],sa:['paralyze']}],
-  fukuoka_hakata:[{name:'Entidad Portuaria',hp:140,maxHp:140,atk:26,def:9,xp:88,em:40,emoji:'🚢',tags:['MARINA'],sa:['poison']}],
-  // Cursed Users (for mission type 'curse')
-  user_basic:[{name:'Usuario Maldito Renegado',hp:160,maxHp:160,atk:32,def:12,xp:120,em:55,emoji:'🧙',tags:['USUARIO','MALDITO'],sa:['bleed'],isCurseUser:true}],
-  user_mid:[{name:'Hechicero Caído — Grado 2',hp:240,maxHp:240,atk:48,def:18,xp:180,em:80,emoji:'⚔️',tags:['HECHICERO','ENEMIGO'],sa:['burn','bleed'],isCurseUser:true}],
-  user_elite:[{name:'Hechicero Especial Enemigo',hp:380,maxHp:380,atk:70,def:24,xp:280,em:120,emoji:'💀',tags:['ESPECIAL','ENEMIGO'],sa:['bleed','poison','burn'],isCurseUser:true}],
+
+// Helper: build enemy skill
+function es(name,power,statusEffect,msg){return {name,power,statusEffect,msg};}
+
+const CURSE_CATALOG={
+
+// ── GRADO 5 ─────────────────────────────────────────────
+// Maldiciones simples, sin técnica. Puro instinto y fuerza bruta.
+grade5:[
+  {id:'cg5_limo',name:'Maldición Viscosa',grade:5,emoji:'🟢',
+   hp:55,maxHp:55,atk:8,def:0,xp:12,em:6,
+   desc:'Masa amorfa de energía maldita corrompida. Sin inteligencia aparente.',
+   tags:['G-5','AMORFA'],
+   skills:[es('Golpe Viscoso',10,null,'¡La masa te golpea torpemente!')],
+   sa:[]},
+
+  {id:'cg5_sombra',name:'Sombra Maldita Menor',grade:5,emoji:'👤',
+   hp:45,maxHp:45,atk:7,def:0,xp:10,em:5,
+   desc:'Sombra sin forma que acecha en rincones oscuros.',
+   tags:['G-5','SOMBRA'],
+   skills:[es('Abrazo Oscuro',8,'bleed','¡La sombra te envuelve y araña!')],
+   sa:['bleed']},
+
+  {id:'cg5_rata',name:'Rata Maldita',grade:5,emoji:'🐀',
+   hp:38,maxHp:38,atk:6,def:0,xp:8,em:4,
+   desc:'Roedor impregnado de energía maldita. Muerde en horda.',
+   tags:['G-5','BESTIA'],
+   skills:[es('Mordisco Maldito',7,'bleed','¡La rata te muerde y sangras!')],
+   sa:['bleed']},
+
+  {id:'cg5_llama',name:'Llama Errante',grade:5,emoji:'🔥',
+   hp:42,maxHp:42,atk:9,def:0,xp:11,em:5,
+   desc:'Fuego de EM sin control que vaga por zonas infestadas.',
+   tags:['G-5','FUEGO'],
+   skills:[es('Chispazo',9,'burn','¡La llama te chamusca!')],
+   sa:['burn']},
+
+  {id:'cg5_espanto',name:'Espanto Etéreo',grade:5,emoji:'👻',
+   hp:40,maxHp:40,atk:7,def:1,xp:10,em:5,
+   desc:'Presencia que aterroriza. Paraliza con un aullido.',
+   tags:['G-5','ETÉREO'],
+   skills:[es('Aullido Aterrador',0,'paralyze','¡Un aullido penetrante te paraliza!')],
+   sa:['paralyze']},
+],
+
+// ── GRADO 4 ─────────────────────────────────────────────
+// Ya tienen rudimentos de habilidades. Más resistentes.
+grade4:[
+  {id:'cg4_guerrero',name:'Guerrero Maldito',grade:4,emoji:'💀',
+   hp:90,maxHp:90,atk:14,def:3,xp:45,em:18,
+   desc:'Maldición con forma humanoide y agresividad táctica básica.',
+   tags:['G-4','HUMANOIDE'],
+   skills:[
+     es('Puño Maldito',16,null,'¡El guerrero descarga un puñetazo maldito!'),
+     es('Acometida',20,'bleed','¡El guerrero te embiste causando sangrado!'),
+   ],
+   sa:['bleed']},
+
+  {id:'cg4_bestia',name:'Bestia de las Nieves',grade:4,emoji:'🐺',
+   hp:100,maxHp:100,atk:15,def:4,xp:50,em:20,
+   desc:'Criatura maldita adaptada al frío extremo. Cazadora nata.',
+   tags:['G-4','BESTIA','HIELO'],
+   skills:[
+     es('Zarpazo Gélido',14,'freeze','¡Las garras heladas ralentizan tus movimientos!'),
+     es('Mordisco Feroz',18,'bleed','¡La bestia te muerde ferozmente!'),
+   ],
+   sa:['freeze','bleed']},
+
+  {id:'cg4_espiritu_agua',name:'Espíritu Fluvial',grade:4,emoji:'💧',
+   hp:85,maxHp:85,atk:13,def:5,xp:42,em:17,
+   desc:'Espíritu del agua que controla corrientes para inmovilizar.',
+   tags:['G-4','ESPIRITU','AGUA'],
+   skills:[
+     es('Corriente Arrastadora',12,'freeze','¡La corriente te arrastra e inmoviliza!'),
+     es('Chorro a Presión',16,null,'¡Un chorro de agua maldita te golpea con fuerza!'),
+   ],
+   sa:['freeze']},
+
+  {id:'cg4_toxina',name:'Maldición Toxina',grade:4,emoji:'☠️',
+   hp:78,maxHp:78,atk:11,def:3,xp:40,em:16,
+   desc:'Segrega veneno maldito por su cuerpo gelatinoso.',
+   tags:['G-4','TOXINA'],
+   skills:[
+     es('Nube Venenosa',0,'poison','¡Libera una nube de veneno maldito!'),
+     es('Escupitajo Tóxico',12,'poison','¡El veneno penetra en tus heridas!'),
+   ],
+   sa:['poison']},
+
+  {id:'cg4_arbóreo',name:'Espíritu Arbóreo',grade:4,emoji:'🌲',
+   hp:110,maxHp:110,atk:16,def:6,xp:55,em:22,
+   desc:'Maldición que controla la naturaleza y el crecimiento vegetal.',
+   tags:['G-4','NATURALEZA'],
+   skills:[
+     es('Raíces Aprisionantes',0,'freeze','¡Las raíces te atrapan los pies!'),
+     es('Golpe de Rama',18,null,'¡Una rama enorme te golpea!'),
+     es('Espinas Malditas',14,'bleed','¡Las espinas te desgarran!'),
+   ],
+   sa:['freeze','bleed']},
+],
+
+// ── GRADO 3 ─────────────────────────────────────────────
+// Inteligencia básica. Usan varias habilidades estratégicamente.
+grade3:[
+  {id:'cg3_cazador',name:'Cazador Maldito',grade:3,emoji:'🎯',
+   hp:145,maxHp:145,atk:22,def:7,xp:80,em:35,
+   desc:'Maldición que acecha y espera el momento para atacar con precisión.',
+   tags:['G-3','CAZADOR'],
+   skills:[
+     es('Ataque Certero',25,'bleed','¡El cazador te alcanza en un punto vital!'),
+     es('Emboscada',28,null,'¡Sale de las sombras y te golpea por sorpresa!'),
+     es('Red Maldita',0,'paralyze','¡Una red de EM te deja inmovilizado!'),
+   ],
+   sa:['bleed','paralyze']},
+
+  {id:'cg3_llamas',name:'Espíritu de las Llamas',grade:3,emoji:'🔥',
+   hp:135,maxHp:135,atk:24,def:6,xp:85,em:38,
+   desc:'Encarna el fuego destructivo. Arde sin extinguirse.',
+   tags:['G-3','FUEGO'],
+   skills:[
+     es('Llamarada',26,'burn','¡El espíritu exhala una llamarada que te abrasa!'),
+     es('Explosión de EM',30,null,'¡Libera energía explosiva en todas las direcciones!'),
+     es('Manto Íg neo',0,'boost','¡El espíritu se rodea de llamas, potenciándose!'),
+   ],
+   sa:['burn']},
+
+  {id:'cg3_sombra_alta',name:'Sombra Absorbente',grade:3,emoji:'🌑',
+   hp:150,maxHp:150,atk:20,def:9,xp:78,em:34,
+   desc:'Absorbe la energía maldita del entorno para regenerarse lentamente.',
+   tags:['G-3','SOMBRA'],
+   skills:[
+     es('Drenaje de EM',15,null,'¡La sombra absorbe parte de tu energía!'),
+     es('Tentáculos Oscuros',22,'bleed','¡Tentáculos oscuros te golpean desde múltiples ángulos!'),
+     es('Velo de Oscuridad',0,'paralyze','¡Un velo oscuro te envuelve y paraliza!'),
+   ],
+   sa:['bleed','paralyze']},
+
+  {id:'cg3_acuático',name:'Entidad Marina Grado 3',grade:3,emoji:'🌊',
+   hp:160,maxHp:160,atk:26,def:8,xp:92,em:42,
+   desc:'Entidad del mar profundo. Controla el agua con destreza.',
+   tags:['G-3','MARINA'],
+   skills:[
+     es('Tifón Maldito',28,'freeze','¡Un remolino de agua helada te congela!'),
+     es('Presión Abisal',32,null,'¡La presión del fondo oceánico te aplasta!'),
+     es('Veneno de las Profundidades',0,'poison','¡Segrega toxinas del fondo marino!'),
+   ],
+   sa:['freeze','poison']},
+
+  {id:'cg3_demonio',name:'Demonio Folclórico',grade:3,emoji:'👹',
+   hp:170,maxHp:170,atk:28,def:10,xp:100,em:46,
+   desc:'Espíritu de la tradición folclórica japonesa corrompido por la EM.',
+   tags:['G-3','DEMONIO','FOLCLORE'],
+   skills:[
+     es('Maza de Hierro',32,'bleed','¡El demonio te golpea con su maza maldita!'),
+     es('Rugido Aterrador',0,'paralyze','¡Su rugido te paraliza de miedo!'),
+     es('Fuerza Demoníaca',0,'boost','¡El demonio canaliza su poder ancestral!'),
+     es('Zarpazo',25,'bleed','¡Sus garras te desgarran!'),
+   ],
+   sa:['bleed','paralyze']},
+],
+
+// ── GRADO 2 ─────────────────────────────────────────────
+// Inteligencia táctica. Rudimentos de técnica. Más variedad de habilidades.
+grade2:[
+  {id:'cg2_hanabi',name:'Hanabi — Espíritu del Fuego',grade:2,emoji:'💥',
+   hp:210,maxHp:210,atk:35,def:12,xp:130,em:58,
+   innate:'Técnica del Fuego Maldito',
+   desc:'Espíritu de grado 2 con control elemental del fuego. Técnica innata rudimentaria.',
+   tags:['G-2','FUEGO','TÉCNICA'],
+   skills:[
+     es('Detonación Maldita',38,'burn','¡Hanabi detona energía ardiente directamente!'),
+     es('Cortina de Llamas',32,'burn','¡Una cortina de fuego maldito avanza!'),
+     es('Explosión Puntual',45,null,'¡Concentra toda su EM en un punto y detona!'),
+     es('Ardor Interno',0,'boost','¡Hanabi se potencia con su fuego interno!'),
+   ],
+   sa:['burn']},
+
+  {id:'cg2_kōri',name:'Kōri — Señor del Hielo',grade:2,emoji:'🧊',
+   hp:220,maxHp:220,atk:33,def:15,xp:125,em:56,
+   innate:'Manipulación Criónica',
+   desc:'Controla el hielo a nivel molecular. Puede congelar la EM en el aire.',
+   tags:['G-2','HIELO','TÉCNICA'],
+   skills:[
+     es('Lanza de Hielo',36,'freeze','¡Dispara una lanza de hielo puro a gran velocidad!'),
+     es('Tormenta Glacial',30,'freeze','¡La tormenta de hielo cubre todo el campo!'),
+     es('Armadura de Hielo',0,null,'¡Se envuelve en hielo reducieno el daño!')  ,
+     es('Avalancha',42,'freeze','¡Una avalancha de bloques malditos cae sobre ti!'),
+   ],
+   sa:['freeze']},
+
+  {id:'cg2_venenoso',name:'Uzumaki — Espíritu Venenoso',grade:2,emoji:'🐍',
+   hp:195,maxHp:195,atk:30,def:11,xp:120,em:54,
+   innate:'Síntesis de Veneno Maldito',
+   desc:'Sintetiza venenos malditos de diferentes potencias y efectos.',
+   tags:['G-2','VENENO','TÉCNICA'],
+   skills:[
+     es('Veneno Paralizante',0,'paralyze','¡El veneno ralentiza tu sistema nervioso!'),
+     es('Veneno Corrosivo',28,'poison','¡El veneno corroe tus defensas desde dentro!'),
+     es('Nube Tóxica Masiva',20,'poison','¡Libera una nube que envenena todo el campo!'),
+     es('Aguijón Preciso',35,'bleed','¡El aguijón perfora con precisión quirúrgica!'),
+   ],
+   sa:['poison','paralyze']},
+
+  {id:'cg2_sombra_mayor',name:'Gran Sombra Devoratodo',grade:2,emoji:'🌑',
+   hp:240,maxHp:240,atk:38,def:13,xp:135,em:60,
+   innate:'Devoración de Alma',
+   desc:'Una gran sombra que consume todo lo que toca, incluyendo la EM del oponente.',
+   tags:['G-2','SOMBRA','TÉCNICA'],
+   skills:[
+     es('Absorción de EM',0,null,'¡La sombra absorbe tu energía maldita!'),
+     es('Forma Tentacular',35,'bleed','¡Múltiples tentáculos oscuros te atacan!'),
+     es('Velo del Vacío',0,'freeze','¡Te rodea un velo que detiene tu movimiento!'),
+     es('Devoración',42,null,'¡Intenta consumirte por completo!'),
+   ],
+   sa:['bleed','freeze']},
+],
+
+// ── SEMI-GRADO 1 ─────────────────────────────────────────
+// Técnicas innatas desarrolladas. Usan energía maldita tácticamente.
+semigrade1:[
+  {id:'csg1_volcánico',name:'Gozu — Espíritu Volcánico',grade:'sg1',emoji:'🌋',
+   hp:320,maxHp:320,atk:52,def:18,xp:220,em:90,
+   innate:'Llama de la Tierra',
+   desc:'Encarna la calamidad volcánica. Semi-grado 1 con técnica de fuego avanzada.',
+   tags:['SG-1','FUEGO','CALAMIDAD'],
+   skills:[
+     es('Lluvia de Meteoritos',55,'burn','¡Fragmentos de magma llueven sobre ti!'),
+     es('Erupción Localizada',60,null,'¡El suelo bajo tus pies hace erupción!'),
+     es('Manto Magmático',0,'boost','¡Se recubre de magma, potenciando sus ataques!'),
+     es('Columna de Magma',65,'burn','¡Una columna de magma surge desde el suelo!'),
+   ],
+   sa:['burn']},
+
+  {id:'csg1_marino',name:'Ryūsui — Señor del Mar',grade:'sg1',emoji:'🌊',
+   hp:300,maxHp:300,atk:48,def:20,xp:200,em:85,
+   innate:'Dominio Acuático',
+   desc:'Controla el agua a nivel de técnica innata. Puede crear prisiones de agua.',
+   tags:['SG-1','AGUA','TÉCNICA'],
+   skills:[
+     es('Prisión de Agua',0,'freeze','¡Crea una esfera de agua que te atrapa!'),
+     es('Corriente Destructora',52,'bleed','¡Una corriente con presión bestial te golpea!'),
+     es('Torbellino',48,'freeze','¡Un torbellino de agua maldita te arrastra!'),
+     es('Veneno del Mar',40,'poison','¡Inyecta el veneno del fondo marino!'),
+   ],
+   sa:['freeze','poison']},
+
+  {id:'csg1_oscuro',name:'Kuroshio — Marea Oscura',grade:'sg1',emoji:'⬛',
+   hp:340,maxHp:340,atk:55,def:16,xp:230,em:95,
+   innate:'Manipulación de Sombras',
+   desc:'Controla la oscuridad como técnica innata. Puede negar la visión del oponente.',
+   tags:['SG-1','SOMBRA','TÉCNICA'],
+   skills:[
+     es('Lanzadera de Sombra',55,'paralyze','¡Una lanza de oscuridad pura te perfora!'),
+     es('Ceguera Maldita',0,'paralyze','¡La oscuridad niega completamente tu visión!'),
+     es('Golpe Desde la Oscuridad',62,null,'¡Aparece desde las sombras con fuerza total!'),
+     es('Armadura de Oscuridad',0,'boost','¡La oscuridad le hace más resistente!'),
+   ],
+   sa:['paralyze']},
+],
+
+// ── GRADO 1 ─────────────────────────────────────────────
+// Técnicas innatas plenas. Energía inversa rudimentaria. Gran variedad.
+grade1:[
+  {id:'cg1_jishin',name:'Jishin — Espíritu Sísmico',grade:1,emoji:'⚡',
+   hp:420,maxHp:420,atk:68,def:22,xp:320,em:130,
+   innate:'Resonancia Sísmica',
+   desc:'Grado 1. Controla las vibraciones y terremotos a través de la EM.',
+   tags:['G-1','TIERRA','VIBRACIÓN'],
+   skills:[
+     es('Terremoto Maldito',70,'paralyze','¡El suelo vibra con una frecuencia que paraliza!'),
+     es('Ondas de Choque',65,null,'¡Libera ondas sísmicas de EM expansivas!'),
+     es('Fisura Abisal',75,'bleed','¡El suelo se abre bajo tus pies!'),
+     es('Resonancia Interna',0,'boost','¡Las vibraciones potencian su EM interna!'),
+     es('Pulso Sísmico',60,'freeze','¡Un pulso vibra a la frecuencia que congela!'),
+   ],
+   sa:['paralyze','bleed']},
+
+  {id:'cg1_viento',name:'Kazegami — Dios del Viento',grade:1,emoji:'🌪️',
+   hp:400,maxHp:400,atk:65,def:20,xp:300,em:125,
+   innate:'Control del Aliento Maldito',
+   desc:'Manipula el viento con EM. Velocidad extrema y cortes de aire invisibles.',
+   tags:['G-1','VIENTO','VELOCIDAD'],
+   skills:[
+     es('Cuchilla de Viento',68,'bleed','¡Un corte de aire maldito invisible te alcanza!'),
+     es('Tornado Maldito',72,null,'¡Un tornado de EM te envuelve!'),
+     es('Ráfaga Letal',65,'bleed','¡Múltiples cuchillas de aire simultáneas!'),
+     es('Velocidad del Viento',0,'boost','¡Se mueve a velocidad del viento, esquivando!'),
+     es('Vacío de Aire',0,'paralyze','¡Elimina el aire de tu zona, asfixiándote!'),
+   ],
+   sa:['bleed']},
+
+  {id:'cg1_sangre',name:'Ketsueki — Demonio de la Sangre',grade:1,emoji:'🩸',
+   hp:450,maxHp:450,atk:70,def:18,xp:340,em:140,
+   innate:'Manipulación de Sangre Avanzada',
+   desc:'Controla la sangre con maestría. Puede usar la sangre del enemigo contra él.',
+   tags:['G-1','SANGRE','TÉCNICA'],
+   skills:[
+     es('Sangre Perforadora',72,'bleed','¡Proyectiles de sangre solidificada a velocidad bala!'),
+     es('Coagulación Forzada',0,'freeze','¡Coagula tu sangre, ralentizándote!'),
+     es('Hemorragia Interna',65,'bleed','¡Causa sangrado desde adentro!'),
+     es('Lluvia de Sangre',68,'bleed','¡Una lluvia de sangre maldita cae sobre ti!'),
+     es('Supernova Carmesí',80,null,'¡Explota sangre acumulada en un punto!'),
+   ],
+   sa:['bleed','poison'],
+   inversa:true},
+
+  {id:'cg1_miko',name:'Miko — Sacerdotisa Corrupta',grade:1,emoji:'⛩️',
+   hp:380,maxHp:380,atk:62,def:24,xp:290,em:120,
+   innate:'Purificación Inversa',
+   desc:'Sacerdotisa cuya técnica sagrada se corrompió. Usa energía inversa para atacar.',
+   tags:['G-1','SAGRADO','INVERSA'],
+   skills:[
+     es('Purificación Maldita',65,'bleed','¡Su purificación corrupta quema tu EM!'),
+     es('Energía Inversa',0,null,'¡Usa energía inversa para curarse! (+40 HP)'),
+     es('Sello Maldito',0,'paralyze','¡Un sello espiritual te paraliza!'),
+     es('Ola Sagrada Corrompida',70,'burn','¡Una ola de energía sagrada corrupta te abrasa!'),
+   ],
+   sa:['burn','paralyze'],
+   inversa:true},
+],
+
+// ── SEMI-GRADO ESPECIAL ────────────────────────────────
+// Técnicas innatas completas. Energía inversa. Dominios rudimentarios.
+semispecial:[
+  {id:'css_hanami_prime',name:'Hanami — Espíritu de la Naturaleza',grade:'semi',emoji:'🌸',
+   hp:650,maxHp:650,atk:90,def:28,xp:580,em:220,
+   innate:'Técnica de la Naturaleza',
+   desc:'Espíritu de semi-grado especial que encarna la naturaleza primordial maldita.',
+   tags:['SEMI-ESP','NATURALEZA','DOMINIO'],
+   skills:[
+     es('Flores del Infierno',88,'burn','¡Flores de EM explosiva brotan de la tierra!'),
+     es('Árbol del Fin del Mundo',95,null,'¡Una raíz colosal atraviesa el campo!'),
+     es('Absorción de Agua',0,null,'¡Absorbe el agua del entorno para recuperarse!'),
+     es('Ramas Aprisionantes',0,'freeze','¡Ramas malditas te atrapan completamente!'),
+     es('Espinas Eternas',85,'bleed','¡Miles de espinas malditas te atraviesan!'),
+   ],
+   domain:{name:'Bosque de las Flores Malditas',power:180,statusEffect:'burn',
+     desc:'El campo se llena de flores que estallan. Daño de quemadura en cada turno.'},
+   sa:['burn','freeze'],
+   inversa:false},
+
+  {id:'css_dagon',name:'Dagon — Entidad del Mar Profundo',grade:'semi',emoji:'🌊',
+   hp:700,maxHp:700,atk:88,def:30,xp:620,em:240,
+   innate:'Técnica de los Peces Malditos',
+   desc:'Espíritu del mar profundo. Evolved desde maldición menor hasta semi-especial.',
+   tags:['SEMI-ESP','MAR','PECES'],
+   skills:[
+     es('Lluvia de Peces Malditos',85,'bleed','¡Miles de peces malditos llueven!'),
+     es('Técnica de los Peces: Diluvio',95,'freeze','¡Un diluvio de criaturas marinas cae!'),
+     es('Presión Abisal Infinita',100,null,'¡La presión del fondo marino aplasta todo!'),
+     es('Regeneración Marina',0,null,'¡El agua lo regenera! (+60 HP)'),
+     es('Tentáculos Profundos',90,'bleed','¡Tentáculos del fondo marino emergen!'),
+   ],
+   domain:{name:'Penitenciario de las Almas Acuáticas',power:200,statusEffect:'freeze',
+     desc:'El campo se inunda. Ataques de criaturas marinas inevitables por turno.'},
+   sa:['bleed','freeze'],
+   inversa:true},
+],
+
+// ── GRADO ESPECIAL ──────────────────────────────────────
+// Técnica innata maldita compleja. Energía inversa. Dominio expandido.
+// Múltiples fases. Son las maldiciones más poderosas de la humanidad.
+special:[
+  {id:'csp_mahito',name:'Mahito',grade:'special',emoji:'🧬',
+   hp:950,maxHp:950,atk:120,def:35,xp:900,em:350,
+   innate:'Transformación Inactiva',
+   desc:'Espíritu especial. Manipula directamente el alma. Su toque transforma irreversiblemente.',
+   tags:['ESP','ALMA','TÉCNICA INNATA'],
+   skills:[
+     es('Distorsión del Alma',110,'bleed','¡Mahito toca tu alma y la distorsiona!'),
+     es('Multiplicidad del Alma',125,null,'¡Genera copias para atacar desde múltiples ángulos!'),
+     es('Transfiguración Corporal',130,'bleed','¡Transforma parte de tu cuerpo!'),
+     es('Expansión de Forma',0,'boost','¡Mahito remodela su cuerpo para potenciarse!'),
+     es('Plenitud Corporal',0,null,'¡Usa Plenitud Corporal para curarse! (+80 HP)'),
+   ],
+   domain:{name:'Autoembrión Cerrado',power:250,statusEffect:'bleed',
+     desc:'Todo el campo es el alma de Mahito. Cualquier contacto transforma al objetivo.'},
+   sa:['bleed'],
+   inversa:false},
+
+  {id:'csp_jogo',name:'Jogo',grade:'special',emoji:'🌋',
+   hp:900,maxHp:900,atk:115,def:32,xp:850,em:330,
+   innate:'Maldición Volcánica',
+   desc:'Espíritu volcánico especial. Encarna la calamidad del fuego. Rival de Gojo.',
+   tags:['ESP','FUEGO','CALAMIDAD'],
+   skills:[
+     es('Meteoros de Magma',115,'burn','¡Lluvia de meteoritos ardientes!'),
+     es('Ataúd de Hierro Fundido',130,null,'¡Te encierra en hierro fundido!'),
+     es('Erupción Total',125,'burn','¡El suelo completo hace erupción!'),
+     es('Absorción de Calor',0,'boost','¡Absorbe el calor ambiente para potenciarse!'),
+     es('Recuperación Ígnea',0,null,'¡El fuego lo regenera! (+70 HP)'),
+   ],
+   domain:{name:'Caja de Hierro Candente',power:270,statusEffect:'burn',
+     desc:'El campo se vuelve un horno. Daño de quemadura masivo cada turno.'},
+   sa:['burn'],
+   inversa:false},
+
+  {id:'csp_kenjaku',name:'Kenjaku',grade:'special',emoji:'🧠',
+   hp:1100,maxHp:1100,atk:130,def:40,xp:1100,em:420,
+   innate:'Almacenamiento de Técnicas',
+   desc:'Ser inmortal que lleva milenios. Puede copiar y usar las técnicas de otros cerebros.',
+   tags:['ESP','INMORTAL','COPIA'],
+   skills:[
+     es('Copia de Técnica: Llamas',120,'burn','¡Imita la técnica de fuego!'),
+     es('Copia de Técnica: Sangre',125,'bleed','¡Imita la manipulación de sangre!'),
+     es('Copia de Técnica: Veneno',0,'poison','¡Imita la síntesis de veneno!'),
+     es('Energía Inversa Robada',0,null,'¡Usa energía inversa robada para curarse! (+90 HP)'),
+     es('Barrera Antigua',0,'boost','¡Activa una barrera de EM ancestral!'),
+     es('Copia: Dominio',140,null,'¡Activa una copia de dominio! Daño máximo.'),
+   ],
+   domain:{name:'Juego de las Fronteras',power:300,statusEffect:'paralyze',
+     desc:'Múltiples barreras se superponen. Técnicas copiadas atacan desde todos los ángulos.'},
+   sa:['bleed','poison','burn'],
+   inversa:true},
+
+  {id:'csp_sukuna_frag',name:'Sukuna — 4 Dedos',grade:'special',emoji:'👹',
+   hp:1400,maxHp:1400,atk:160,def:45,xp:1500,em:550,
+   innate:'Santuario (Fragmento)',
+   desc:'El Rey de las Maldiciones con 4 dedos activos. Versión limitada pero devastadora.',
+   tags:['ESP','REY','SANTUARIO'],
+   skills:[
+     es('Desmantelar',145,'bleed','¡Sukuna desmantelar: corte invisible sin límite!'),
+     es('Hender',160,null,'¡Hender: lo parte todo a la mitad!'),
+     es('Lluvia de Cortes',155,'bleed','¡Desmantelar y Hender en todos los ángulos!'),
+     es('Técnica Inversa',0,null,'¡Sukuna se cura con energía inversa! (+120 HP)'),
+     es('Katana de EM',170,null,'¡Materializa su katana de EM pura!'),
+   ],
+   domain:{name:'Altar del Conquistador (Parcial)',power:350,statusEffect:'bleed',
+     desc:'Versión parcial del dominio. Desmantelar y Hender inevitables en el área.'},
+   sa:['bleed'],
+   inversa:true},
+],
+
 };
+
+// ── HELPERS para obtener enemigos por zona/grado ──────────
+function getCursesByGrade(grade){
+  const map={5:'grade5',4:'grade4',3:'grade3',2:'grade2','sg1':'semigrade1',1:'grade1','semi':'semispecial','special':'special'};
+  return CURSE_CATALOG[map[grade]]||CURSE_CATALOG.grade5;
+}
+
+function pickEnemyForZone(zoneGrade){
+  const pool=getCursesByGrade(zoneGrade);
+  const e=pool[Math.floor(Math.random()*pool.length)];
+  return JSON.parse(JSON.stringify(e));
+}
+
 
 // ═══════════════════════════════════════════════════════
 // BOSSES — expanded roster
@@ -1074,6 +1634,8 @@ const DFLT={
   },
   tasks:[],habits:[],goals:[],
   sprites:{curse_low:null,curse_mid:null,curse_high:null,boss_mahito:null,boss_hanami:null,boss_jogo:null,boss_sukuna:null},
+  enemySprites:{},      // { enemyId: base64 } — per-enemy sprites
+  uploadedSprites:[],   // [{ name, data }] — staging pool of uploaded images
   zoneStatus:{}, // zoneId -> {remaining, status}
   activeBosses:[],
   log:[],activeMissions:[],completedMissions:[],
@@ -1083,11 +1645,45 @@ const DFLT={
 };
 
 let S=loadS();
+function saveS(){
+  try{
+    // Separate sprites from main save to avoid quota issues
+    // Main save: everything except image data
+    const forSave={...S,
+      sprites:Object.fromEntries(Object.entries(S.sprites).map(([k,v])=>[k,v?'__sprite__':null])),
+      enemySprites:Object.fromEntries(Object.entries(S.enemySprites||{}).map(([k])=>[k,'__sprite__'])),
+      uploadedSprites:(S.uploadedSprites||[]).map(s=>({name:s.name,data:'__sprite__'})),
+      player:{...S.player,avatar:S.player.avatar?'__sprite__':null,playerSprite:S.player.playerSprite?'__sprite__':null},
+    };
+    localStorage.setItem('jjk_v4',JSON.stringify(forSave));
+
+    // Sprites in separate key
+    const sprData={
+      sprites:S.sprites||{},
+      enemySprites:S.enemySprites||{},
+      uploadedSprites:(S.uploadedSprites||[]),
+      avatar:S.player.avatar||null,
+      playerSprite:S.player.playerSprite||null,
+    };
+    try{localStorage.setItem('jjk_v4_sprites',JSON.stringify(sprData));}
+    catch(sprErr){
+      // If sprites still too big, save without uploaded pool (keep assignments)
+      sprData.uploadedSprites=[];
+      try{localStorage.setItem('jjk_v4_sprites',JSON.stringify(sprData));}
+      catch(e2){console.warn('Sprites too large even without pool, skipping sprite save');}
+    }
+  }catch(e){
+    console.warn('Save error:',e);
+    toast('⚠️ Error al guardar — datos demasiado grandes','error');
+  }
+}
+
 function loadS(){
   try{
-    const s=localStorage.getItem('jjk_v4');
-    if(s){
-      const d=JSON.parse(s);
+    const raw=localStorage.getItem('jjk_v4');
+    if(raw){
+      const d=JSON.parse(raw);
+      // Migrations
       if(!d.player.skillMastery)d.player.skillMastery={};
       if(!d.player.bossesKilled)d.player.bossesKilled={};
       if(d.player.techMasteryXP===undefined)d.player.techMasteryXP=0;
@@ -1098,14 +1694,32 @@ function loadS(){
       if(!d.dynamicEvents)d.dynamicEvents=[];
       if(!d.zoneStatus)d.zoneStatus={};
       if(!d.player.missionsCompleted)d.player.missionsCompleted=0;
+      if(!d.enemySprites)d.enemySprites={};
+      if(!d.uploadedSprites)d.uploadedSprites=[];
       // Migrate old grade 4 start → 5
       if(d.player.grade===4&&d.player.level<=1)d.player.grade=5;
+
+      // Restore sprites from separate key
+      try{
+        const sprRaw=localStorage.getItem('jjk_v4_sprites');
+        if(sprRaw){
+          const sprData=JSON.parse(sprRaw);
+          // Restore sprites objects
+          if(sprData.sprites){
+            Object.entries(sprData.sprites).forEach(([k,v])=>{if(v&&v!=='__sprite__')d.sprites[k]=v;});
+          }
+          if(sprData.enemySprites)d.enemySprites=sprData.enemySprites;
+          if(sprData.uploadedSprites)d.uploadedSprites=sprData.uploadedSprites.filter(s=>s.data&&s.data!=='__sprite__');
+          if(sprData.avatar)d.player.avatar=sprData.avatar;
+          if(sprData.playerSprite)d.player.playerSprite=sprData.playerSprite;
+        }
+      }catch(sprErr){console.warn('Could not load sprites:',sprErr);}
+
       return d;
     }
-  }catch(e){}
+  }catch(e){console.warn('Load error:',e);}
   return JSON.parse(JSON.stringify(DFLT));
 }
-function saveS(){localStorage.setItem('jjk_v4',JSON.stringify(S));}
 
 // ═══════════════════════════════════════════════════════
 // ZONE STATUS HELPERS
@@ -1346,6 +1960,7 @@ function generateMissions(){
       type,title:baseName,
       cityId:city.id,cityName:city.name,
       zoneId:zone.id,zoneName:zone.name,
+      zoneGrade:zone.grade,  // used for enemy grade selection
       difficulty:diff,
       generatedAt:Date.now(),
     };
@@ -1736,34 +2351,27 @@ function renderMaestriaContent(){
     '</div>'+
     // ── Skills list ──
     '<div class="ct">⚡ Habilidades</div>'+
-    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">'+
+    '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">'+
     tech.skills.map(sk=>{
       const req=sk.masteryReq||1;
       const reached=curLv>=req;
-      const ul=p.unlockedSkills.includes(sk.id);
+      const isDomain=sk.type==='domain';
       const tc=typeColors[sk.type]||'var(--ts)';
-      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;'+
-        'background:'+(reached?'rgba(59,124,244,.04)':'var(--bg-el)')+';'+
-        'border:1px solid '+(reached?'rgba(59,124,244,.25)':'var(--bdr)')+';border-radius:var(--r)">'+
-        '<div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;'+
-          'background:'+(reached?tc+'22':'var(--bdr)')+';border:2px solid '+(reached?tc:'var(--tm)')+';'+
-          'display:flex;align-items:center;justify-content:center;font-size:17px">'+sk.icon+'</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div class="flex iac jb">'+
-            '<div class="t-sm fw6">'+sk.name+'</div>'+
-            '<div class="mono t-xs fw7" style="color:'+(reached?'var(--ok)':'var(--tm)')+'">'+req+' Maestría</div>'+
-          '</div>'+
-          '<div class="t-xs c-ts">'+sk.desc+'</div>'+
-          '<div class="t-xs mono mt1" style="color:'+tc+'">'+
-            sk.type.toUpperCase()+
-            (sk.cost===0?' · Sin coste':' · '+sk.cost+' EM')+
-            (sk.power?' · '+sk.power+' poder':'')+
+      const typeLabel={attack:'Ataque',defense:'Defensa',heal:'Curación',domain:'Dominio Expandido',buff:'Potenciador',debuff:'Debilitador'}[sk.type]||sk.type;
+      return '<div class="tech-skill-row'+(isDomain?' domain-row':'')+(reached?' active':'')+'">'+
+        '<div class="tsr-icon '+(isDomain?'domain':reached?'active':'locked')+'">'+sk.icon+'</div>'+
+        '<div class="tsr-body">'+
+          '<div class="tsr-name" style="color:'+(reached?(isDomain?'var(--purple)':tc):'var(--tm)')+'">'+sk.name+'</div>'+
+          '<div class="tsr-desc">'+sk.desc+'</div>'+
+          '<div class="tsr-meta">'+
+            '<span class="tsr-tag" style="color:'+tc+';border-color:'+tc+'33">'+typeLabel+'</span>'+
+            (sk.cost>0?'<span class="tsr-tag">'+sk.cost+' EM</span>':'<span class="tsr-tag">Sin coste</span>')+
+            (sk.power?'<span class="tsr-tag">'+sk.power+' poder</span>':'')+
           '</div>'+
         '</div>'+
-        (reached?
-          '<div class="badge" style="background:rgba(62,200,106,.12);color:var(--ok);border-color:rgba(62,200,106,.3);white-space:nowrap">✓ ACTIVA</div>':
-          '<div class="badge" style="background:var(--bg-el);color:var(--tm);white-space:nowrap">🔒 Nv.'+req+'</div>'
-        )+
+        '<div class="tsr-req" style="color:'+(reached?'var(--ok)':'var(--ts)')+'">'+
+          (reached?'✓ ACTIVA':'🔒 M'+req)+
+        '</div>'+
       '</div>';
     }).join('')+
     '</div>';
@@ -2037,24 +2645,54 @@ function startMissionCombat(mId){
   activeMissionId=mId;bossPhase=false;
   document.getElementById('missionBoardSel').style.display='none';
   document.getElementById('battleMain').style.display='block';
-  let enemyPool;
-  if(m.type==='curse')enemyPool=ENEMIES[m.enemyPool]||ENEMIES.user_basic;
-  else if(m.type==='boss_curse'){
-    // Are we fighting guards or boss?
+
+  let enemy;
+  if(m.type==='curse'){
+    // Cursed user enemy — pick from user pools
+    const userPools={user_basic:'grade3',user_mid:'grade1',user_elite:'special'};
+    const poolKey=userPools[m.enemyPool]||'grade3';
+    enemy=pickEnemyForZone(poolKey==='grade3'?3:poolKey==='grade1'?1:'special');
+    enemy.isCurseUser=true;
+  } else if(m.type==='boss_curse'){
     bossPhase=(m.progress||0)>=(m.guardCount||2);
-    enemyPool=bossPhase?[buildBossCurse(m)]:(ENEMIES[m.zoneId]||ENEMIES.shibuya);
+    enemy=bossPhase?buildBossCurse(m):pickEnemyForZone(m.zoneGrade||3);
+  } else {
+    // Pick from CURSE_CATALOG by zone grade
+    enemy=pickEnemyForZone(m.zoneGrade||3);
   }
-  else enemyPool=ENEMIES[m.zoneId]||ENEMIES.shibuya;
-  const enemy=JSON.parse(JSON.stringify(enemyPool[Math.floor(Math.random()*enemyPool.length)]));
+
+  // Scale enemy slightly to player level
+  const lvMult=1+Math.max(0,(S.player.level-1)*0.015);
+  enemy.hp=Math.max(enemy.hp,Math.round(enemy.hp*lvMult));
+  enemy.maxHp=enemy.hp;
+  enemy.atk=Math.round(enemy.atk*lvMult);
+
   const p=S.player;
-  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[]};
+  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false};
   updateCombat();buildBActions();clearCLog();
-  clog('⚔️ '+m.title+' — '+m.zoneName,'cl-info');clog('Enemigo: '+enemy.name,'cl-log');
+  // Show enemy info in log
+  const gradeLabel={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[enemy.grade]||'';
+  const innateInfo=enemy.innate?' — Técnica: '+enemy.innate:'';
+  clog('⚔️ '+m.title+' — '+m.zoneName,'cl-info');
+  clog('Enemigo: '+enemy.emoji+' '+enemy.name+' ['+gradeLabel+']'+innateInfo,'cl-log');
+  if(enemy.domain)clog('⚠️ Puede activar Dominio: '+enemy.domain.name,'cl-info');
   document.getElementById('bResOverlay').innerHTML='';startTimer();
   document.getElementById('bTopZone').textContent=m.cityName+' · '+m.zoneName;
 }
+
 function buildBossCurse(m){
-  return {name:'Gran Maldición de '+m.zoneName,hp:400+S.player.level*15,maxHp:400+S.player.level*15,atk:55+S.player.level*2,def:20,xp:350+S.player.level*10,em:150,emoji:'👾',tags:['JEFE','MALDICION'],sa:['bleed','poison'],isBoss:true};
+  const lvl=S.player.level;
+  return {
+    name:'Gran Maldición de '+m.zoneName,
+    hp:450+lvl*18,maxHp:450+lvl*18,atk:58+lvl*2,def:22,xp:380+lvl*12,em:160,
+    emoji:'👾',grade:'special',tags:['JEFE','MALDICION'],
+    skills:[
+      es('Golpe del Jefe',65,'bleed','¡El jefe descarga un golpe devastador!'),
+      es('Rugido Maldito',0,'paralyze','¡El rugido paraliza!'),
+      es('Embestida',70,null,'¡Embestida colosal!'),
+    ],
+    sa:['bleed','poison'],isBoss:true
+  };
 }
 
 function updateCombat(){
@@ -2071,7 +2709,11 @@ function updateCombat(){
   const ehp=bd.enemy.hp/bd.enemy.maxHp*100;
   const ehEl=document.getElementById('bEnemyHP');ehEl.style.width=ehp+'%';
   ehEl.className='ba-hp-fill'+(ehp<25?' crit':ehp<50?' low':'');
-  document.getElementById('bEnemyTags').innerHTML=(bd.enemy.tags||[]).map(t=>'<span class="type-tag">'+t+'</span>').join('');
+  document.getElementById('bEnemyTags').innerHTML=
+    (bd.enemy.tags||[]).map(t=>'<span class="type-tag">'+t+'</span>').join('')+
+    (bd.enemy.innate?'<span class="type-tag" style="color:var(--purple);border-color:var(--purple)44">⚡ '+bd.enemy.innate+'</span>':'')+
+    (bd.enemy.domain&&!BD.domainUsed?'<span class="type-tag" style="color:var(--gold);border-color:var(--gold)44">⬡ Dominio</span>':'')+
+    (bd.enemy.inversa?'<span class="type-tag" style="color:var(--ok);border-color:var(--ok)44">💚 Inversa</span>':'');
   renderStatusRow('enemyStatusRow',bd.enemyStatus||[]);
   document.getElementById('bPlayerName').textContent=p.name;
   document.getElementById('bPlayerHPTxt').textContent=bd.playerHP+'/'+bd.playerMaxHP;
@@ -2085,7 +2727,10 @@ function updateCombat(){
   if(p.playerSprite)ps.innerHTML='<img src="'+p.playerSprite+'" alt="">';else ps.textContent='🧑';
   const es=document.getElementById('bEnemySprite');
   const spKey=bd.enemy.isBoss?'boss_mahito':bd.enemy.isCurseUser?'curse_high':'curse_mid';
-  if(S.sprites[spKey])es.innerHTML='<img src="'+S.sprites[spKey]+'" alt="">';else es.textContent=bd.enemy.emoji;
+  const enemySpr=bd.enemy.id?S.enemySprites[bd.enemy.id]:null;
+  if(enemySpr)es.innerHTML='<img src="'+enemySpr+'" alt="" style="width:100%;height:100%;object-fit:contain">';
+  else if(S.sprites[spKey])es.innerHTML='<img src="'+S.sprites[spKey]+'" alt="">';
+  else es.textContent=bd.enemy.emoji;
 }
 function renderStatusRow(elId,statuses){
   const el=document.getElementById(elId);if(!el)return;
@@ -2159,21 +2804,122 @@ function bAction(type,skillId){
 function enemyTurn(){
   if(BD.ended)return;
   const enemy=BD.enemy,p=S.player;
-  if(isParalyzed(BD.enemyStatus)){clog('⚡ '+enemy.name+' paralizado. Pierde turno.','cl-status');processStatus(BD.enemyStatus,enemy.name);BD.turn='player';setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},400);return;}
-  let dmg=(enemy.atk||12)+Math.round(Math.random()*6);
-  const barrier=BD.playerStatus.find(s=>s.type==='barrier');
-  if(barrier){const bp=STATUS_DEFS.barrier.blockPct||.7;dmg=Math.round(dmg*(1-bp));BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);clog('🛡 Barrera absorbe (−'+Math.round(bp*100)+'%)','cl-def');}
-  dmg=Math.max(1,dmg-Math.round(p.stats.defensa*1.1));
-  if(Math.random()<.08){clog('✨ MISS — '+enemy.name,'cl-info');floatDmg('MISS','ms');}
-  else{
-    BD.playerHP=Math.max(0,BD.playerHP-dmg);clog('🔴 '+enemy.name+': −'+dmg+' HP','cl-dmg');floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');
-    const abil=(enemy.sa||[]);if(abil.length&&Math.random()<.3){const ab=abil[Math.floor(Math.random()*abil.length)];const sd=STATUS_DEFS[ab];if(sd&&!BD.playerStatus.find(s=>s.type===ab)){applyStatus(BD.playerStatus,ab,sd.turns);clog(sd.icon+' ¡'+enemy.name+' te infligió '+sd.label+'!','cl-status');}}
+
+  if(isParalyzed(BD.enemyStatus)){
+    clog('⚡ '+enemy.name+' paralizado. Pierde turno.','cl-status');
+    processStatus(BD.enemyStatus,enemy.name);
+    BD.turn='player';
+    setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},400);
+    return;
   }
-  const eStDmg=processStatus(BD.enemyStatus,enemy.name);if(eStDmg>0){BD.enemy.hp=Math.max(0,BD.enemy.hp-eStDmg);floatDmg(eStDmg,'ed');}
+
+  let dmg=0;let actionDone=false;
+
+  // ── Domain: 25% chance if enemy has one and low HP ──
+  if(enemy.domain&&!BD.domainUsed&&(enemy.hp/enemy.maxHp)<0.45&&Math.random()<0.4){
+    BD.domainUsed=true;
+    const d=enemy.domain;
+    triggerDomainAnim(enemy.name+' — '+d.name);
+    dmg=d.power+Math.round(Math.random()*20);
+    if(d.statusEffect){const sd=STATUS_DEFS[d.statusEffect];if(sd)applyStatus(BD.playerStatus,d.statusEffect,sd.turns);}
+    clog('⬡ '+enemy.name+' activa: '+d.name,'cl-domain');
+    clog(d.desc,'cl-info');
+    actionDone=true;
+  }
+
+  // ── Inversa healing: when HP < 30% ──
+  if(!actionDone&&enemy.inversa&&(enemy.hp/enemy.maxHp)<0.3&&Math.random()<0.55){
+    const heal=Math.round(enemy.maxHp*0.18)+30;
+    enemy.hp=Math.min(enemy.hp+heal,enemy.maxHp);
+    clog('💚 '+enemy.name+' usa Energía Inversa: +'+heal+' HP','cl-hit');
+    updateCombat();
+    BD.turn='player';
+    setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},600);
+    return;
+  }
+
+  // ── Use a skill if available ──
+  if(!actionDone&&enemy.skills&&enemy.skills.length&&Math.random()<0.65){
+    // Filter: prefer heal skills when low HP, prefer status skills when full HP
+    let pool=enemy.skills;
+    const hpRatio=enemy.hp/enemy.maxHp;
+    if(hpRatio<0.3)pool=enemy.skills.filter(s=>s.power===0||s.statusEffect==='boost')||enemy.skills;
+    const sk=pool[Math.floor(Math.random()*pool.length)];
+
+    // Check for self-heal skill (power=0, no statusEffect, name contains +HP)
+    if(sk.name.includes('HP')&&sk.power===0){
+      const healMatch=sk.desc.match(/\+(\d+) HP/);
+      const heal=healMatch?parseInt(healMatch[1]):40;
+      enemy.hp=Math.min(enemy.hp+heal,enemy.maxHp);
+      clog('💚 '+enemy.name+': '+sk.msg,'cl-hit');
+      updateCombat();
+      BD.turn='player';
+      setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},500);
+      return;
+    }
+
+    // Self-buff (power=0, boost)
+    if(sk.power===0&&sk.statusEffect==='boost'){
+      applyStatus(BD.enemyStatus,'boost',2);
+      clog('💪 '+enemy.name+': '+sk.msg,'cl-status');
+      actionDone=true;
+    }
+    // Status-only (power=0)
+    else if(sk.power===0&&sk.statusEffect){
+      const sd=STATUS_DEFS[sk.statusEffect];
+      if(sd&&!BD.playerStatus.find(s=>s.type===sk.statusEffect)){
+        applyStatus(BD.playerStatus,sk.statusEffect,sd.turns);
+        clog((sd.icon||'⚡')+' '+enemy.name+': '+sk.msg,'cl-status');
+      }
+      actionDone=true;
+    }
+    // Damage skill
+    else if(sk.power>0){
+      dmg=sk.power+Math.round(Math.random()*10);
+      if(sk.statusEffect){
+        const sd=STATUS_DEFS[sk.statusEffect];
+        if(sd&&Math.random()<0.6)applyStatus(BD.playerStatus,sk.statusEffect,sd.turns);
+      }
+      clog('⚔️ '+enemy.name+': '+sk.msg,'cl-dmg');
+      actionDone=true;
+    }
+  }
+
+  // ── Basic attack fallback ──
+  if(!actionDone){
+    dmg=(enemy.atk||12)+Math.round(Math.random()*8);
+    // Basic attack status chance
+    const abil=(enemy.sa||[]);
+    if(abil.length&&Math.random()<0.28){
+      const ab=abil[Math.floor(Math.random()*abil.length)];
+      const sd=STATUS_DEFS[ab];
+      if(sd&&!BD.playerStatus.find(s=>s.type===ab)){
+        applyStatus(BD.playerStatus,ab,sd.turns);
+        clog((sd.icon||'⚡')+' ¡'+enemy.name+' infligió '+sd.label+'!','cl-status');
+      }
+    }
+    clog('🔴 '+enemy.name+' ataca básico','cl-dmg');
+  }
+
+  // Apply damage
+  if(dmg>0){
+    const boost=BD.enemyStatus.find(s=>s.type==='boost');
+    if(boost)dmg=Math.round(dmg*1.25);
+    const barrier=BD.playerStatus.find(s=>s.type==='barrier');
+    if(barrier){const bp=STATUS_DEFS.barrier.blockPct||.7;dmg=Math.round(dmg*(1-bp));BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);clog('🛡 Barrera absorbe (−'+Math.round(bp*100)+'%)','cl-def');}
+    dmg=Math.max(1,dmg-Math.round(p.stats.defensa*1.1));
+    if(Math.random()<0.06){clog('✨ MISS — '+enemy.name,'cl-info');floatDmg('MISS','ms');}
+    else{BD.playerHP=Math.max(0,BD.playerHP-dmg);clog('🔴 −'+dmg+' HP','cl-dmg');floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');}
+  }
+
+  const eStDmg=processStatus(BD.enemyStatus,enemy.name);
+  if(eStDmg>0){BD.enemy.hp=Math.max(0,BD.enemy.hp-eStDmg);floatDmg(eStDmg,'ed');}
   updateCombat();
+
   if(BD.playerHP<=0){BD.playerHP=0;updateCombat();setTimeout(combatDefeat,600);return;}
   if(BD.enemy.hp<=0){BD.enemy.hp=0;updateCombat();setTimeout(combatVictory,600);return;}
-  BD.turn='player';setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},400);
+  BD.turn='player';
+  setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},450);
 }
 
 function combatVictory(){
@@ -2346,10 +3092,9 @@ function fightRaidWave(){
       isBoss:true,
     };
   } else {
-    // Regular wave — pull from raid's zone enemy pool
-    const pool=ENEMIES[r.zoneId]||ENEMIES.shibuya;
-    enemy=JSON.parse(JSON.stringify(pool[Math.floor(Math.random()*pool.length)]));
-    // Scale slightly to wave number
+    // Regular wave — pick from CURSE_CATALOG by raid's minGrade
+    enemy=pickEnemyForZone(r.minGrade);
+    // Scale to wave number
     const scale=1+(r.currentWave-1)*0.12;
     enemy.hp=Math.round(enemy.hp*scale);enemy.maxHp=enemy.hp;
     enemy.atk=Math.round(enemy.atk*scale);
@@ -2359,7 +3104,7 @@ function fightRaidWave(){
   // Store raid context and start combat in raid mode
   raidCombatActive=true;
   const p=S.player;
-  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[]};
+  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false};
 
   // Show combat in the raids page by injecting combat UI
   const raEl=document.getElementById('raidActive');
@@ -2675,20 +3420,313 @@ function calNext(){calDate.setDate(calDate.getDate()+1);renderCalendar();}
 // ═══════════════════════════════════════════════════════
 function renderConfig(){
   document.getElementById('cfgName').value=S.player.name;
-  const skeys=['curse_low','curse_mid','curse_high','boss_mahito','boss_hanami','boss_jogo','boss_sukuna'];
-  const slbls={curse_low:'Débil',curse_mid:'Media',curse_high:'Fuerte',boss_mahito:'Mahito',boss_hanami:'Hanami',boss_jogo:'Jogo',boss_sukuna:'Sukuna'};
-  document.getElementById('sprGrid').innerHTML=skeys.map(k=>'<div class="spr-slot" onclick="triggerSpr(\''+k+'\')">'+( S.sprites[k]?'<img src="'+S.sprites[k]+'" alt=""><div style="font-size:9px;margin-top:2px">'+slbls[k]+'</div>':'<span style="font-size:17px">📷</span><span>'+slbls[k]+'</span>')+'</div>').join('');
+  document.getElementById('cfgCurLv').textContent=S.player.level;
+  document.getElementById('testLvInput').value=S.player.level;
   document.getElementById('pSpritePrev').textContent=S.player.playerSprite?'✓ Sprite subido':'Sin sprite';
+
+  // Generic fallback sprites grid
+  const skeys=['curse_low','curse_mid','curse_high','boss_mahito','boss_hanami','boss_jogo','boss_sukuna'];
+  const slbls={curse_low:'Mald. Débil',curse_mid:'Mald. Media',curse_high:'Mald. Fuerte',boss_mahito:'Mahito',boss_hanami:'Hanami',boss_jogo:'Jogo',boss_sukuna:'Sukuna'};
+  document.getElementById('sprGrid').innerHTML=skeys.map(k=>
+    '<div class="spr-slot" onclick="triggerSpr(\''+k+'\')">'+
+    (S.sprites[k]?'<img src="'+S.sprites[k]+'" alt=""><div style="font-size:9px;margin-top:2px">'+slbls[k]+'</div>':
+    '<span style="font-size:17px">📷</span><span>'+slbls[k]+'</span>')+
+    '</div>').join('');
+
+  renderSpritePool();
+  renderEnemySpriteAssign();
+}
+
+// ─── SPRITE POOL: staging area ───
+function triggerBulkSpriteUpload(){document.getElementById('bulkSprInput').click();}
+
+// ─── IMAGE COMPRESSION ───
+// Resizes to max 256px on longest side, converts to JPEG quality 0.55
+// Keeps base64 size under ~30KB per image
+function compressImage(dataUrl, maxPx, quality, cb){
+  const img=new Image();
+  img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxPx||h>maxPx){
+      if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}
+      else{w=Math.round(w*maxPx/h);h=maxPx;}
+    }
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',quality));
+  };
+  img.src=dataUrl;
+}
+
+function handleBulkSprites(e){
+  if(!S.uploadedSprites)S.uploadedSprites=[];
+  const files=Array.from(e.target.files);
+  let processed=0;
+  const total=files.length;
+  files.forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      compressImage(ev.target.result,256,0.55,compressed=>{
+        if(!S.uploadedSprites.find(s=>s.name===file.name)){
+          S.uploadedSprites.push({name:file.name,data:compressed});
+        }
+        processed++;
+        if(processed===total){saveS();renderSpritePool();renderEnemySpriteAssign();}
+      });
+    };
+    r.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function renderSpritePool(){
+  const pool=S.uploadedSprites||[];
+  document.getElementById('uploadCount').textContent=pool.length+' sprite'+(pool.length!==1?'s':'')+' subidos';
+  const el=document.getElementById('uploadedSprPool');
+  if(!el)return;
+  if(!pool.length){
+    el.innerHTML='<div class="spr-pool"><span class="spr-pool-empty">Sin sprites subidos — pulsa "Subir Sprites" para añadir.</span></div>';
+    return;
+  }
+  el.innerHTML='<div class="t-xs mono c-muted mb2">Sprites disponibles (pasa el ratón para eliminar):</div>'+
+    '<div class="spr-pool">'+
+    pool.map((s,i)=>
+      '<div class="spr-thumb">'+
+        '<img src="'+s.data+'" alt="'+s.name+'">'+
+        '<div class="spr-name">'+s.name+'</div>'+
+        '<button class="spr-del" onclick="removeUploadedSprite('+i+')" title="Eliminar">✕</button>'+
+      '</div>'
+    ).join('')+
+    '</div>';
+}
+
+function removeUploadedSprite(idx){
+  S.uploadedSprites.splice(idx,1);
+  saveS();renderSpritePool();renderEnemySpriteAssign();
+}
+
+function clearUploadedSprites(){
+  if(!confirm('¿Eliminar todos los sprites subidos del pool? Las asignaciones existentes no se borran.'))return;
+  S.uploadedSprites=[];saveS();renderSpritePool();renderEnemySpriteAssign();
+}
+
+// ─── ENEMY ASSIGNMENT LIST ───
+let sprAssignOpen=false;
+
+function toggleSpriteAssignPanel(){
+  sprAssignOpen=!sprAssignOpen;
+  renderEnemySpriteAssign();
+  if(sprAssignOpen){
+    setTimeout(()=>{
+      const el=document.getElementById('enemySprAssign');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    },50);
+  }
+}
+
+function saveSpriteAssignments(){
+  saveS();
+  sprAssignOpen=false;
+  renderEnemySpriteAssign();
+  toast('✅ Sprites guardados correctamente','success');
+}
+
+function renderEnemySpriteAssign(){
+  const el=document.getElementById('enemySprAssign');if(!el)return;
+  const pool=S.uploadedSprites||[];
+  const assigned=Object.keys(S.enemySprites||{}).length;
+
+  // Always show toggle button + summary
+  let html=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
+      '<button class="btn btn-p btn-sm" onclick="toggleSpriteAssignPanel()">'+
+        (sprAssignOpen?'▲ Cerrar lista':'▼ Asignar sprites a enemigos')+
+      '</button>'+
+      (assigned?'<span class="badge" style="background:rgba(62,200,106,.12);color:var(--ok);border-color:rgba(62,200,106,.3)">'+assigned+' asignados</span>':'')+
+    '</div>';
+
+  if(!sprAssignOpen){el.innerHTML=html;return;}
+
+  // Build assignment list
+  if(!pool.length){
+    html+='<div class="t-sm c-muted" style="padding:8px 0">Sube sprites primero para poder asignarlos.</div>';
+    el.innerHTML=html;return;
+  }
+
+  const gradeOrder=['grade5','grade4','grade3','grade2','semigrade1','grade1','semispecial','special'];
+  const gradeLabels={grade5:'Grado 5',grade4:'Grado 4',grade3:'Grado 3',grade2:'Grado 2',semigrade1:'Semi-Grado 1',grade1:'Grado 1',semispecial:'Semi-Grado Especial',special:'Grado Especial'};
+  const gradeColors={grade5:'#607080',grade4:'var(--g4)',grade3:'var(--g3)',grade2:'var(--g2)',semigrade1:'#80a0e0',grade1:'var(--g1)',semispecial:'var(--gse)',special:'var(--gsp)'};
+  const bossGroup=BOSSES.map(b=>({id:'boss_'+b.id,name:b.name,emoji:b.emoji,grade:'JEFE'}));
+
+  html+=
+    '<div style="background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden">'+
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">'+
+      '<span class="t-sm fw6">Asignación de sprites</span>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-ok" onclick="saveSpriteAssignments()">💾 Guardar</button>'+
+        '<button class="btn btn-g btn-sm" onclick="toggleSpriteAssignPanel()">✕ Cerrar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div style="padding:12px 14px;max-height:60vh;overflow-y:auto">';
+
+  gradeOrder.forEach(gk=>{
+    const enemies=CURSE_CATALOG[gk]||[];
+    if(!enemies.length)return;
+    html+='<div class="spr-grade-hdr" style="color:'+gradeColors[gk]+'">'+gradeLabels[gk]+'</div>';
+    enemies.forEach(enemy=>{html+=renderEnemyAssignRow(enemy,pool,gradeColors[gk]||'var(--tm)');});
+  });
+
+  html+='<div class="spr-grade-hdr" style="color:var(--gold)">Jefes</div>';
+  bossGroup.forEach(b=>{html+=renderEnemyAssignRow(b,pool,'var(--gold)');});
+
+  html+=
+    '</div>'+
+    '<div style="padding:12px 14px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px">'+
+      '<button class="btn btn-ok" onclick="saveSpriteAssignments()">💾 Guardar y cerrar</button>'+
+      '<button class="btn btn-g btn-sm" onclick="toggleSpriteAssignPanel()">Cerrar sin guardar</button>'+
+    '</div>'+
+    '</div>';
+
+  el.innerHTML=html;
+}
+
+function renderEnemyAssignRow(enemy,pool,color){
+  const assigned=S.enemySprites[enemy.id];
+  const preview=assigned?
+    '<img src="'+assigned+'" alt="">':
+    (enemy.emoji||'👾');
+
+  // Dropdown options from pool
+  const opts=pool.map((s,i)=>'<option value="'+i+'" '+(assigned===s.data?'selected':'')+'>'+s.name+'</option>').join('');
+
+  return '<div class="enemy-spr-row">'+
+    '<div class="enemy-spr-preview">'+preview+'</div>'+
+    '<div class="enemy-spr-info">'+
+      '<div class="enemy-spr-name">'+enemy.emoji+' '+enemy.name+'</div>'+
+      '<div class="enemy-spr-grade" style="color:'+color+'">'+(enemy.innate||enemy.grade||'')+'</div>'+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:6px">'+
+      '<select class="fs" style="font-size:11px;padding:4px 6px;min-width:130px" onchange="assignEnemySprite(\''+enemy.id+'\',this.value)">'+
+        '<option value="">— Sin asignar —</option>'+opts+
+      '</select>'+
+      (assigned?'<button class="btn btn-g btn-sm" onclick="clearEnemySprite(\''+enemy.id+'\')" title="Quitar sprite">✕</button>':'')+
+    '</div>'+
+  '</div>';
+}
+
+function assignEnemySprite(enemyId,poolIdxStr){
+  if(!S.enemySprites)S.enemySprites={};
+  if(poolIdxStr===''){delete S.enemySprites[enemyId];}
+  else{
+    const idx=parseInt(poolIdxStr);
+    const spr=(S.uploadedSprites||[])[idx];
+    if(spr)S.enemySprites[enemyId]=spr.data;
+  }
+  saveS();renderEnemySpriteAssign();
+}
+
+function clearEnemySprite(enemyId){
+  delete S.enemySprites[enemyId];
+  saveS();renderEnemySpriteAssign();
+}
+
+// ─── TEST: set level freely ───
+function testSetLevel(){
+  const input=document.getElementById('testLvInput');
+  const newLv=Math.max(1,Math.min(200,parseInt(input.value)||1));
+  const p=S.player;
+  p.level=newLv;
+  // Recalculate XP curve
+  p.xp=0;
+  p.xpNext=Math.round(100*Math.pow(1.35,newLv-1));
+  // Recalculate HP and EM based on level
+  const baseHp=100;const hpPerLv=12;
+  p.maxHp=baseHp+hpPerLv*(newLv-1);
+  p.hp=Math.min(p.hp,p.maxHp);
+  const baseEm=500;const emPerLv=30;
+  p.maxEm=baseEm+emPerLv*(newLv-1);
+  // Recalculate grade
+  for(let i=GRADES.length-1;i>=0;i--){
+    if(newLv>=GRADES[i].lvReq){p.grade=GRADES[i].id;break;}
+  }
+  // Add stat points proportional to level
+  p.statPoints=Math.max(p.statPoints,newLv*3);
+  saveS();uiAll();
+  document.getElementById('cfgCurLv').textContent=newLv;
+  toast('✓ Nivel cambiado a '+newLv+' · Grado: '+gd(p.grade).label,'gold');
 }
 function saveCfgName(){S.player.name=document.getElementById('cfgName').value;saveS();uiAll();}
 function triggerAvatarUpload(){document.getElementById('avInput')?.click();}
-function handleAvatar(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.player.avatar=ev.target.result;saveS();uiAll();renderPlayer();toast('Avatar actualizado','success');};r.readAsDataURL(f);}
-function triggerSpr(key){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.sprites[key]=ev.target.result;saveS();renderConfig();};r.readAsDataURL(f);};i.click();}
-function triggerSpriteUpload(type){if(type==='player'){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.player.playerSprite=ev.target.result;saveS();renderConfig();};r.readAsDataURL(f);};i.click();}}
-function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='jjk_v4_'+S.player.name+'_'+Date.now()+'.json';a.click();toast('Exportado','success');}
+function handleAvatar(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    compressImage(ev.target.result,128,0.65,compressed=>{
+      S.player.avatar=compressed;saveS();uiAll();renderPlayer();toast('Avatar actualizado','success');
+    });
+  };
+  r.readAsDataURL(f);
+}
+function triggerSpr(key){
+  const i=document.createElement('input');i.type='file';i.accept='image/*';
+  i.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      compressImage(ev.target.result,256,0.6,compressed=>{
+        S.sprites[key]=compressed;saveS();renderConfig();
+      });
+    };
+    r.readAsDataURL(f);
+  };
+  i.click();
+}
+function triggerSpriteUpload(type){
+  if(type==='player'){
+    const i=document.createElement('input');i.type='file';i.accept='image/*';
+    i.onchange=e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        compressImage(ev.target.result,256,0.65,compressed=>{
+          S.player.playerSprite=compressed;saveS();renderConfig();
+        });
+      };
+      r.readAsDataURL(f);
+    };
+    i.click();
+  }
+}
+function exportData(){
+  // Merge sprites back into export
+  const exp=JSON.parse(JSON.stringify(S));
+  const b=new Blob([JSON.stringify(exp,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='jjk_v4_'+S.player.name+'_'+Date.now()+'.json';a.click();
+  toast('📤 Exportado (incluye sprites)','success');
+}
 function importTrigger(){document.getElementById('impInput').click();}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{Object.assign(S,JSON.parse(ev.target.result));saveS();uiAll();nav('dashboard');toast('Importado','success');}catch{toast('Error','error');}};r.readAsText(f);}
-function resetAll(){if(confirm('¿Resetear TODO el progreso?')){localStorage.removeItem('jjk_v4');S=JSON.parse(JSON.stringify(DFLT));saveS();uiAll();nav('dashboard');toast('Reseteado','em');}}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      Object.assign(S,d);
+      saveS();uiAll();nav('dashboard');
+      toast('📥 Importado correctamente','success');
+    }catch{toast('Error al importar','error');}
+  };
+  r.readAsText(f);
+}
+function resetAll(){
+  if(confirm('¿Resetear TODO el progreso y sprites?')){
+    localStorage.removeItem('jjk_v4');
+    localStorage.removeItem('jjk_v4_sprites');
+    S=JSON.parse(JSON.stringify(DFLT));
+    saveS();uiAll();nav('dashboard');toast('Reseteado','em');
+  }
+}
 
 // ═══════════════════════════════════════════════════════
 // TEST MODE
