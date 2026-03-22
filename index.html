@@ -2171,6 +2171,7 @@ function renderCleaningMissions(){
       '<div class="flex iac jb">'+
         '<div class="flex g2_"><span class="mb-tag">⭐+'+m.reward.xp+' XP</span><span class="mb-tag c-em">⚡+'+emReward+' EM</span></div>'+
         (m.completed?'<span class="t-xs c-ok mono fw7">COMPLETADA</span>':
+         m.paused?'<button class="btn btn-p btn-sm" onclick="resumeCleaningMission(\''+m.id+'\')">▶ Reanudar ('+m.resumeCost+' EM)</button>':
           '<button class="btn btn-d btn-sm" onclick="startCleaningCombat(\''+m.id+'\')">⚔️ Combatir</button>')+
       '</div>'+
     '</div>';
@@ -2231,6 +2232,18 @@ function startCleaningCombat(mId){
 
 // Override endCombat to also handle cleaning missions
 // (already handled via BD.isCleaningMission flag in combatVictory/endCombat)
+
+function resumeCleaningMission(mId){
+  if(!cleaningSelectedZone)return;
+  const zoneId=cleaningSelectedZone.zone.id;
+  const cm=S.cleaningMissions?.[zoneId];if(!cm)return;
+  const m=cm.missions.find(x=>x.id===mId);if(!m||m.completed)return;
+  const cost=m.resumeCost||0;
+  if(cost>0&&S.player.em<cost)return toast('Necesitas '+cost+' EM para reanudar esta misión','error');
+  if(cost>0){S.player.em-=cost;saveS();uiAll();toast('⚡ −'+cost+' EM · Misión reanudada','em');}
+  m.paused=false;m.resumeCost=0;saveS();
+  startCleaningCombat(mId);
+}
 
 
 // ═══════════════════════════════════════════════════════
@@ -2319,14 +2332,88 @@ function renderRadar(){
   drawRadar(c.getContext('2d'),c.width,c.height);
 }
 function drawRadar(ctx,W,H){
-  const cx=W/2,cy=H/2+6,r=Math.min(W,H)*.32,st=S.player.stats,keys=Object.keys(st),labels=['Fuerza','Defensa','Velocidad','Intelig.','Maldición','Dominio'],n=keys.length,mx=30;
+  const p=S.player,st=p.stats;
+  const cx=W/2,cy=H/2+6,r=Math.min(W,H)*.32;
+
+  // 6 ejes coherentes con el árbol de stats y el combate real:
+  // 1. Salud     — HP máx normalizado (base 100, max árbol 420)
+  // 2. Ataque    — Fuerza + bonus árbol ATQ
+  // 3. Maldición — stat maldicion (daño de habilidades)
+  // 4. Técnica   — techPowerBonus + maestría combinados
+  // 5. Energía   — EM máx normalizado
+  // 6. Dominio   — stat dominio (defensa/curación)
+  const maxHpScale=Math.min(p.maxHp,600);   // cap visual en 600
+  const maxEmScale=Math.min(p.maxEm,1200);  // cap visual en 1200
+  const techPow=Math.round(getTechPowerBonus()*100); // 0–24%
+  const masteryLv=Math.min(getTechMasteryLevel(p.techMasteryXP||0),getTechMaxMastery());
+  const masteryMax=getTechMaxMastery()||20;
+  // Normalize each to 0–100 range for the radar
+  const axes=[
+    {label:'Salud',     val:Math.round(maxHpScale/6),   max:100, color:'#e05050'},
+    {label:'Ataque',    val:Math.min(st.fuerza,100),     max:100, color:'#e07030'},
+    {label:'Maldición', val:Math.min(st.maldicion,100),  max:100, color:'#a070f0'},
+    {label:'Técnica',   val:Math.min(techPow+Math.round(masteryLv/masteryMax*60),100), max:100, color:'#6050e0'},
+    {label:'Energía',   val:Math.round(maxEmScale/12),   max:100, color:'#3b7cf4'},
+    {label:'Dominio',   val:Math.min(st.dominio,100),    max:100, color:'#30a0c0'},
+  ];
+  const n=axes.length;
+
   ctx.clearRect(0,0,W,H);
-  for(let ring=1;ring<=5;ring++){ctx.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2*i/n-Math.PI/2,rr=r*(ring/5),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath();ctx.strokeStyle=ring===5?'#253060':'#141e30';ctx.lineWidth=1;ctx.stroke();}
-  for(let i=0;i<n;i++){const a=Math.PI*2*i/n-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.strokeStyle='#181e38';ctx.lineWidth=1;ctx.stroke();}
-  ctx.beginPath();keys.forEach((k,i)=>{const v=Math.min(st[k],mx),a=Math.PI*2*i/n-Math.PI/2,rr=r*(v/mx),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle='rgba(59,124,244,.18)';ctx.fill();ctx.strokeStyle='#3b7cf4';ctx.lineWidth=2;ctx.stroke();
-  ctx.font='10px Rajdhani,sans-serif';ctx.fillStyle='#5a6888';ctx.textAlign='center';
-  keys.forEach((k,i)=>{const a=Math.PI*2*i/n-Math.PI/2,lx=cx+(r+18)*Math.cos(a),ly=cy+(r+18)*Math.sin(a);ctx.fillText(labels[i],lx,ly+3);});
-  keys.forEach((k,i)=>{const v=Math.min(st[k],mx),a=Math.PI*2*i/n-Math.PI/2,rr=r*(v/mx),x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#6ba3ff';ctx.fill();});
+
+  // Grid rings
+  for(let ring=1;ring<=5;ring++){
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=Math.PI*2*i/n-Math.PI/2;
+      const rr=r*(ring/5);
+      const x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle=ring===5?'#253060':'#141e30';
+    ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // Axis lines with colored tips
+  axes.forEach((ax,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+    ctx.strokeStyle='#181e38';ctx.lineWidth=1;ctx.stroke();
+  });
+
+  // Filled polygon
+  ctx.beginPath();
+  axes.forEach((ax,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2;
+    const rr=r*(ax.val/ax.max);
+    const x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(59,124,244,.15)';ctx.fill();
+  ctx.strokeStyle='#3b7cf4';ctx.lineWidth=2;ctx.stroke();
+
+  // Labels
+  ctx.font='bold 9px Rajdhani,sans-serif';ctx.textAlign='center';
+  axes.forEach((ax,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2;
+    const lx=cx+(r+20)*Math.cos(a),ly=cy+(r+20)*Math.sin(a);
+    ctx.fillStyle=ax.color;
+    ctx.fillText(ax.label,lx,ly+3);
+  });
+
+  // Value dots with color per axis
+  axes.forEach((ax,i)=>{
+    const a=Math.PI*2*i/n-Math.PI/2;
+    const rr=r*(ax.val/ax.max);
+    const x=cx+rr*Math.cos(a),y=cy+rr*Math.sin(a);
+    ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle=ax.color;ctx.fill();
+    // Small value label next to dot
+    ctx.font='8px Rajdhani,sans-serif';ctx.fillStyle='#7a8ea0';
+    ctx.fillText(ax.val,x+(Math.cos(a)*9),y+(Math.sin(a)*9)+3);
+  });
 }
 function renderGradeProg(){
   const el=document.getElementById('gradeProgress');if(!el)return;
@@ -2342,7 +2429,10 @@ function renderTechContent(){
   const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
   if(!tech){el.innerHTML='<div class="card" style="text-align:center;padding:32px"><div style="font-size:36px;margin-bottom:8px">⚡</div><div class="c-muted t-sm mb3">Sin técnica innata</div><button class="btn btn-p" onclick="openTechPick()">Elegir Técnica</button></div>';return;}
   const mxp=p.techMasteryXP||0;
-  const ml=getTechMasteryLevel(mxp);
+  const mlNum=getTechMasteryLevel(mxp);
+  const mlMax2=getTechMaxMastery();
+  const mlColor2=mlNum>=mlMax2?'var(--gold)':mlNum>=Math.round(mlMax2*0.7)?'var(--purple)':mlNum>=Math.round(mlMax2*0.4)?'var(--emb)':'var(--g3)';
+  const mlLabel2=mlNum>=mlMax2?'Máxima':mlNum>=Math.round(mlMax2*0.7)?'Avanzado':mlNum>=Math.round(mlMax2*0.4)?'Intermedio':'Aprendiz';
   const evolvable=isTechEvolvable();
   el.innerHTML=
     '<div class="card mb3">'+
@@ -2352,7 +2442,7 @@ function renderTechContent(){
           '<div style="font-family:var(--fd);font-size:15px;color:'+tech.rc+'">'+tech.name+'</div>'+
           '<div class="t-xs mono" style="color:'+tech.rc+'">'+tech.rarity+' · '+tech.user+' · Tier '+tech.tier+'</div>'+
         '</div>'+
-        '<div class="tm-level-badge" style="background:'+ml.color+'22;color:'+ml.color+';border:1px solid '+ml.color+'44">Nv.'+ml.level+' '+ml.label+'</div>'+
+        '<div class="tm-level-badge" style="background:'+mlColor2+'22;color:'+mlColor2+';border:1px solid '+mlColor2+'44">Nv.'+mlNum+' '+mlLabel2+'</div>'+
       '</div>'+
       '<div class="t-sm mb3" style="color:var(--ts);line-height:1.5">'+tech.desc+'</div>'+
       // Mastery bar
@@ -2391,7 +2481,10 @@ function renderTechEvolContent(){
   if(!tech){el.innerHTML='<div class="c-muted t-sm">Elige primero una técnica.</div>';return;}
   const canEvolve=isTechEvolvable();
   const mxp=p.techMasteryXP||0;
-  const ml=getTechMasteryLevel(mxp);
+  const mlNum=getTechMasteryLevel(mxp);
+  const mlMax=getTechMaxMastery();
+  const mlColor=mlNum>=mlMax?'var(--gold)':mlNum>=Math.round(mlMax*0.7)?'var(--purple)':mlNum>=Math.round(mlMax*0.4)?'var(--emb)':'var(--g3)';
+  const mlLabel=mlNum>=mlMax?'Maestría Máxima':mlNum>=Math.round(mlMax*0.7)?'Avanzado':mlNum>=Math.round(mlMax*0.4)?'Intermedio':'Aprendiz';
   const targets=tech.evolInto||[];
   el.innerHTML=
     '<div class="card mb3"><div class="ct">🔥 Estado de Evolución</div>'+
@@ -2401,11 +2494,11 @@ function renderTechEvolContent(){
     '</div>'+
     '<div class="flex iac g3_ mb2">'+
       '<span class="t-xs mono c-muted">Maestría:</span>'+
-      '<span class="tm-level-badge" style="background:'+ml.color+'22;color:'+ml.color+';border:1px solid '+ml.color+'44">Nivel '+ml.level+' — '+ml.label+'</span>'+
-      '<span class="t-xs mono c-muted">'+mxp+'/'+xpForLevel(getTechMaxMastery())+' XP</span>'+
+      '<span class="tm-level-badge" style="background:'+mlColor+'22;color:'+mlColor+';border:1px solid '+mlColor+'44">Nivel '+mlNum+' — '+mlLabel+'</span>'+
+      '<span class="t-xs mono c-muted">'+mxp+'/'+xpForLevel(mlMax)+' XP</span>'+
     '</div>'+
-    '<div class="pw mb2" style="height:6px"><div class="pf p-mastery" style="width:'+Math.min(100,(mxp/xpForLevel(getTechMaxMastery())*100))+'%"></div></div>'+
-    (canEvolve?'<div class="t-xs c-ok mono">✓ Maestría al máximo. Elige tu evolución abajo.</div>':'<div class="t-xs c-muted mono">Usa habilidades en combate para ganar XP de maestría. Necesitas '+xpForLevel(getTechMaxMastery())+' XP para evolucionar.</div>')+
+    '<div class="pw mb2" style="height:6px"><div class="pf p-mastery" style="width:'+Math.min(100,Math.round(mxp/xpForLevel(mlMax)*100))+'%"></div></div>'+
+    (canEvolve?'<div class="t-xs c-ok mono">✓ Maestría al máximo. Elige tu evolución abajo.</div>':'<div class="t-xs c-muted mono">Usa habilidades en combate para ganar XP de maestría. Necesitas '+xpForLevel(mlMax)+' XP para evolucionar.</div>')+
     '</div>'+
     (!targets.length?'<div class="card"><div class="c-muted t-sm">Esta técnica está en el tier más alto. No puede evolucionar más.</div></div>':
     '<div class="card"><div class="ct">⚡ Evoluciones Disponibles</div><div class="tech-tier-cards">'+
@@ -3051,34 +3144,44 @@ function completeMission(id){
 // ═══════════════════════════════════════════════════════
 let BD={};let timerInt=null;let activeMissionId=null;let bossPhase=false;
 
-// ── Skill cooldown system ──────────────────────────────
-// Returns the cooldown in turns for a given skill.
-// Basic attacks: 0. Higher cost/power/domain = more cooldown.
-function getSkillCooldown(sk){
+// ── Skill cooldown system (real-time, seconds-based) ──
+// Cooldown scales with EM cost: more expensive = longer cooldown.
+// Stored as {skillId: expiryTimestamp} in BD.skillCooldowns.
+function getSkillCooldownSecs(sk){
   if(!sk)return 0;
-  if(sk.type==='domain')return 5;
-  if(sk.type==='buff'||sk.type==='defense')return 3;
-  if(sk.type==='heal')return 3;
-  if(sk.type==='debuff')return 2;
-  // Attack: scale by cost
-  if(sk.cost>=150)return 4;
-  if(sk.cost>=80)return 3;
-  if(sk.cost>=40)return 2;
-  if(sk.cost>=20)return 1;
+  if(sk.type==='domain')return 90;
+  if(sk.type==='buff'||sk.type==='defense')return 45;
+  if(sk.type==='heal')return 40;
+  if(sk.type==='debuff')return 30;
+  // Attack: scale by EM cost
+  if(sk.cost>=250)return 90;
+  if(sk.cost>=150)return 70;
+  if(sk.cost>=80)return 50;
+  if(sk.cost>=40)return 30;
+  if(sk.cost>=20)return 15;
+  if(sk.cost>0)return 8;
   return 0;
 }
 function initSkillCooldowns(){
-  // Returns a fresh {skillId: 0} map for all unlocked skills
   const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
   const cds={};
   if(tech)tech.skills.forEach(sk=>{if(p.unlockedSkills.includes(sk.id))cds[sk.id]=0;});
   return cds;
 }
-function getCD(skillId){return (BD.skillCooldowns||{})[skillId]||0;}
-function tickCooldowns(){
-  if(!BD.skillCooldowns)return;
-  Object.keys(BD.skillCooldowns).forEach(k=>{if(BD.skillCooldowns[k]>0)BD.skillCooldowns[k]--;});
+function getCD(skillId){
+  const exp=(BD.skillCooldowns||{})[skillId]||0;
+  if(!exp)return 0;
+  const rem=Math.ceil((exp-Date.now())/1000);
+  return rem>0?rem:0;
 }
+function setCD(skillId,seconds){
+  if(!BD.skillCooldowns)BD.skillCooldowns={};
+  BD.skillCooldowns[skillId]=Date.now()+seconds*1000;
+}
+// Legacy compat — no longer used for turn ticking, CDs are time-based
+function tickCooldowns(){}
+// Legacy compat
+function getSkillCooldown(sk){return getSkillCooldownSecs(sk);}
 
 function startMissionCombat(mId){
   const m=S.activeMissions?.find(m=>m.id===mId);if(!m)return;
@@ -3199,15 +3302,31 @@ function buildBActions(){
     const cd=getCD(sk.id);
     const onCd=cd>0;
     const disabled=!af||onCd;
-    const cdColor='color:var(--warn)';
-    btns.push('<button class="ba-btn '+(dom?'domain-btn':'')+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="bAction(\'skill\',\''+sk.id+'\')">'+
+    btns.push('<button class="ba-btn '+(dom?'domain-btn':'')+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="bAction(\'skill\',\''+sk.id+'\')" id="skbtn_'+sk.id+'">'+
       '<div class="bbn">'+sk.icon+' '+sk.name+'</div>'+
-      '<div class="bbc">'+(onCd?'<span style="'+cdColor+'">CD: '+cd+' turno'+(cd>1?'s':'')+'</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
-      '<div class="bbt">'+sk.type+(sk.statusEffect?' · '+sk.statusEffect:'')+(getSkillCooldown(sk)>0?' · CD'+getSkillCooldown(sk):'')+'</div>'+
+      '<div class="bbc">'+(onCd?'<span style="color:var(--warn)">⏱ '+cd+'s</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
+      '<div class="bbt">'+sk.type+(sk.statusEffect?' · '+sk.statusEffect:'')+(getSkillCooldownSecs(sk)>0?' · CD'+getSkillCooldownSecs(sk)+'s':'')+'</div>'+
     '</button>');
   });}
   btns.push('<button class="ba-btn flee" onclick="bAction(\'flee\')"><div class="bbn">🏃 Huir</div><div class="bbc" style="color:var(--warn)">60%</div><div class="bbt">Escapar</div></button>');
   el.innerHTML=btns.join('');
+  // Start a CD refresh ticker if any skill is on cooldown
+  scheduleCDRefresh();
+}
+
+let cdRefreshInt=null;
+function scheduleCDRefresh(){
+  clearInterval(cdRefreshInt);
+  if(!BD.skillCooldowns||BD.ended)return;
+  const hasActive=Object.values(BD.skillCooldowns).some(exp=>exp>Date.now());
+  if(!hasActive)return;
+  cdRefreshInt=setInterval(()=>{
+    if(BD.ended){clearInterval(cdRefreshInt);return;}
+    // Only refresh if player's turn (don't interrupt enemy turn UI)
+    if(BD.turn==='player')buildBActions();
+    const stillActive=Object.values(BD.skillCooldowns||{}).some(exp=>exp>Date.now());
+    if(!stillActive)clearInterval(cdRefreshInt);
+  },1000);
 }
 
 function startTimer(){
@@ -3243,7 +3362,7 @@ function bAction(type,skillId){
   }
   else if(type==='skill'&&tech){
     const sk=tech.skills.find(s=>s.id===skillId);if(!sk)return;
-    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+' turnos)','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+'s restantes)','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
     // Apply EM discount from tree
     const discountedCost=applyEmDiscount(sk.cost);
     if(discountedCost>0&&p.em<discountedCost){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
@@ -3251,9 +3370,9 @@ function bAction(type,skillId){
     // Track EM spent this combat for Absorción Maldita
     if(!BD.emSpentThisCombat)BD.emSpentThisCombat=0;
     BD.emSpentThisCombat+=discountedCost;
-    // Set cooldown after use
-    const cdVal=getSkillCooldown(sk);
-    if(cdVal>0&&BD.skillCooldowns)BD.skillCooldowns[sk.id]=cdVal;
+    // Set cooldown after use (seconds-based)
+    const cdSecs=getSkillCooldownSecs(sk);
+    if(cdSecs>0)setCD(sk.id,cdSecs);
     const mb=getMasteryBonus(sk.id)*(1+getTechPowerBonus());
     // Apply resonance bonus
     const resonanceMult=hasTreeNode('tec_p3')?1+Math.min(resonanceBonus,2)*0.1:1;
@@ -3524,20 +3643,75 @@ function endCombat(success){
 }
 
 function showCombatResult(win,xp,em){
+  const o=document.getElementById('bResOverlay');
+  if(!win){
+    o.innerHTML='<div class="bres">'+
+      '<div class="bres-title lose">💀 DERROTA</div>'+
+      '<div class="t-sm c-muted">Recupera energía.</div>'+
+      '<button class="btn btn-g" onclick="endCombat(false)">← Volver al tablero</button>'+
+    '</div>';
+    return;
+  }
+  // WIN
+  if(BD.isCleaningMission){
+    const zoneId=BD.cleaningZoneId;
+    const cm=S.cleaningMissions?.[zoneId];
+    const mission=cm?.missions.find(x=>x.id===activeMissionId);
+    const done=mission?.completed;
+    const progress=mission?.progress||0;
+    const target=mission?.target||1;
+    const remaining=target-progress;
+    const canContinue=!done&&remaining>0;
+    // EM cost to resume if paused: proportional (10% of maxEM per remaining kill, min 5)
+    const resumeCost=Math.max(5,Math.round(S.player.maxEm*0.08*remaining));
+    const hasEM=S.player.em>=5;
+    o.innerHTML='<div class="bres">'+
+      '<div class="bres-title win">⚔️ VICTORIA</div>'+
+      '<div class="bres-rwds">'+
+        '<div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div>'+
+        '<div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+2</div></div>'+
+      '</div>'+
+      (done?'<div class="t-sm c-ok mb2">🏆 ¡Misión completada!</div>':'<div class="t-xs mono c-muted mb2">Progreso: '+progress+'/'+target+' maldiciones</div>')+
+      (canContinue&&hasEM?'<button class="btn btn-d" style="width:100%;margin-bottom:6px" onclick="continueCleaning()">⚔️ Siguiente maldición ('+remaining+' restantes)</button>':'')+
+      (canContinue&&!hasEM?'<div class="t-xs" style="color:var(--warn);margin-bottom:6px">⚡ Sin EM para continuar</div>':'')+
+      (canContinue?'<button class="btn btn-g" style="width:100%;margin-bottom:6px" onclick="pauseCleaning('+resumeCost+')">⏸ Pausar misión (reanudar costará '+resumeCost+' EM)</button>':'')+
+      '<button class="btn btn-g btn-sm" onclick="endCombat(true)">← Volver al tablero</button>'+
+    '</div>';
+    return;
+  }
+  // Non-cleaning win
   const am=S.activeMissions?.find(x=>x.id===activeMissionId);
   const missionDone=am&&am.progress>=am.target;
-  const o=document.getElementById('bResOverlay');
   o.innerHTML='<div class="bres">'+
-    '<div class="bres-title '+(win?'win':'lose')+'">'+(win?'⚔️ VICTORIA':'💀 DERROTA')+'</div>'+
-    (win?'<div class="bres-rwds">'+
+    '<div class="bres-title win">⚔️ VICTORIA</div>'+
+    '<div class="bres-rwds">'+
       '<div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div>'+
       '<div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+2</div></div>'+
-    '</div>':'<div class="t-sm c-muted">Recupera energía.</div>')+
-    (win&&am&&!missionDone?'<button class="btn btn-d" onclick="continueCombat()">⚔️ Continuar ('+((am.progress||0)+'/'+am.target)+')</button>':'')+
+    '</div>'+
+    (am&&!missionDone?'<button class="btn btn-d" onclick="continueCombat()">⚔️ Continuar ('+((am.progress||0)+'/'+am.target)+')</button>':'')+
     (missionDone?'<div class="t-sm c-ok">🏆 ¡Misión completada!</div>':'')+
-    '<button class="btn btn-g" onclick="endCombat('+win+')">← Volver al tablero</button>'+
+    '<button class="btn btn-g" onclick="endCombat(true)">← Volver al tablero</button>'+
   '</div>';
 }
+
+function continueCleaning(){
+  if(S.player.em<5)return toast('Sin EM para continuar','error');
+  document.getElementById('bResOverlay').innerHTML='';
+  startCleaningCombat(activeMissionId);
+}
+
+function pauseCleaning(resumeCost){
+  // Save pause state on the mission
+  const zoneId=BD.cleaningZoneId;
+  if(zoneId&&S.cleaningMissions?.[zoneId]){
+    const mission=S.cleaningMissions[zoneId].missions.find(x=>x.id===activeMissionId);
+    if(mission){mission.paused=true;mission.resumeCost=resumeCost;}
+    saveS();
+  }
+  toast('⏸ Misión pausada. Costará '+resumeCost+' EM reanudarla.','em');
+  endCombat(true);
+}
+
 function continueCombat(){document.getElementById('bResOverlay').innerHTML='';startMissionCombat(activeMissionId);}
 
 function triggerDomainAnim(name){
@@ -3970,11 +4144,12 @@ function buildRaidActions(){
     const cd=getCD(sk.id);const onCd=cd>0;const disabled=!af||onCd;
     btns+='<button class="ba-btn '+(sk.type==='domain'?'domain-btn':'')+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="raidAction(\'skill\',\''+sk.id+'\')">'+
       '<div class="bbn">'+sk.icon+' '+sk.name+'</div>'+
-      '<div class="bbc">'+(onCd?'<span style="color:var(--warn)">CD: '+cd+'t</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
+      '<div class="bbc">'+(onCd?'<span style="color:var(--warn)">⏱ '+cd+'s</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
     '</button>';
   });}
   btns+='<button class="ba-btn flee" onclick="raidAction(\'flee\')"><div class="bbn">🏃 Huir / Pausar</div><div class="bbc" style="color:var(--warn)">Pausa la raid</div></button>';
   el.innerHTML=btns;
+  scheduleCDRefresh();
 }
 
 function raidAction(type,skillId){
@@ -3992,11 +4167,10 @@ function raidAction(type,skillId){
   }
   else if(type==='skill'&&tech){
     const sk=tech.skills.find(s=>s.id===skillId);if(!sk)return;
-    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+' turnos)','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
+    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+'s)','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
     if(sk.cost>0&&p.em<sk.cost){toast('EM insuficiente','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
     if(sk.cost>0)useEM(sk.cost);
-    const cdVal=getSkillCooldown(sk);
-    if(cdVal>0&&BD.skillCooldowns)BD.skillCooldowns[sk.id]=cdVal;
+    const cdSecs2=getSkillCooldownSecs(sk);if(cdSecs2>0)setCD(sk.id,cdSecs2);
     const mb=getMasteryBonus(sk.id);
     if(sk.type==='attack'||sk.type==='domain'){dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);}if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
     else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
@@ -4632,7 +4806,7 @@ function handleAvatar(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
-    compressImage(ev.target.result,128,0.65,compressed=>{
+    compressImage(ev.target.result,512,0.92,compressed=>{
       S.player.avatar=compressed;saveS();uiAll();renderPlayer();toast('Avatar actualizado','success');
     });
   };
@@ -4659,7 +4833,7 @@ function triggerSpriteUpload(type){
       const f=e.target.files[0];if(!f)return;
       const r=new FileReader();
       r.onload=ev=>{
-        compressImage(ev.target.result,256,0.65,compressed=>{
+        compressImage(ev.target.result,400,0.88,compressed=>{
           S.player.playerSprite=compressed;saveS();renderConfig();
         });
       };
