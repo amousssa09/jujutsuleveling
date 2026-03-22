@@ -699,8 +699,8 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 <!-- RAIDS -->
 <div class="page" id="page-raids">
-  <div class="page-h"><h1>Raids</h1><p>Accede a cualquier raid que cumpla los requisitos de grado.</p></div>
-  <div id="raidList" class="raid-grid"></div>
+  <div class="page-h"><h1>Raids</h1><p>Raids globales, raids de ciudad y jefes locales.</p></div>
+  <div id="raidList"></div>
 </div>
 
 <!-- RAID COMBAT (dedicated page) -->
@@ -825,7 +825,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div class="mh"><div class="modal-title" id="habitMoT">Nuevo Hábito</div><div class="mc" onclick="cm('habitMo')">✕</div></div>
   <div class="fg"><label>Nombre *</label><input class="fi" id="hbName"></div>
   <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="hbPri"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="hbDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
-  <div class="g2"><div class="fg"><label>Frecuencia</label><select class="fs" id="hbFreq"><option value="daily">Diario</option><option value="weekly">Semanal</option></select></div><div class="fg"><label>EM por vez</label><input type="number" class="fi" id="hbEM" value="20" min="5" max="150"></div></div>
+  <div class="fg"><label>Frecuencia</label><select class="fs" id="hbFreq"><option value="daily">Diario</option><option value="weekly">Semanal</option></select></div>
   <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="hbS"></div><div class="fg"><label>Fin (opcional)</label><input type="date" class="fi" id="hbE"></div></div>
   <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('habitMo')">Cancelar</button><button class="btn btn-p" onclick="saveHabit()">✓ Guardar</button></div>
 </div></div>
@@ -1640,7 +1640,8 @@ const DFLT={
     stats:{fuerza:5,defensa:5,velocidad:5,inteligencia:5,maldicion:5,dominio:5},
     technique:null,unlockedSkills:[],skillMastery:{},
     techMasteryXP:0,   // unified technique mastery XP
-    statTreeNodes:[],  // unlocked stat tree node ids
+    statTreeNodes:[],  // unlocked branch node ids
+    statNodePts:{},    // { nodeId: ptsInvested } for stat nodes
     failStreak:0,missionsCompleted:0,bossesKilled:{}
   },
   tasks:[],habits:[],goals:[],
@@ -1701,6 +1702,7 @@ function loadS(){
       if(!d.player.bossesKilled)d.player.bossesKilled={};
       if(d.player.techMasteryXP===undefined)d.player.techMasteryXP=0;
       if(!d.player.statTreeNodes)d.player.statTreeNodes=[];
+      if(!d.player.statNodePts)d.player.statNodePts={};
       if(!d.activeMissions)d.activeMissions=[];
       if(!d.completedMissions)d.completedMissions=[];
       if(!d.generatedMissions)d.generatedMissions=[];
@@ -2020,30 +2022,38 @@ function generateCleaningMissions(){
   if(!cleaningSelectedZone)return toast('Selecciona una zona primero','error');
   const {city,zone}=cleaningSelectedZone;
   const p=S.player;
-  // Clear existing cleaning missions for this zone
   if(!S.cleaningMissions)S.cleaningMissions={};
+
+  // Difficulty tier based on player level
   const diffIdx=Math.min(3,Math.max(0,Math.floor((p.level-1)/10)));
   const diffTable=['facil','normal','dificil','extreme'];
-  const diffMult={facil:1,normal:1.5,dificil:2.2,extreme:3.5};
-  // Pick 3 distinct types, varying from available
+  const diffMult={facil:1,normal:1.3,dificil:1.7,extreme:2.2};
+
+  // Kill targets: always small numbers (3–10), enemy difficulty compensates
+  // facil→5-7, normal→4-6, dificil→3-5, extreme→3-4
+  const killTargets={facil:[5,6,7],normal:[4,5,6],dificil:[3,4,5],extreme:[3,4]};
+
   const typePool=[...CLEANING_TYPES];
   const missions=[];
   for(let i=0;i<3;i++){
     const type=typePool[Math.floor(Math.random()*typePool.length)];
-    // Vary difficulty slightly per mission
     const varIdx=Math.max(0,Math.min(3,diffIdx+(Math.random()<.3?1:0)));
     const diff=diffTable[varIdx];
     const dm=diffMult[diff];
     const title=CLEANING_NAMES[Math.floor(Math.random()*CLEANING_NAMES.length)].replace('{zone}',zone.name);
+    const targetPool=killTargets[diff];
+    const killCount=targetPool[Math.floor(Math.random()*targetPool.length)];
     const m={
       id:'cm_'+Date.now()+'_'+i,
       type,title,diff,
       cityId:city.id,cityName:city.name,zoneId:zone.id,zoneName:zone.name,zoneGrade:zone.grade,
-      progress:0,target:type==='kill'?Math.round((2+p.level*0.5)*dm):1,
-      reward:{xp:Math.round(60*dm*p.level*0.4+40)},
-      desc:type==='kill'?'Elimina maldiciones en '+zone.name+'.':
-           type==='protect'?'Protege '+zone.name+' durante el combate.':
-           'Neutraliza al usuario maldito en '+zone.name+'.',
+      progress:0,
+      target:type==='kill'?killCount:1,
+      reward:{xp:Math.round(80*dm*p.level*0.35+60)},
+      desc:type==='kill'?
+        'Elimina '+killCount+' maldiciones '+(diff==='extreme'||diff==='dificil'?'de élite ':'')+'en '+zone.name+'.':
+        type==='protect'?'Protege '+zone.name+' durante el combate.':
+        'Neutraliza al usuario maldito en '+zone.name+'.',
       completed:false,
     };
     missions.push(m);
@@ -2086,10 +2096,12 @@ function claimCleaningReward(){
   const cm=S.cleaningMissions?.[zoneId];
   if(!cm||cm.missions.filter(m=>m.completed).length<3)return;
   if(cm.claimed)return toast('Ya reclamaste esta recompensa','error');
-  // Compute reward: sum of all mission XP + mastery bonus
+  // Compute reward: sum of all mission XP + EM + mastery bonus
   const totalXP=cm.missions.reduce((a,m)=>a+m.reward.xp,0);
+  const totalEM=cm.missions.reduce((a,m)=>a+Math.round(m.reward.xp*0.4),0);
   const masteryGain=8;
   addXP(totalXP);
+  addEM(totalEM,'Zona limpiada: '+cleaningSelectedZone.zone.name);
   gainMastery(null,masteryGain);
   cm.claimed=true;
   cm.completedAt=Date.now();
@@ -2099,7 +2111,7 @@ function claimCleaningReward(){
   // Mark zone as safe
   const zst=S.zoneStatus[zoneId];if(zst)zst.remaining=0;
   saveS();
-  toast('🏆 +'+totalXP+' XP + Maestría ×'+masteryGain+' — Zona limpia por 30 min','gold');
+  toast('🏆 +'+totalXP+' XP · +'+totalEM+' EM · Maestría ×'+masteryGain+' — Zona limpia por 30 min','gold');
   log_('Zona limpiada: '+cleaningSelectedZone.zone.name);
   cleaningSelectedZone=null;
   clearCleaningZone();
@@ -2130,16 +2142,24 @@ function renderCleaningMissions(){
   const zoneId=cleaningSelectedZone.zone.id;
   const cm=S.cleaningMissions?.[zoneId];
   if(!cm){el.innerHTML='<div class="c-muted t-sm">Pulsa "Generar 3 Misiones" para empezar.</div>';return;}
-  const typeLabel={kill:'⚔️ Eliminación',protect:'🛡 Proteger',curse:'🧙 Usuario Maldito'}
+  const typeLabel={kill:'⚔️ Eliminación',protect:'🛡 Proteger',curse:'🧙 Usuario Maldito'};
+  const diffColor={facil:'var(--ok)',normal:'var(--emb)',dificil:'var(--warn)',extreme:'var(--red)'};
+  const gradeOrder=[5,4,3,2,'sg1',1,'semi','special'];
+  const gradeUpMap={facil:0,normal:0,dificil:1,extreme:2};
+  const gradeLbl={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'};
   el.innerHTML='<div class="mboard">'+cm.missions.map((m,i)=>{
     const pct=m.target>0?Math.round((m.progress||0)/m.target*100):0;
+    const baseIdx=Math.max(0,gradeOrder.indexOf(m.zoneGrade||3));
+    const enemyGrade=gradeOrder[Math.min(gradeOrder.length-1,baseIdx+(gradeUpMap[m.diff]||0))];
+    const emReward=Math.round(m.reward.xp*0.4);
     return '<div class="mbc mt-'+m.type+' '+(m.completed?'accepted':'')+'">'+
       '<div class="mb-hdr">'+
         '<div>'+
           '<div class="mb-title">'+(m.completed?'✅ ':'')+m.title+'</div>'+
           '<div class="mb-tags mt1">'+
             '<span class="mb-tag tt-'+m.type+'">'+typeLabel[m.type]+'</span>'+
-            '<span class="mb-tag diff-'+m.diff+'">'+m.diff.toUpperCase()+'</span>'+
+            '<span class="mb-tag diff-'+m.diff+'" style="color:'+diffColor[m.diff]+';border-color:'+diffColor[m.diff]+'44">'+m.diff.toUpperCase()+'</span>'+
+            '<span class="mb-tag">💀 '+gradeLbl[enemyGrade]+'</span>'+
             '<span class="mb-tag">📍'+m.zoneName+'</span>'+
           '</div>'+
         '</div>'+
@@ -2149,7 +2169,7 @@ function renderCleaningMissions(){
       (!m.completed&&m.target>1?'<div class="mb-prog-row"><span>Progreso</span><span>'+((m.progress||0)+'/'+m.target)+'</span></div>'+
         '<div class="pw mb3" style="height:4px"><div class="pf p-em" style="width:'+pct+'%"></div></div>':'')+
       '<div class="flex iac jb">'+
-        '<div class="flex g2_"><span class="mb-tag">⭐+'+m.reward.xp+' XP</span></div>'+
+        '<div class="flex g2_"><span class="mb-tag">⭐+'+m.reward.xp+' XP</span><span class="mb-tag c-em">⚡+'+emReward+' EM</span></div>'+
         (m.completed?'<span class="t-xs c-ok mono fw7">COMPLETADA</span>':
           '<button class="btn btn-d btn-sm" onclick="startCleaningCombat(\''+m.id+'\')">⚔️ Combatir</button>')+
       '</div>'+
@@ -2163,28 +2183,44 @@ function startCleaningCombat(mId){
   const cm=S.cleaningMissions?.[zoneId];if(!cm)return;
   const m=cm.missions.find(x=>x.id===mId);if(!m||m.completed)return;
   activeMissionId=mId;
-  // Build the enemy from zone grade
+
+  // Enemy grade: use zone grade, but bump up for dificil/extreme missions
+  const gradeUpMap={facil:0,normal:0,dificil:1,extreme:2};
+  const gradeOrder=[5,4,3,2,'sg1',1,'semi','special'];
+  const baseGradeIdx=Math.max(0,gradeOrder.indexOf(m.zoneGrade||3));
+  const bumpedIdx=Math.min(gradeOrder.length-1,baseGradeIdx+(gradeUpMap[m.diff]||0));
+  const enemyGrade=gradeOrder[bumpedIdx];
+
   let enemy;
   if(m.type==='curse'){
-    const poolKey=S.player.level<10?3:S.player.level<25?1:'special';
-    enemy=pickEnemyForZone(poolKey);enemy.isCurseUser=true;
+    // Cursed user: always high grade
+    const curseGradeIdx=Math.min(gradeOrder.length-1,bumpedIdx+1);
+    enemy=pickEnemyForZone(gradeOrder[curseGradeIdx]);enemy.isCurseUser=true;
   } else {
-    enemy=pickEnemyForZone(m.zoneGrade||3);
+    enemy=pickEnemyForZone(enemyGrade);
   }
+
+  // Scale stats: level mult + difficulty mult
+  const diffStatMult={facil:1.0,normal:1.15,dificil:1.4,extreme:1.75};
   const lvMult=1+Math.max(0,(S.player.level-1)*0.015);
-  enemy.hp=Math.round(enemy.hp*lvMult);enemy.maxHp=enemy.hp;enemy.atk=Math.round(enemy.atk*lvMult);
+  const dm=(diffStatMult[m.diff]||1)*lvMult;
+  enemy.hp=Math.round(enemy.hp*dm);enemy.maxHp=enemy.hp;
+  enemy.atk=Math.round(enemy.atk*dm);
+  // Dificil/extreme enemies get extra defense
+  if(m.diff==='dificil'||m.diff==='extreme')enemy.def=(enemy.def||0)+Math.round(enemy.atk*0.2);
+
   const p=S.player;
   // Use a fake mission object compatible with battle system
   BD={
     missionId:mId,
     mission:{...m,id:mId,target:1,progress:0}, // each fight = 1 kill
     enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
-    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),
     isCleaningMission:true,cleaningZoneId:zoneId,
   };
   document.getElementById('missionBoardSel').style.display='none';
   document.getElementById('battleMain').style.display='block';
-  updateCombat();buildBActions();clearCLog();
+  if(hasTreeNode('em_p3')&&S.player.em<50){S.player.em=50;saveS();}updateCombat();buildBActions();clearCLog();
   const gradeLabel={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[enemy.grade]||'';
   clog('⚔️ '+m.title+' — '+m.zoneName,'cl-info');
   clog('Enemigo: '+enemy.emoji+' '+enemy.name+' ['+gradeLabel+']','cl-log');
@@ -2420,113 +2456,306 @@ function showSkillInfo(techId,skId){
 
 // ─── STAT SKILL TREE DATA ───
 // 4 pillars: Vida, Fuerza, Técnica, Espíritu
+// ═══════════════════════════════════════════════════════
+// STAT TREE — Progressive investment system
+// Stat nodes: invest pts 1 at a time up to maxPts (10).
+//   Every 3 pts invested → bonus applies incrementally.
+//   When node reaches maxPts → "complete", unlocks its branches.
+// Branch nodes (passive/active): 1-time purchase with flat cost.
+// ═══════════════════════════════════════════════════════
 const STAT_TREE={
-  vida:{label:'Vida',icon:'❤️',color:'#e05050',nodes:[
-    {id:'vida_1',name:'Resistencia I',icon:'💪',type:'stat',desc:'+20 HP máximo',cost:1,effect:{maxHp:20},req:[]},
-    {id:'vida_2',name:'Resistencia II',icon:'🛡',type:'stat',desc:'+40 HP máximo',cost:2,effect:{maxHp:40},req:['vida_1']},
-    {id:'vida_p1',name:'Regeneración',icon:'🌿',type:'passive',desc:'Recuperas 5 HP al inicio de cada combate',cost:2,effect:{regen:5},req:['vida_1']},
-    {id:'vida_3',name:'Cuerpo de Acero',icon:'⚙️',type:'stat',desc:'+80 HP máximo. Reducción de daño −5%',cost:3,effect:{maxHp:80,dmgReduce:5},req:['vida_2']},
-    {id:'vida_a1',name:'Voluntad Inquebrantable',icon:'🔥',type:'active',desc:'Activa: Recupera 25% de HP máximo. (1 uso/combate)',cost:3,effect:{healPct:25},req:['vida_p1','vida_2']},
-    {id:'vida_4',name:'Cuerpo Maldito',icon:'☠️',type:'stat',desc:'+150 HP máximo',cost:4,effect:{maxHp:150},req:['vida_3']},
-  ]},
-  fuerza:{label:'Fuerza',icon:'⚔️',color:'#e07030',nodes:[
-    {id:'fuerza_1',name:'Golpe Firme',icon:'👊',type:'stat',desc:'+3 Fuerza',cost:1,effect:{fuerza:3},req:[]},
-    {id:'fuerza_2',name:'Impacto Potenciado',icon:'💥',type:'stat',desc:'+5 Fuerza',cost:2,effect:{fuerza:5},req:['fuerza_1']},
-    {id:'fuerza_p1',name:'Instinto Combativo',icon:'🐾',type:'passive',desc:'10% de probabilidad de golpe crítico (×2 daño)',cost:2,effect:{critChance:10},req:['fuerza_1']},
-    {id:'fuerza_3',name:'Demoledor',icon:'🏔',type:'stat',desc:'+8 Fuerza. Ignora 15% de defensa enemiga',cost:3,effect:{fuerza:8,piercing:15},req:['fuerza_2']},
-    {id:'fuerza_a1',name:'Ráfaga Maldita',icon:'🌪️',type:'active',desc:'Activa: Ataque que hace ×1.8 daño (1 uso/combate)',cost:3,effect:{burstMult:1.8},req:['fuerza_p1','fuerza_2']},
-    {id:'fuerza_4',name:'Puño del Rey',icon:'👑',type:'stat',desc:'+12 Fuerza. +5% daño por oleada en raids',cost:4,effect:{fuerza:12,raidDmgBonus:5},req:['fuerza_3']},
-  ]},
-  tecnica:{label:'Técnica',icon:'✨',color:'#6050e0',nodes:[
-    {id:'tec_1',name:'Refinamiento',icon:'🔮',type:'stat',desc:'+3 Maldición. +2 EM máximo',cost:1,effect:{maldicion:3,maxEm:20},req:[]},
-    {id:'tec_2',name:'Canal Estable',icon:'💫',type:'stat',desc:'+5 Maldición. Habilidades cuestan −5% EM',cost:2,effect:{maldicion:5,emDiscount:5},req:['tec_1']},
-    {id:'tec_p1',name:'Acumulación Pasiva',icon:'⚡',type:'passive',desc:'Ganas +2 EM al inicio de cada turno en combate',cost:2,effect:{emPerTurn:2},req:['tec_1']},
-    {id:'tec_3',name:'Dominio Expandido',icon:'⬡',type:'stat',desc:'+8 Maldición. Dominios hacen ×1.2 daño adicional',cost:3,effect:{maldicion:8,domainBonus:20},req:['tec_2']},
-    {id:'tec_a1',name:'Sobrecarga de EM',icon:'🌀',type:'active',desc:'Activa: +50 EM instantáneo (1 uso/combate)',cost:3,effect:{emBurst:50},req:['tec_p1','tec_2']},
-    {id:'tec_4',name:'Técnica Perfecta',icon:'🌟',type:'stat',desc:'+12 Maldición. Maestría gana +50% XP',cost:4,effect:{maldicion:12,masteryBonus:50},req:['tec_3']},
-  ]},
-  espiritu:{label:'Espíritu',icon:'👁',color:'#30a0c0',nodes:[
-    {id:'esp_1',name:'Percepción Maldita',icon:'🔍',type:'stat',desc:'+3 Dominio. +2 Inteligencia',cost:1,effect:{dominio:3,inteligencia:2},req:[]},
-    {id:'esp_2',name:'Aura Amplificada',icon:'🌊',type:'stat',desc:'+5 Dominio. Gana +5% XP de combate',cost:2,effect:{dominio:5,xpBonus:5},req:['esp_1']},
-    {id:'esp_p1',name:'Sentido Maldito',icon:'🧠',type:'passive',desc:'Ves los HP del enemigo más claramente. +10% esquiva',cost:2,effect:{dodgeBonus:10},req:['esp_1']},
-    {id:'esp_3',name:'Alma Fortalecida',icon:'💎',type:'stat',desc:'+8 Dominio. Resistencia a estados de alteración +30%',cost:3,effect:{dominio:8,statusResist:30},req:['esp_2']},
-    {id:'esp_a1',name:'Escudo del Alma',icon:'🛡',type:'active',desc:'Activa: Barrera que absorbe el 80% del siguiente ataque',cost:3,effect:{soulBarrier:80},req:['esp_p1','esp_2']},
-    {id:'esp_4',name:'Maestría del Alma',icon:'⭐',type:'stat',desc:'+12 Dominio. +3 a todos los stats',cost:4,effect:{dominio:12,allStats:3},req:['esp_3']},
-  ]},
+  // ── PILAR 1: SALUD ────────────────────────────────────
+  salud:{label:'Salud',icon:'❤️',color:'#e05050',
+    nodes:[
+      // STAT NODES — invest up to maxPts; per3 = bonus per 3 pts invested
+      {id:'salud_1',name:'Vida I',   icon:'❤️',type:'stat',maxPts:10,req:[],
+        per3:{maxHp:8},desc:'Cada 3 pts: +8 HP máx. Al completar desbloquea Aguante.'},
+      {id:'salud_2',name:'Vida II',  icon:'❤️',type:'stat',maxPts:10,req:['salud_1'],
+        per3:{maxHp:8},desc:'Cada 3 pts: +8 HP máx. Al completar desbloquea Cuerpo Templado.'},
+      {id:'salud_3',name:'Vida III', icon:'❤️',type:'stat',maxPts:10,req:['salud_2'],
+        per3:{maxHp:8},desc:'Cada 3 pts: +8 HP máx. Al completar desbloquea Barrera Corporal y Límite Roto.'},
+      {id:'salud_4',name:'Vida IV',  icon:'❤️',type:'stat',maxPts:10,req:['salud_3'],
+        per3:{maxHp:8},desc:'Cada 3 pts: +8 HP máx.'},
+      // BRANCH NODES — unlocked when parent stat is complete
+      {id:'salud_p1',name:'Aguante',         icon:'🛡',type:'passive',cost:15,req:['salud_1'],
+        desc:'Al recibir daño letal, sobrevives con 1 HP (una vez por combate).',effect:{lastStand:true}},
+      {id:'salud_p2',name:'Cuerpo Templado', icon:'🪨',type:'passive',cost:20,req:['salud_2'],
+        desc:'Reduce todo el daño recibido en 5 fijo.',effect:{flatDmgReduce:5}},
+      {id:'salud_a1',name:'Barrera Corporal',icon:'🔵',type:'active', cost:30,req:['salud_3'],
+        desc:'Activa: escudo que absorbe el siguiente ataque completamente (1 uso/combate).',effect:{fullBarrier:true}},
+      {id:'salud_p3',name:'Límite Roto',     icon:'💥',type:'passive',cost:25,req:['salud_3'],
+        desc:'Cuando HP < 30%, tu defensa se duplica automáticamente.',effect:{lowHpDefDouble:true}},
+    ]},
+  // ── PILAR 2: ATAQUE ───────────────────────────────────
+  ataque:{label:'Ataque',icon:'⚔️',color:'#e07030',
+    nodes:[
+      {id:'atq_1',name:'Atq I',  icon:'⚔️',type:'stat',maxPts:10,req:[],
+        per3:{fuerza:3,critChance:1},desc:'Cada 3 pts: +3 fuerza, +1% crítico. Al completar desbloquea Puño Divergente.'},
+      {id:'atq_2',name:'Atq II', icon:'⚔️',type:'stat',maxPts:10,req:['atq_1'],
+        per3:{fuerza:3,critChance:1},desc:'Cada 3 pts: +3 fuerza, +1% crítico. Al completar desbloquea Combo Acelerado.'},
+      {id:'atq_3',name:'Atq III',icon:'⚔️',type:'stat',maxPts:10,req:['atq_2'],
+        per3:{fuerza:3,critChance:1},desc:'Cada 3 pts: +3 fuerza, +1% crítico. Al completar desbloquea Instinto y Acometida.'},
+      {id:'atq_4',name:'Atq IV', icon:'⚔️',type:'stat',maxPts:10,req:['atq_3'],
+        per3:{fuerza:3,critChance:1},desc:'Cada 3 pts: +3 fuerza, +1% crítico. Al completar desbloquea Destello Negro y Maestro del Golpe.'},
+      {id:'atq_a1',name:'Puño Divergente',   icon:'👊',type:'active', cost:10,req:['atq_1'],
+        desc:'Golpe sin coste de EM, daño base fijo. (sin CD)',effect:{treeSkill:'div_tree'}},
+      {id:'atq_a2',name:'Combo Acelerado',   icon:'⚡',type:'active', cost:20,req:['atq_2'],
+        desc:'Tres golpes rápidos, daño distribuido. (CD 1)',effect:{treeSkill:'combo_tree'}},
+      {id:'atq_p1',name:'Instinto de Combate',icon:'🐾',type:'passive',cost:20,req:['atq_3'],
+        desc:'20% de probabilidad de atacar dos veces en el mismo turno.',effect:{doubleStrike:20}},
+      {id:'atq_a3',name:'Acometida',         icon:'🌪️',type:'active', cost:25,req:['atq_3'],
+        desc:'Golpe que ignora el 50% de la defensa del enemigo. (CD 2)',effect:{treeSkill:'acometida_tree'}},
+      {id:'atq_a4',name:'Destello Negro',    icon:'⚫',type:'active', cost:40,req:['atq_4'],
+        desc:'Daño ×2.5, coste alto de EM. (CD 3)',effect:{treeSkill:'black_tree'}},
+      {id:'atq_p2',name:'Maestro del Golpe', icon:'⭐',type:'passive',cost:30,req:['atq_4'],
+        desc:'El Destello Negro nunca falla.',effect:{blackFlashNeverMiss:true}},
+    ]},
+  // ── PILAR 3: TÉCNICA ──────────────────────────────────
+  tecnica:{label:'Técnica',icon:'✨',color:'#6050e0',
+    nodes:[
+      {id:'tec_1',name:'Tec I',  icon:'✨',type:'stat',maxPts:10,req:[],
+        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Percepción Maldita.'},
+      {id:'tec_2',name:'Tec II', icon:'✨',type:'stat',maxPts:10,req:['tec_1'],
+        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Eficiencia Técnica.'},
+      {id:'tec_3',name:'Tec III',icon:'✨',type:'stat',maxPts:10,req:['tec_2'],
+        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Dominio Simple y Resonancia Innata.'},
+      {id:'tec_4',name:'Tec IV', icon:'✨',type:'stat',maxPts:10,req:['tec_3'],
+        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Dominio Expandido.'},
+      {id:'tec_p1',name:'Percepción Maldita', icon:'🔍',type:'passive',cost:10,req:['tec_1'],
+        desc:'Ves los stats completos del enemigo al inicio del combate.',effect:{enemyStats:true}},
+      {id:'tec_p2',name:'Eficiencia Técnica', icon:'💫',type:'passive',cost:15,req:['tec_2'],
+        desc:'−10% coste de EM en todas las habilidades de la técnica.',effect:{emDiscount:10}},
+      {id:'tec_a1',name:'Dominio Simple',     icon:'⬡', type:'active', cost:35,req:['tec_3'],
+        desc:'El próximo ataque es certero (no puede fallar). (CD 3)',effect:{treeSkill:'dominio_simple'}},
+      {id:'tec_p3',name:'Resonancia Innata',  icon:'🌀',type:'passive',cost:25,req:['tec_3'],
+        desc:'Cada habilidad de la técnica aumenta el daño de la siguiente +10%, hasta ×3.',effect:{resonance:true}},
+      {id:'tec_a2',name:'Dominio Expandido',  icon:'⬡', type:'active', cost:60,req:['tec_4'],gradeReq:'g1',
+        desc:'Todos los ataques certeros, daño ×2 por 3 turnos. Requiere Grado 1+. (CD 5)',effect:{treeSkill:'dominio_expandido'}},
+    ]},
+  // ── PILAR 4: ENERGÍA MALDITA ─────────────────────────
+  energia:{label:'Energía Maldita',icon:'⚡',color:'#3b7cf4',
+    nodes:[
+      {id:'em_1',name:'EM I',  icon:'⚡',type:'stat',maxPts:10,req:[],
+        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Flujo Constante.'},
+      {id:'em_2',name:'EM II', icon:'⚡',type:'stat',maxPts:10,req:['em_1'],
+        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Técnica Inversa.'},
+      {id:'em_3',name:'EM III',icon:'⚡',type:'stat',maxPts:10,req:['em_2'],
+        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Absorción Maldita.'},
+      {id:'em_4',name:'EM IV', icon:'⚡',type:'stat',maxPts:10,req:['em_3'],
+        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Control Absoluto y Explosión de EM.'},
+      {id:'em_p1',name:'Flujo Constante',   icon:'🔄',type:'passive',cost:15,req:['em_1'],
+        desc:'Regenera 8 EM al inicio de cada turno en combate.',effect:{emRegen:8}},
+      {id:'em_a1',name:'Técnica Inversa',   icon:'💚',type:'active', cost:25,req:['em_2'],
+        desc:'Convierte EM en curación, HP proporcional a la EM gastada. (CD 3)',effect:{treeSkill:'inversa_tree'}},
+      {id:'em_p2',name:'Absorción Maldita', icon:'🧲',type:'passive',cost:20,req:['em_3'],
+        desc:'Al derrotar un enemigo, recuperas 20% de la EM gastada en ese combate.',effect:{emAbsorb:20}},
+      {id:'em_p3',name:'Control Absoluto',  icon:'🌟',type:'passive',cost:30,req:['em_4'],
+        desc:'La EM nunca baja de 50 al inicio de un combate.',effect:{emFloor:50}},
+      {id:'em_a2',name:'Explosión de EM',   icon:'💥',type:'active', cost:40,req:['em_4'],
+        desc:'Libera toda la EM restante en un ataque. Daño = EM÷3. (CD 4)',effect:{treeSkill:'em_explosion'}},
+    ]},
 };
 
-function isStatNodeUnlocked(id){return (S.player.statTreeNodes||[]).includes(id);}
-function canUnlockStatNode(node){
-  if(isStatNodeUnlocked(node.id))return false;
-  if((S.player.statPoints||0)<node.cost)return false;
-  return node.req.every(r=>isStatNodeUnlocked(r));
+// ── Stat node investment helpers ──────────────────────
+// statNodePts: { nodeId: currentPts } stored on S.player
+function getNodePts(id){return (S.player.statNodePts||{})[id]||0;}
+function isStatNodeComplete(id){
+  const node=Object.values(STAT_TREE).flatMap(p=>p.nodes).find(n=>n.id===id);
+  if(!node||node.type!=='stat')return false;
+  return getNodePts(id)>=(node.maxPts||10);
 }
-function unlockStatNode(pillarId,nodeId){
+// A stat node is "unlocked" (accessible) if its req stat nodes are complete
+// A branch node is "unlocked" (accessible) if its req stat nodes are complete
+function isNodeAccessible(node){
+  return node.req.every(r=>{
+    const rNode=Object.values(STAT_TREE).flatMap(p=>p.nodes).find(n=>n.id===r);
+    if(!rNode)return false;
+    if(rNode.type==='stat')return isStatNodeComplete(r);
+    return (S.player.statTreeNodes||[]).includes(r); // branch req
+  });
+}
+function isBranchUnlocked(id){return (S.player.statTreeNodes||[]).includes(id);}
+
+function investStatNode(pillarId,nodeId){
   const pillar=STAT_TREE[pillarId];if(!pillar)return;
-  const node=pillar.nodes.find(n=>n.id===nodeId);if(!node)return;
-  if(!canUnlockStatNode(node))return toast('Requisitos no cumplidos','error');
+  const node=pillar.nodes.find(n=>n.id===nodeId);
+  if(!node||node.type!=='stat')return toast('Nodo inválido','error');
+  if(!isNodeAccessible(node))return toast('Desbloquea el nodo anterior primero','error');
+  if(isStatNodeComplete(nodeId))return toast('Nodo ya completado','error');
+  if((S.player.statPoints||0)<1)return toast('Sin puntos de estadística','error');
+
+  // Deduct 1 point and invest
+  S.player.statPoints--;
+  if(!S.player.statNodePts)S.player.statNodePts={};
+  const prev=S.player.statNodePts[nodeId]||0;
+  S.player.statNodePts[nodeId]=prev+1;
+  const newPts=prev+1;
+
+  // Apply per-3-pts bonuses when crossing a multiple of 3
+  if(newPts%3===0&&node.per3){
+    const e=node.per3;
+    if(e.maxHp){S.player.maxHp+=e.maxHp;S.player.hp=Math.min(S.player.hp+e.maxHp,S.player.maxHp);}
+    if(e.maxEm)S.player.maxEm+=e.maxEm;
+    if(e.fuerza)S.player.stats.fuerza+=e.fuerza;
+    if(e.maldicion)S.player.stats.maldicion+=e.maldicion;
+    if(e.dominio)S.player.stats.dominio+=e.dominio;
+    if(e.inteligencia)S.player.stats.inteligencia+=e.inteligencia;
+    // techPowerPct, critChance, emCostPct stored in flags, applied at runtime
+    toast('⬆️ '+node.name+': bonificación aplicada ('+newPts+'/'+node.maxPts+'pts)','success');
+  } else if(isStatNodeComplete(nodeId)){
+    toast('✅ '+node.name+' COMPLETADO — ramas desbloqueadas','gold');
+  } else {
+    toast(node.name+': '+newPts+'/'+node.maxPts+' pts','em');
+  }
+  saveS();uiAll();renderArbolContent();
+}
+
+function unlockBranchNode(pillarId,nodeId){
+  const pillar=STAT_TREE[pillarId];if(!pillar)return;
+  const node=pillar.nodes.find(n=>n.id===nodeId);
+  if(!node||node.type==='stat')return;
+  if(isBranchUnlocked(nodeId))return toast('Ya desbloqueado','error');
+  if(!isNodeAccessible(node))return toast('Completa el nodo stat requerido primero','error');
+  if(node.gradeReq){
+    const go=[5,4,3,2,'sg1',1,'semi','special'];
+    if(go.indexOf(S.player.grade)<go.indexOf(1))return toast('Requiere Grado 1 o superior','error');
+  }
+  if((S.player.statPoints||0)<node.cost)return toast('Necesitas '+node.cost+' pts (tienes '+(S.player.statPoints||0)+')','error');
   S.player.statPoints-=node.cost;
   if(!S.player.statTreeNodes)S.player.statTreeNodes=[];
   S.player.statTreeNodes.push(nodeId);
-  // Apply effects
-  const e=node.effect;
+  const e=node.effect||{};
   if(e.maxHp){S.player.maxHp+=e.maxHp;S.player.hp=Math.min(S.player.hp+e.maxHp,S.player.maxHp);}
   if(e.maxEm)S.player.maxEm+=e.maxEm;
-  if(e.fuerza)S.player.stats.fuerza+=e.fuerza;
-  if(e.maldicion)S.player.stats.maldicion+=e.maldicion;
-  if(e.dominio)S.player.stats.dominio+=e.dominio;
-  if(e.inteligencia)S.player.stats.inteligencia+=e.inteligencia;
-  if(e.allStats){Object.keys(S.player.stats).forEach(k=>S.player.stats[k]+=e.allStats);}
-  saveS();toast('✅ '+node.name+' desbloqueado!','success');uiAll();
-  renderArbolContent();
+  saveS();toast('✅ '+node.name+' desbloqueado!','success');uiAll();renderArbolContent();
 }
+
+// ── Runtime helpers ───────────────────────────────────
+function hasTreeNode(id){return isBranchUnlocked(id);}
+function getEmDiscount(){
+  let pct=0;
+  // Each EM stat node: per 3 pts invested = -1% cost (cap 12% from stats)
+  ['em_1','em_2','em_3','em_4'].forEach(id=>{pct+=Math.floor(getNodePts(id)/3);});
+  if(hasTreeNode('tec_p2'))pct+=10;
+  return Math.min(pct,50);
+}
+function applyEmDiscount(cost){
+  const d=getEmDiscount();
+  return d>0?Math.max(1,Math.round(cost*(1-d/100))):cost;
+}
+function getTechPowerBonus(){
+  // +2% per 3 pts in each tec stat node
+  let pct=0;
+  ['tec_1','tec_2','tec_3','tec_4'].forEach(id=>{pct+=Math.floor(getNodePts(id)/3)*2;});
+  return pct/100;
+}
+function getCritChance(){
+  // +1% per 3 pts in each atq stat node
+  let pct=0;
+  ['atq_1','atq_2','atq_3','atq_4'].forEach(id=>{pct+=Math.floor(getNodePts(id)/3);});
+  return pct;
+}
+// Legacy compat for testUnlockStatTree
+function isStatNodeUnlocked(id){return isStatNodeComplete(id)||isBranchUnlocked(id);}
+function canUnlockStatNode(node){return false;} // replaced by new system
+
+
 
 function renderArbolContent(){
   const el=document.getElementById('arbolContent');if(!el)return;
   const p=S.player;
-  const typeTag={stat:'📊 Stat',passive:'🔵 Pasiva',active:'🟣 Activa'};
-  const typeClass={stat:'',passive:'passive',active:'active-skill'};
+  const typeColor={passive:'var(--ok)',active:'var(--purple)'};
+  const typeTag={passive:'🔵 Pasiva',active:'🟣 Activa'};
+
   el.innerHTML=
     '<div class="stat-pts-banner">'+
-      '<div><div class="t-sm fw6">⭐ Puntos de Estadística disponibles</div><div class="t-xs c-muted mono">Ganas 3 puntos por nivel. Úsalos para desbloquear nodos del árbol.</div></div>'+
+      '<div>'+
+        '<div class="t-sm fw6">⭐ Puntos de Estadística</div>'+
+        '<div class="t-xs c-muted mono">Ganas 3 pts por nivel · Cada 3 pts invertidos en un nodo da su bonificación · Completa un nodo (10 pts) para desbloquear sus ramas.</div>'+
+      '</div>'+
       '<div class="mono c-gold" style="font-size:22px;font-weight:700">'+p.statPoints+'</div>'+
     '</div>'+
     '<div class="sktree-pillars">'+
     Object.entries(STAT_TREE).map(([pid,pillar])=>{
-      const spent=pillar.nodes.filter(n=>isStatNodeUnlocked(n.id)).reduce((a,n)=>a+n.cost,0);
+      const statNodes=pillar.nodes.filter(n=>n.type==='stat');
+      const branchNodes=pillar.nodes.filter(n=>n.type!=='stat');
+      const totalInvested=statNodes.reduce((a,n)=>a+getNodePts(n.id),0);
+
       return '<div class="sktree-pillar">'+
-        '<div class="skp-header" style="border-bottom:2px solid '+pillar.color+'22">'+
+        '<div class="skp-header" style="border-bottom:2px solid '+pillar.color+'44">'+
           '<div class="skp-icon">'+pillar.icon+'</div>'+
           '<div class="skp-name" style="color:'+pillar.color+'">'+pillar.label+'</div>'+
-          '<div class="skp-pts">'+spent+' pts gastados</div>'+
+          '<div class="skp-pts">'+totalInvested+' pts invertidos</div>'+
         '</div>'+
         '<div class="skp-body">'+
-        pillar.nodes.map((node,i)=>{
-          const ul=isStatNodeUnlocked(node.id);
-          const can=canUnlockStatNode(node);
-          const locked=!ul&&!can;
-          const tc=typeClass[node.type]||'';
-          let effectDesc='';
-          if(ul)effectDesc='<div class="t-xs" style="color:var(--ok);margin-top:2px">✓ Activo</div>';
-          else if(can)effectDesc='<div class="t-xs c-em mono">'+node.cost+' pts</div>';
-          else effectDesc='<div class="t-xs c-muted mono">Req: '+node.req.map(r=>{const rn=Object.values(STAT_TREE).flatMap(p=>p.nodes).find(n=>n.id===r);return rn?rn.name:r;}).join(', ')+'</div>';
-          const hasConnector=i>0;
-          return (hasConnector?'<div class="skt-conn '+(ul?'active':'')+'"></div>':'')+
+        statNodes.map((node,i)=>{
+          const pts=getNodePts(node.id);
+          const max=node.maxPts||10;
+          const complete=pts>=max;
+          const accessible=isNodeAccessible(node);
+          const pct=Math.round(pts/max*100);
+          const bonusCount=Math.floor(pts/3);
+          const nextBonus=pts%3===0?3:3-(pts%3);
+          // branches of this node
+          const branches=branchNodes.filter(b=>b.req.includes(node.id));
+
+          return (i>0?'<div class="skt-conn '+(complete?'active':'')+'"></div>':'')+
             '<div class="skt-node">'+
-              '<div class="skt-btn '+(ul?'unlocked '+tc:can?'':'locked-node')+(ul&&node.cost>=4?' max-node':'')+'" '+
-                (can&&!ul?'onclick="unlockStatNode(\''+pid+'\',\''+node.id+'\')" title="'+node.desc+'"':'')+'>'+
-                '<div class="skt-ico">'+node.icon+'</div>'+
-                '<div class="skt-name">'+node.name+'</div>'+
-                '<div class="skt-cost">'+typeTag[node.type]+'</div>'+
-                '<div class="skt-desc">'+node.desc+'</div>'+
-                effectDesc+
+              '<div class="skt-btn '+(complete?'unlocked max-node':accessible?'':'locked-node')+'" style="cursor:'+(complete||!accessible?'default':'pointer')+'">'+
+                '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+                  '<div style="display:flex;align-items:center;gap:5px">'+
+                    '<span class="skt-ico" style="font-size:14px">'+node.icon+'</span>'+
+                    '<span class="skt-name">'+node.name+'</span>'+
+                  '</div>'+
+                  '<span class="skt-cost" style="color:'+(complete?'var(--gold)':accessible?'var(--emb)':'var(--tm)')+'">'+
+                    (complete?'✓ COMPLETO':pts+'/'+max+' pts')+
+                  '</span>'+
+                '</div>'+
+                // Progress bar
+                '<div style="background:var(--bdr);border-radius:3px;height:6px;overflow:hidden;margin-bottom:4px">'+
+                  '<div style="height:100%;border-radius:3px;width:'+pct+'%;background:linear-gradient(90deg,'+pillar.color+','+pillar.color+'cc);transition:width .3s"></div>'+
+                '</div>'+
+                '<div class="skt-desc" style="margin-bottom:4px">'+node.desc+'</div>'+
+                // Bonus earned so far
+                (bonusCount>0?'<div class="t-xs" style="color:var(--ok)">✓ '+bonusCount+'× bonificación aplicada</div>':'')+
+                // Next bonus indicator
+                (!complete&&accessible?'<div class="t-xs mono" style="color:var(--emb)">Próxima bonificación en '+nextBonus+' pts</div>':'')+
+                // Invest button
+                (!complete&&accessible&&p.statPoints>0?
+                  '<button class="btn btn-p btn-sm" style="margin-top:5px;width:100%" onclick="investStatNode(\''+pid+'\',\''+node.id+'\')">+1 Punto</button>':
+                  !complete&&accessible&&p.statPoints===0?'<div class="t-xs c-muted mono" style="margin-top:4px">Sin puntos disponibles</div>':'')+
               '</div>'+
-            '</div>';
+            '</div>'+
+            // Branch nodes unlocked by completing this stat node
+            (complete&&branches.length?
+              '<div style="width:92%;border-left:2px solid '+pillar.color+';padding-left:8px;margin:4px 0 4px auto;display:flex;flex-direction:column;gap:4px">'+
+              branches.map(b=>{
+                const unlocked=isBranchUnlocked(b.id);
+                const canBuy=!unlocked&&(p.statPoints||0)>=b.cost;
+                const grReq=b.gradeReq?'<div class="t-xs" style="color:var(--warn)">⚠️ Requiere Grado 1 o superior</div>':'';
+                return '<div class="skt-btn '+(unlocked?'unlocked '+(b.type==='passive'?'passive':'active-skill'):canBuy?'':'locked-node')+'" style="cursor:'+(unlocked?'default':canBuy?'pointer':'not-allowed')+'">'+
+                  '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'+
+                    '<div style="display:flex;align-items:center;gap:5px">'+
+                      '<span style="font-size:13px">'+b.icon+'</span>'+
+                      '<span style="font-size:11px;font-weight:700">'+b.name+'</span>'+
+                    '</div>'+
+                    '<span style="font-size:9px;font-family:var(--fm);color:'+typeColor[b.type]+'">'+typeTag[b.type]+'</span>'+
+                  '</div>'+
+                  '<div class="skt-desc">'+b.desc+'</div>'+
+                  grReq+
+                  (unlocked?'<div class="t-xs" style="color:var(--ok);margin-top:3px">✓ Activo</div>':
+                   canBuy?'<button class="btn btn-pur btn-sm" style="margin-top:5px;width:100%" onclick="unlockBranchNode(\''+pid+'\',\''+b.id+'\')">Desbloquear ('+b.cost+' pts)</button>':
+                   '<div class="t-xs mono c-muted" style="margin-top:3px">'+b.cost+' pts'+(p.statPoints<b.cost?' — faltan '+(b.cost-p.statPoints)+' pts':'')+' </div>')+
+                '</div>';
+              }).join('')+
+              '</div>'
+            :'');
         }).join('')+
         '</div></div>';
     }).join('')+
     '</div>';
 }
+
 
 // ─── TÉCNICA + MAESTRÍA (combined tab) ───
 function renderMaestriaContent(){
@@ -2822,6 +3051,35 @@ function completeMission(id){
 // ═══════════════════════════════════════════════════════
 let BD={};let timerInt=null;let activeMissionId=null;let bossPhase=false;
 
+// ── Skill cooldown system ──────────────────────────────
+// Returns the cooldown in turns for a given skill.
+// Basic attacks: 0. Higher cost/power/domain = more cooldown.
+function getSkillCooldown(sk){
+  if(!sk)return 0;
+  if(sk.type==='domain')return 5;
+  if(sk.type==='buff'||sk.type==='defense')return 3;
+  if(sk.type==='heal')return 3;
+  if(sk.type==='debuff')return 2;
+  // Attack: scale by cost
+  if(sk.cost>=150)return 4;
+  if(sk.cost>=80)return 3;
+  if(sk.cost>=40)return 2;
+  if(sk.cost>=20)return 1;
+  return 0;
+}
+function initSkillCooldowns(){
+  // Returns a fresh {skillId: 0} map for all unlocked skills
+  const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
+  const cds={};
+  if(tech)tech.skills.forEach(sk=>{if(p.unlockedSkills.includes(sk.id))cds[sk.id]=0;});
+  return cds;
+}
+function getCD(skillId){return (BD.skillCooldowns||{})[skillId]||0;}
+function tickCooldowns(){
+  if(!BD.skillCooldowns)return;
+  Object.keys(BD.skillCooldowns).forEach(k=>{if(BD.skillCooldowns[k]>0)BD.skillCooldowns[k]--;});
+}
+
 function startMissionCombat(mId){
   const m=S.activeMissions?.find(m=>m.id===mId);if(!m)return;
   activeMissionId=mId;bossPhase=false;
@@ -2850,8 +3108,8 @@ function startMissionCombat(mId){
   enemy.atk=Math.round(enemy.atk*lvMult);
 
   const p=S.player;
-  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false};
-  updateCombat();buildBActions();clearCLog();
+  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns()};
+  if(hasTreeNode('em_p3')&&S.player.em<50){S.player.em=50;saveS();}updateCombat();buildBActions();clearCLog();
   // Show enemy info in log
   const gradeLabel={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[enemy.grade]||'';
   const innateInfo=enemy.innate?' — Técnica: '+enemy.innate:'';
@@ -2933,8 +3191,21 @@ function buildBActions(){
   const el=document.getElementById('bActGrid');
   const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
   const btns=[];
-  btns.push('<button class="ba-btn basic" onclick="bAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--ok)">GRATIS · '+(10+Math.round(p.stats.fuerza*1.5))+'</div><div class="bbt">Físico sin coste</div></button>');
-  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{const af=sk.cost===0||p.em>=sk.cost;const ms=p.skillMastery[sk.id]||0;const dom=sk.type==='domain';btns.push('<button class="ba-btn '+(dom?'domain-btn':'')+' '+(af?'':'disabled')+'" '+(af?'':'disabled')+' onclick="bAction(\'skill\',\''+sk.id+'\')"><div class="bbn">'+sk.icon+' '+sk.name+'</div><div class="bbc">'+(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+' '+(ms>0?'<span style="color:var(--purple)">('+ms+'%)</span>':'')+'</div><div class="bbt">'+sk.type+(sk.statusEffect?' · '+sk.statusEffect:'')+'</div></button>');});}
+  btns.push('<button class="ba-btn basic" onclick="bAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--warn)">5 EM · '+(10+Math.round(p.stats.fuerza*1.5))+'</div><div class="bbt">Físico</div></button>');
+  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{
+    const af=sk.cost===0||p.em>=sk.cost;
+    const ms=p.skillMastery[sk.id]||0;
+    const dom=sk.type==='domain';
+    const cd=getCD(sk.id);
+    const onCd=cd>0;
+    const disabled=!af||onCd;
+    const cdColor='color:var(--warn)';
+    btns.push('<button class="ba-btn '+(dom?'domain-btn':'')+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="bAction(\'skill\',\''+sk.id+'\')">'+
+      '<div class="bbn">'+sk.icon+' '+sk.name+'</div>'+
+      '<div class="bbc">'+(onCd?'<span style="'+cdColor+'">CD: '+cd+' turno'+(cd>1?'s':'')+'</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
+      '<div class="bbt">'+sk.type+(sk.statusEffect?' · '+sk.statusEffect:'')+(getSkillCooldown(sk)>0?' · CD'+getSkillCooldown(sk):'')+'</div>'+
+    '</button>');
+  });}
   btns.push('<button class="ba-btn flee" onclick="bAction(\'flee\')"><div class="bbn">🏃 Huir</div><div class="bbc" style="color:var(--warn)">60%</div><div class="bbt">Escapar</div></button>');
   el.innerHTML=btns.join('');
 }
@@ -2956,24 +3227,58 @@ function bAction(type,skillId){
   document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=true);
   if(isParalyzed(BD.playerStatus)){clog('⚡ ¡Paralizado! Pierdes el turno.','cl-status');setTimeout(enemyTurn,800);return;}
   const p=S.player,enemy=BD.enemy,tech=p.technique?TECHNIQUES[p.technique]:null;
+
+  // ── Passive: Flujo Constante — em regen at start of player turn ──
+  if(hasTreeNode('em_p1')){const reg=8;addEM(reg,'Flujo Constante');clog('🔄 Flujo Constante: +'+reg+' EM','cl-info');}
+
   let dmg=0,heal=0;
+  let resonanceBonus=BD.resonanceStack||0; // stack from Resonancia Innata
+
   if(type==='flee'){if(Math.random()<.6){clog('🏃 ¡Huiste!','cl-info');setTimeout(()=>endCombat(false),700);}else{clog('❌ No pudiste huir.','cl-dmg');setTimeout(enemyTurn,700);}return;}
-  if(type==='basic'){dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);}
+  if(type==='basic'){
+    if(p.em<5){toast('Sin EM para atacar (mínimo 5)','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    useEM(5);
+    dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);
+    BD.resonanceStack=0; // basic attack resets resonance
+  }
   else if(type==='skill'&&tech){
     const sk=tech.skills.find(s=>s.id===skillId);if(!sk)return;
-    if(sk.cost>0&&p.em<sk.cost){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
-    if(sk.cost>0)useEM(sk.cost);
-    const mb=getMasteryBonus(sk.id);
+    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+' turnos)','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    // Apply EM discount from tree
+    const discountedCost=applyEmDiscount(sk.cost);
+    if(discountedCost>0&&p.em<discountedCost){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    if(discountedCost>0)useEM(discountedCost);
+    // Track EM spent this combat for Absorción Maldita
+    if(!BD.emSpentThisCombat)BD.emSpentThisCombat=0;
+    BD.emSpentThisCombat+=discountedCost;
+    // Set cooldown after use
+    const cdVal=getSkillCooldown(sk);
+    if(cdVal>0&&BD.skillCooldowns)BD.skillCooldowns[sk.id]=cdVal;
+    const mb=getMasteryBonus(sk.id)*(1+getTechPowerBonus());
+    // Apply resonance bonus
+    const resonanceMult=hasTreeNode('tec_p3')?1+Math.min(resonanceBonus,2)*0.1:1;
     if(sk.type==='attack'||sk.type==='domain'){
-      dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);
+      dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb*resonanceMult);
       if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);clog('⬡ DOMINIO: '+sk.name,'cl-domain');}
       if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);clog(sd.icon+' '+sd.label+' al '+enemy.name,'cl-status');}}
+      // Resonance Innata: accumulate stack
+      if(hasTreeNode('tec_p3')){BD.resonanceStack=Math.min((BD.resonanceStack||0)+1,3);if(BD.resonanceStack>1)clog('🌀 Resonancia ×'+BD.resonanceStack,'cl-info');}
     } else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
     else if(sk.type==='defense'){applyStatus(BD.playerStatus,'barrier',1);clog('🛡 Barrera activada.','cl-def');}
     else if(sk.type==='buff'){if(sk.statusEffect)applyStatus(BD.playerStatus,sk.statusEffect,2);clog('⚡ '+sk.name+' activado.','cl-info');}
     else if(sk.type==='debuff'){dmg=Math.round((sk.power||0)*mb);if(sk.statusEffect){const sd=STATUS_DEFS[sk.statusEffect];if(sd){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
     gainMastery(sk.id,2);
   }
+
+  // ── Passive: Instinto de Combate — 20% double strike ──
+  if(dmg>0&&hasTreeNode('atq_p1')&&Math.random()<0.2){
+    const bonus=Math.round(dmg*0.6);dmg+=bonus;
+    clog('🐾 Instinto de Combate: doble golpe! +'+bonus,'cl-hit');
+  }
+  // ── Passive: Crit chance from ATQ nodes ──
+  const crit=getCritChance();
+  if(dmg>0&&crit>0&&Math.random()*100<crit){dmg=Math.round(dmg*2);clog('💥 ¡CRÍTICO! ×2','cl-special');}
+
   const boost=BD.playerStatus.find(s=>s.type==='boost');if(boost&&dmg>0)dmg=Math.round(dmg*(STATUS_DEFS.boost.dmgMult||1.3));
   if(dmg>0){const fd=Math.max(1,dmg-Math.round((enemy.def||0)*.4));enemy.hp-=fd;clog('💥 '+fd+' HP al '+enemy.name,'cl-hit');floatDmg(fd,'ed');aniSprite('bPlayerSprite','atk');aniSprite('bEnemySprite','shaking');}
   if(heal>0){BD.playerHP=Math.min(BD.playerHP+heal,BD.playerMaxHP);clog('💚 +'+heal+' HP','cl-hit');}
@@ -3025,12 +3330,13 @@ function enemyTurn(){
     // Filter: prefer heal skills when low HP, prefer status skills when full HP
     let pool=enemy.skills;
     const hpRatio=enemy.hp/enemy.maxHp;
-    if(hpRatio<0.3)pool=enemy.skills.filter(s=>s.power===0||s.statusEffect==='boost')||enemy.skills;
+    if(hpRatio<0.3){const filtered=enemy.skills.filter(s=>s.power===0||s.statusEffect==='boost');if(filtered.length)pool=filtered;}
     const sk=pool[Math.floor(Math.random()*pool.length)];
-
+    if(!sk){actionDone=false;}
     // Check for self-heal skill (power=0, no statusEffect, name contains +HP)
-    if(sk.name.includes('HP')&&sk.power===0){
-      const healMatch=sk.desc.match(/\+(\d+) HP/);
+    else if(sk.name&&sk.name.includes('HP')&&sk.power===0){
+      const healText=sk.msg||sk.desc||'';
+      const healMatch=healText.match(/\+(\d+) HP/);
       const heal=healMatch?parseInt(healMatch[1]):40;
       enemy.hp=Math.min(enemy.hp+heal,enemy.maxHp);
       clog('💚 '+enemy.name+': '+sk.msg,'cl-hit');
@@ -3041,13 +3347,13 @@ function enemyTurn(){
     }
 
     // Self-buff (power=0, boost)
-    if(sk.power===0&&sk.statusEffect==='boost'){
+    else if(sk&&sk.power===0&&sk.statusEffect==='boost'){
       applyStatus(BD.enemyStatus,'boost',2);
       clog('💪 '+enemy.name+': '+sk.msg,'cl-status');
       actionDone=true;
     }
     // Status-only (power=0)
-    else if(sk.power===0&&sk.statusEffect){
+    else if(sk&&sk.power===0&&sk.statusEffect){
       const sd=STATUS_DEFS[sk.statusEffect];
       if(sd&&!BD.playerStatus.find(s=>s.type===sk.statusEffect)){
         applyStatus(BD.playerStatus,sk.statusEffect,sd.turns);
@@ -3056,7 +3362,7 @@ function enemyTurn(){
       actionDone=true;
     }
     // Damage skill
-    else if(sk.power>0){
+    else if(sk&&sk.power>0){
       dmg=sk.power+Math.round(Math.random()*10);
       if(sk.statusEffect){
         const sd=STATUS_DEFS[sk.statusEffect];
@@ -3089,9 +3395,24 @@ function enemyTurn(){
     if(boost)dmg=Math.round(dmg*1.25);
     const barrier=BD.playerStatus.find(s=>s.type==='barrier');
     if(barrier){const bp=STATUS_DEFS.barrier.blockPct||.7;dmg=Math.round(dmg*(1-bp));BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);clog('🛡 Barrera absorbe (−'+Math.round(bp*100)+'%)','cl-def');}
-    dmg=Math.max(1,dmg-Math.round(p.stats.dominio*0.8));
+    // ── Passive: Cuerpo Templado — flat −5 dmg ──
+    if(hasTreeNode('salud_p2')){dmg=Math.max(0,dmg-5);}
+    // ── Passive: Límite Roto — double defense when HP < 30% ──
+    let defVal=Math.round(p.stats.dominio*0.8);
+    if(hasTreeNode('salud_p3')&&BD.playerHP/BD.playerMaxHP<0.3)defVal*=2;
+    dmg=Math.max(1,dmg-defVal);
     if(Math.random()<0.06){clog('✨ MISS — '+enemy.name,'cl-info');floatDmg('MISS','ms');}
-    else{BD.playerHP=Math.max(0,BD.playerHP-dmg);clog('🔴 −'+dmg+' HP','cl-dmg');floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');}
+    else{
+      const newHP=Math.max(0,BD.playerHP-dmg);
+      // ── Passive: Aguante — last stand (once per combat) ──
+      if(newHP<=0&&hasTreeNode('salud_p1')&&!BD.lastStandUsed){
+        BD.lastStandUsed=true;BD.playerHP=1;
+        clog('🛡 ¡AGUANTE! Sobrevives con 1 HP','cl-special');floatDmg('AGUANTE','ms');
+      } else {
+        BD.playerHP=newHP;
+      }
+      clog('🔴 −'+dmg+' HP','cl-dmg');floatDmg(dmg,'pd');aniSprite('bEnemySprite','atk');aniSprite('bPlayerSprite','hurt');
+    }
   }
 
   const eStDmg=processStatus(BD.enemyStatus,enemy.name);
@@ -3101,6 +3422,7 @@ function enemyTurn(){
   if(BD.playerHP<=0){BD.playerHP=0;updateCombat();setTimeout(combatDefeat,600);return;}
   if(BD.enemy.hp<=0){BD.enemy.hp=0;updateCombat();setTimeout(combatVictory,600);return;}
   BD.turn='player';
+  tickCooldowns();
   setTimeout(()=>{if(!BD.ended){document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);buildBActions();startTimer();}},450);
 }
 
@@ -3108,6 +3430,12 @@ function combatVictory(){
   if(BD.ended)return;BD.ended=true;clearInterval(timerInt);
   const enemy=BD.enemy,m=BD.mission;
   S.player.hp=BD.playerHP;
+  // ── Passive: Absorción Maldita — recover 20% EM spent ──
+  if(hasTreeNode('em_p2')&&BD.emSpentThisCombat>0){
+    const recovered=Math.round(BD.emSpentThisCombat*0.2);
+    addEM(recovered,'Absorción Maldita');
+    clog('🧲 Absorción Maldita: +'+recovered+' EM recuperado','cl-info');
+  }
 
   if(BD.isBossFight){
     // Boss fight victory
@@ -3124,7 +3452,7 @@ function combatVictory(){
     return;
   }
 
-  addXP(enemy.xp||30);addEM(enemy.em||15,'Victoria vs '+enemy.name);
+  addXP(enemy.xp||30);gainMastery(null,2);
   // Update zone curse count
   const zst=S.zoneStatus[m?.zoneId];if(zst&&zst.remaining>0){zst.remaining--;if(zst.remaining===0)zst.status='safe';}
 
@@ -3148,13 +3476,13 @@ function combatVictory(){
     return;
   }
 
-  // Update old mission system progress (raids, etc.)
+  // Update old mission system progress
   if(m?.target>0){
     const am=S.activeMissions?.find(x=>x.id===activeMissionId);
     if(am){am.progress=(am.progress||0)+1;if(am.progress>=am.target)completeMission(am.id);}
   }
   saveS();log_('Victoria vs '+enemy.name);
-  showCombatResult(true,enemy.xp,enemy.em);
+  showCombatResult(true,enemy.xp,0);
   clog('🏆 ¡Victoria!','cl-special');
 }
 
@@ -3203,7 +3531,7 @@ function showCombatResult(win,xp,em){
     '<div class="bres-title '+(win?'win':'lose')+'">'+(win?'⚔️ VICTORIA':'💀 DERROTA')+'</div>'+
     (win?'<div class="bres-rwds">'+
       '<div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xp+'</div></div>'+
-      '<div><div class="t-xs c-muted">EM</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+em+'</div></div>'+
+      '<div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+2</div></div>'+
     '</div>':'<div class="t-sm c-muted">Recupera energía.</div>')+
     (win&&am&&!missionDone?'<button class="btn btn-d" onclick="continueCombat()">⚔️ Continuar ('+((am.progress||0)+'/'+am.target)+')</button>':'')+
     (missionDone?'<div class="t-sm c-ok">🏆 ¡Misión completada!</div>':'')+
@@ -3225,28 +3553,114 @@ function clearCLog(){const el=document.getElementById('clogBody');if(el)el.inner
 // ═══════════════════════════════════════════════════════
 // RAIDS
 // ═══════════════════════════════════════════════════════
+
+// Global raids (unchanged existing system)
 const RAIDS_DATA=[
-  {id:'r_fukuoka',name:'Raid: Puerto de Fukuoka',cityId:'fukuoka',zoneId:'hakata',waves:3,boss:'Capitán Espectral',minGrade:5,desc:'3 oleadas de espíritus marineros. Raid para novatos G-5.',reward:{xp:150,em:70}},
-  {id:'r_sapporo',name:'Raid: Tundra Maldita',cityId:'sapporo',zoneId:'sapporo_tundra',waves:4,boss:'Bestia del Hielo',minGrade:4,desc:'4 oleadas de maldiciones gélidas en la tundra de Hokkaido.',reward:{xp:320,em:130}},
-  {id:'r_hiroshima',name:'Raid: Miyajima',cityId:'hiroshima',zoneId:'miyajima',waves:4,boss:'Guardián del Torii',minGrade:4,desc:'4 oleadas en la isla sagrada corrompida.',reward:{xp:360,em:150}},
-  {id:'r_sendai',name:'Raid: Costa del Pacífico',cityId:'sendai',zoneId:'sendai_costa',waves:5,boss:'Entidad Marina',minGrade:3,desc:'5 oleadas de entidades de la costa. Zona de G-3.',reward:{xp:500,em:190}},
-  {id:'r_osaka_namba',name:'Raid: Namba Nocturna',cityId:'osaka',zoneId:'namba',waves:5,boss:'Señor de Namba',minGrade:2,desc:'5 oleadas en el corazón de Osaka. G-2.',reward:{xp:720,em:250}},
-  {id:'r_osaka_bahia',name:'Raid: Bahía de Osaka',cityId:'osaka',zoneId:'osaka_bahia',waves:6,boss:'Entidad del Fondo',minGrade:'sg1',desc:'6 oleadas marinas de Semi-Grado 1.',reward:{xp:980,em:340}},
-  {id:'r_kyoto_gion',name:'Raid: Gion Nocturna',cityId:'kyoto',zoneId:'gion',waves:6,boss:'Demonio de Gion',minGrade:1,desc:'6 oleadas de demonios G-1 en Kioto.',reward:{xp:1300,em:450}},
-  {id:'r_kyoto_kinkaku',name:'Raid: Kinkaku-ji',cityId:'kyoto',zoneId:'kyoto_kinkakuji',waves:7,boss:'Espíritu del Oro',minGrade:'semi',desc:'7 oleadas de entidades Semi-Especiales.',reward:{xp:1800,em:600}},
-  {id:'r_tokyo_shibuya',name:'Raid: Operación Shibuya',cityId:'tokyo',zoneId:'shibuya',waves:8,boss:'Mahito',minGrade:'special',desc:'8 oleadas. El incidente de Shibuya. Solo Grado Especial.',reward:{xp:3000,em:900}},
-  {id:'r_tokyo_roppongi',name:'Raid Élite: Roppongi',cityId:'tokyo',zoneId:'roppongi',waves:10,boss:'Ryomen Sukuna (Fragmento)',minGrade:'special',desc:'10 oleadas. El desafío máximo del sistema.',reward:{xp:5000,em:1400}},
+  {id:'r_fukuoka',name:'Raid: Puerto de Fukuoka',cityId:'fukuoka',zoneId:'hakata',waves:3,boss:'Capitán Espectral',minGrade:5,desc:'3 oleadas de espíritus marineros. Raid para novatos G-5.',reward:{xp:150}},
+  {id:'r_sapporo',name:'Raid: Tundra Maldita',cityId:'sapporo',zoneId:'sapporo_tundra',waves:4,boss:'Bestia del Hielo',minGrade:4,desc:'4 oleadas de maldiciones gélidas en la tundra de Hokkaido.',reward:{xp:320}},
+  {id:'r_hiroshima',name:'Raid: Miyajima',cityId:'hiroshima',zoneId:'miyajima',waves:4,boss:'Guardián del Torii',minGrade:4,desc:'4 oleadas en la isla sagrada corrompida.',reward:{xp:360}},
+  {id:'r_sendai',name:'Raid: Costa del Pacífico',cityId:'sendai',zoneId:'sendai_costa',waves:5,boss:'Entidad Marina',minGrade:3,desc:'5 oleadas de entidades de la costa.',reward:{xp:500}},
+  {id:'r_osaka_namba',name:'Raid: Namba Nocturna',cityId:'osaka',zoneId:'namba',waves:5,boss:'Señor de Namba',minGrade:2,desc:'5 oleadas en el corazón de Osaka.',reward:{xp:720}},
+  {id:'r_osaka_bahia',name:'Raid: Bahía de Osaka',cityId:'osaka',zoneId:'osaka_bahia',waves:6,boss:'Entidad del Fondo',minGrade:'sg1',desc:'6 oleadas marinas de Semi-Grado 1.',reward:{xp:980}},
+  {id:'r_kyoto_gion',name:'Raid: Gion Nocturna',cityId:'kyoto',zoneId:'gion',waves:6,boss:'Demonio de Gion',minGrade:1,desc:'6 oleadas de demonios G-1 en Kioto.',reward:{xp:1300}},
+  {id:'r_kyoto_kinkaku',name:'Raid: Kinkaku-ji',cityId:'kyoto',zoneId:'kyoto_kinkakuji',waves:7,boss:'Espíritu del Oro',minGrade:'semi',desc:'7 oleadas de entidades Semi-Especiales.',reward:{xp:1800}},
+  {id:'r_tokyo_shibuya',name:'Raid: Operación Shibuya',cityId:'tokyo',zoneId:'shibuya',waves:8,boss:'Mahito',minGrade:'special',desc:'8 oleadas. El incidente de Shibuya.',reward:{xp:3000}},
+  {id:'r_tokyo_roppongi',name:'Raid Élite: Roppongi',cityId:'tokyo',zoneId:'roppongi',waves:10,boss:'Ryomen Sukuna (Fragmento)',minGrade:'special',desc:'10 oleadas. El desafío máximo del sistema.',reward:{xp:5000}},
 ];
+
+// ── CITY RAIDS: small local raids per city, fixed difficulty, NOT player-scaled ──
+const CITY_RAIDS={
+  fukuoka:[
+    {id:'cr_fuk_1',name:'Emboscada en Hakata',waves:2,minLevel:1,enemyGrade:5,bossName:'Espíritu Portuario',bossHp:180,bossAtk:14,emoji:'👻',desc:'2 oleadas de maldiciones G-5 en el puerto. Ideal para empezar.',reward:{xp:90}},
+    {id:'cr_fuk_2',name:'Bosque de Ito: Noche',waves:3,minLevel:4,enemyGrade:5,bossName:'Árbol Maldito',bossHp:240,bossAtk:18,emoji:'🌲',desc:'3 oleadas. Espíritus del bosque al anochecer.',reward:{xp:140}},
+    {id:'cr_fuk_3',name:'Academia del Sur: Prueba',waves:3,minLevel:7,enemyGrade:4,bossName:'Instructor Corrompido',bossHp:310,bossAtk:22,emoji:'🏫',desc:'3 oleadas de maldiciones G-4 en la academia.',reward:{xp:200}},
+  ],
+  sapporo:[
+    {id:'cr_sap_1',name:'Patrulla Daisetsuzan',waves:2,minLevel:5,enemyGrade:4,bossName:'Oso Espectral',bossHp:280,bossAtk:22,emoji:'🐻',desc:'2 oleadas de bestias heladas en el parque nacional.',reward:{xp:160}},
+    {id:'cr_sap_2',name:'Puerto Ishikari: Tormenta',waves:3,minLevel:8,enemyGrade:4,bossName:'Capitán Fantasma del Norte',bossHp:350,bossAtk:26,emoji:'🚢',desc:'3 oleadas de espíritus del mar del norte.',reward:{xp:230}},
+    {id:'cr_sap_3',name:'Tundra: Invasión',waves:4,minLevel:12,enemyGrade:3,bossName:'Gélido Ancestral',bossHp:480,bossAtk:38,emoji:'❄️',desc:'4 oleadas. Maldición ancestral congelada de G-3.',reward:{xp:370}},
+  ],
+  hiroshima:[
+    {id:'cr_hir_1',name:'Delta del Ōta',waves:2,minLevel:5,enemyGrade:4,bossName:'Entidad del Río',bossHp:260,bossAtk:20,emoji:'🏞',desc:'2 oleadas de entidades acuáticas del delta.',reward:{xp:150}},
+    {id:'cr_hir_2',name:'Monte Futaba: Cima',waves:3,minLevel:9,enemyGrade:4,bossName:'Guardián de la Cima',bossHp:380,bossAtk:28,emoji:'⛰',desc:'3 oleadas. La cima maldita tiene un guardián antiguo.',reward:{xp:260}},
+    {id:'cr_hir_3',name:'Miyajima: Marea Maldita',waves:4,minLevel:14,enemyGrade:3,bossName:'Kijin del Torii',bossHp:520,bossAtk:42,emoji:'⛩',desc:'4 oleadas en la isla sagrada. El Kijin del Torii espera.',reward:{xp:400}},
+  ],
+  sendai:[
+    {id:'cr_sen_1',name:'Matsushima: Niebla',waves:3,minLevel:12,enemyGrade:3,bossName:'Entidad de la Bahía',bossHp:420,bossAtk:35,emoji:'🌊',desc:'3 oleadas en la bahía. La niebla esconde algo peor.',reward:{xp:310}},
+    {id:'cr_sen_2',name:'Campos de Osaki',waves:3,minLevel:16,enemyGrade:3,bossName:'Señor de la Cosecha',bossHp:500,bossAtk:40,emoji:'🌾',desc:'3 oleadas. Espíritus agrarios con poder G-3.',reward:{xp:380}},
+    {id:'cr_sen_3',name:'Costa: Maremoto Maldito',waves:5,minLevel:22,enemyGrade:2,bossName:'Leviatán de Sendai',bossHp:700,bossAtk:58,emoji:'🌀',desc:'5 oleadas. Un leviatán G-2 emerge de las profundidades.',reward:{xp:600}},
+  ],
+  osaka:[
+    {id:'cr_osa_1',name:'Dotonbori: Medianoche',waves:3,minLevel:22,enemyGrade:2,bossName:'Demonio del Canal',bossHp:580,bossAtk:52,emoji:'🌉',desc:'3 oleadas. El demonio del canal aparece a medianoche.',reward:{xp:480}},
+    {id:'cr_osa_2',name:'Castillo de Osaka: Asedio',waves:4,minLevel:28,enemyGrade:2,bossName:'Shogun Maldito',bossHp:720,bossAtk:62,emoji:'🏯',desc:'4 oleadas. El Shogun Maldito defiende la fortaleza.',reward:{xp:650}},
+    {id:'cr_osa_3',name:'Bahía: Fondo Oscuro',waves:5,minLevel:35,enemyGrade:'sg1',bossName:'Kraken de Osaka',bossHp:950,bossAtk:78,emoji:'🦑',desc:'5 oleadas. Un Semi-Grado 1 acecha el fondo de la bahía.',reward:{xp:900}},
+  ],
+  kyoto:[
+    {id:'cr_kyo_1',name:'Arashiyama: Susurros',waves:3,minLevel:50,enemyGrade:1,bossName:'Espíritu del Bambú',bossHp:820,bossAtk:72,emoji:'🎋',desc:'3 oleadas en el bosque de bambú. Espíritus milenarios G-1.',reward:{xp:1000}},
+    {id:'cr_kyo_2',name:'Fushimi: Mil Torii',waves:4,minLevel:60,enemyGrade:1,bossName:'Zorro de Nueve Colas',bossHp:1100,bossAtk:88,emoji:'🦊',desc:'4 oleadas. El Zorro de Nueve Colas controla los torii corrompidos.',reward:{xp:1400}},
+    {id:'cr_kyo_3',name:'Palacio Imperial: Invasión',waves:5,minLevel:70,enemyGrade:'semi',bossName:'Guardián Antiguo del Palacio',bossHp:1500,bossAtk:105,emoji:'🏛',desc:'5 oleadas. El guardián más poderoso del palacio imperial.',reward:{xp:2000}},
+  ],
+  tokyo:[
+    {id:'cr_tok_1',name:'Shinjuku: Zona de Guerra',waves:4,minLevel:100,enemyGrade:'semi',bossName:'Señor de Shinjuku',bossHp:1600,bossAtk:110,emoji:'🌃',desc:'4 oleadas de élite en Shinjuku. Solo para Grado Especial.',reward:{xp:2200}},
+    {id:'cr_tok_2',name:'Akihabara: Anomalía',waves:5,minLevel:100,enemyGrade:'special',bossName:'Entidad Tecnológica',bossHp:2000,bossAtk:130,emoji:'⚡',desc:'5 oleadas. Una entidad de poder absoluto en Akihabara.',reward:{xp:3200}},
+    {id:'cr_tok_3',name:'Harajuku: El Rito',waves:6,minLevel:100,enemyGrade:'special',bossName:'Gran Maldición de Harajuku',bossHp:2800,bossAtk:155,emoji:'🌸',desc:'6 oleadas. El rito maldito de Harajuku convoca algo innombrable.',reward:{xp:4500}},
+  ],
+};
+
+// ── CITY BOSSES: fixed bosses per city, NOT player-scaled ──
+const CITY_BOSSES={
+  fukuoka:[
+    {id:'cb_fuk_1',name:'Ōni de Hakata',emoji:'👹',minLevel:3,hp:220,atk:20,def:5,xp:120,desc:'Un Ōni menor que aterroriza el puerto.',tags:['G-5','ÓNI'],skills:[es('Puñetazo de Ōni',22,null,'¡El Ōni descarga un golpe brutal!'),es('Rugido',0,'paralyze','¡El rugido paraliza de miedo!')],sa:['paralyze']},
+    {id:'cb_fuk_2',name:'Bruja del Bosque',emoji:'🧙',minLevel:6,hp:320,atk:28,def:8,xp:200,desc:'Hechicera maldita que habita el Bosque de Ito.',tags:['G-4','USUARIA'],innate:'Técnica de Encantamiento',skills:[es('Maldición Menor',30,'poison','¡Te lanza una maldición!'),es('Tormenta de Hojas',25,null,'¡Las hojas te cortan!'),es('Barrera Vegetal',0,'boost','¡Se envuelve en raíces protectoras!')],sa:['poison']},
+  ],
+  sapporo:[
+    {id:'cb_sap_1',name:'Yuki-Onna',emoji:'🌨',minLevel:7,hp:380,atk:32,def:10,xp:260,desc:'Espíritu del hielo. Paraliza con su aliento gélido.',tags:['G-4','HIELO'],skills:[es('Aliento Gélido',0,'freeze','¡Su aliento te congela!'),es('Tormenta de Nieve',34,'freeze','¡La tormenta te envuelve!'),es('Lanza de Hielo',38,null,'¡Te atraviesa con hielo puro!')],sa:['freeze']},
+    {id:'cb_sap_2',name:'Kamuy Maldito',emoji:'🐺',minLevel:13,hp:520,atk:46,def:15,xp:380,desc:'Dios ancestral de Hokkaido corrompido por la energía maldita.',tags:['G-3','BESTIA','DIOS'],innate:'Técnica del Permafrost',skills:[es('Zarpa del Ártico',50,'bleed','¡La zarpa te desgarra!'),es('Aullido del Dios',0,'paralyze','¡El aullido sagrado paraliza!'),es('Tormenta Divina',55,null,'¡Desata el poder del dios!')],sa:['freeze','bleed']},
+  ],
+  hiroshima:[
+    {id:'cb_hir_1',name:'Espíritu del Recuerdo',emoji:'🕊',minLevel:6,hp:340,atk:26,def:8,xp:220,desc:'Alma del pasado atrapada en Hiroshima. Llora y destruye.',tags:['G-4','ESPÍRITU'],skills:[es('Llanto Maldito',0,'paralyze','¡Su llanto paraliza el alma!'),es('Ola del Recuerdo',30,'bleed','¡Una ola de energía del pasado!'),es('Abrazo Eterno',28,null,'¡Te atrapa con energía spectral!')],sa:['paralyze']},
+    {id:'cb_hir_2',name:'Tengu del Monte Futaba',emoji:'👺',minLevel:15,hp:580,atk:50,def:18,xp:440,desc:'Tengu guerrero que vigila la montaña desde hace siglos.',tags:['G-3','TENGU'],innate:'Técnica del Viento Cortante',skills:[es('Tajo de Alas',52,'bleed','¡Las alas afiladas te cortan!'),es('Torbellino',46,null,'¡Un torbellino te arrastra!'),es('Espada del Viento',60,null,'¡Golpe concentrado de viento!')],sa:['bleed']},
+  ],
+  sendai:[
+    {id:'cb_sen_1',name:'Kappa Gigante',emoji:'🐢',minLevel:13,hp:460,atk:38,def:14,xp:320,desc:'Kappa de río mutado por la energía maldita. Arrastra víctimas al agua.',tags:['G-3','KAPPA'],skills:[es('Arrastre Acuático',40,'freeze','¡Te arrastra hacia el agua!'),es('Cabezazo del Caparazón',44,null,'¡El caparazón es duro como roca!'),es('Spín Acuático',0,'paralyze','¡Spín que paraliza el sistema nervioso!')],sa:['freeze']},
+    {id:'cb_sen_2',name:'Ushi-Oni',emoji:'🐂',minLevel:25,hp:750,atk:62,def:22,xp:560,desc:'Buey demoniaco G-2. Su carga puede romper muros de piedra.',tags:['G-2','BESTIA'],innate:'Técnica de Embestida',skills:[es('Embestida Brutal',68,'bleed','¡La embestida es imparable!'),es('Pisotón Sísmico',58,null,'¡El suelo tiembla bajo sus patas!'),es('Cornada Maldita',72,'bleed','¡Los cuernos están impregnados de veneno!')],sa:['bleed','poison']},
+  ],
+  osaka:[
+    {id:'cb_osa_1',name:'Ibaraki-Dōji',emoji:'👿',minLevel:23,hp:680,atk:60,def:20,xp:500,desc:'Demonio lugarteniente de Shuten-Dōji. Protege Namba.',tags:['G-2','DEMONIO'],innate:'Técnica del Brazo Demoníaco',skills:[es('Brazo Demoníaco',65,'bleed','¡El brazo maldito te destroza!'),es('Lluvia de Garras',58,null,'¡Decenas de garras te atacan!'),es('Furia del Demonio',0,'boost','¡Se potencia con furia demoníaca!')],sa:['bleed']},
+    {id:'cb_osa_2',name:'Shuten-Dōji',emoji:'🍶',minLevel:38,hp:980,atk:82,def:28,xp:800,desc:'El Gran Demonio de Osaka. Señor de los demonios del Kansai.',tags:['SG-1','DEMONIO','GRAN JEFE'],innate:'Técnica del Sake Maldito',domain:{name:'Bodega de los Demonios',power:140,statusEffect:'poison',desc:'El sake maldito inunda el campo, envenenando todo lo que toca.'},skills:[es('Sake Explosivo',88,'poison','¡El sake maldito explota en tu cara!'),es('Puñetazo del Señor',95,null,'¡Un golpe de poder sobrehumano!'),es('Tormenta Demoníaca',80,'bleed','¡La tormenta demoníaca todo lo desgarra!')],sa:['poison','bleed'],inversa:true},
+  ],
+  kyoto:[
+    {id:'cb_kyo_1',name:'Raijin Corrompido',emoji:'⛈',minLevel:52,hp:1050,atk:90,def:32,xp:1100,desc:'Dios del trueno corrompido por la maldición milenaria de Kioto.',tags:['G-1','DIOS','TRUENO'],innate:'Técnica del Rayo Maldito',skills:[es('Rayo Maldito',95,'paralyze','¡Un rayo te alcanza directamente!'),es('Tormenta Divina',88,null,'¡La tormenta del dios no perdona!'),es('Descarga Masiva',100,'paralyze','¡Descarga eléctrica de área máxima!')],sa:['paralyze'],inversa:true},
+    {id:'cb_kyo_2',name:'Fujin del Bambú',emoji:'🌪',minLevel:65,hp:1350,atk:108,def:40,xp:1500,desc:'Dios del viento atrapado en Arashiyama desde el período Heian.',tags:['SEMI','DIOS','VIENTO'],innate:'Técnica del Viento Infinito',domain:{name:'Huracán del Heian',power:200,statusEffect:'paralyze',desc:'Un huracán de energía del período Heian arrasa con todo.'},skills:[es('Corte de Viento',112,'bleed','¡El viento corta como una espada!'),es('Tornado Sagrado',105,null,'¡El tornado sagrado lo destruye todo!'),es('Viento Curativo',0,null,'El viento divino lo cura (+160 HP)')],sa:['bleed'],inversa:true},
+  ],
+  tokyo:[
+    {id:'cb_tok_1',name:'Disaster Curse Grado Especial',emoji:'☄️',minLevel:100,hp:2200,atk:145,def:55,xp:3500,desc:'Maldición de calamidad. Nació del miedo colectivo de Tokio.',tags:['ESPECIAL','CALAMIDAD'],innate:'Técnica de la Calamidad',domain:{name:'Zona de Calamidad',power:280,statusEffect:'bleed',desc:'Una zona de destrucción total. Nada sobrevive.'},skills:[es('Calamidad Directa',155,'bleed','¡La calamidad te consume!'),es('Lluvia de Calamidad',140,null,'¡Una lluvia de energía maldita!'),es('Pulso de Destrucción',148,'paralyze','¡El pulso destruye tu sistema nervioso!')],sa:['bleed','paralyze'],inversa:true},
+    {id:'cb_tok_2',name:'Sukuna — Dedo Perdido',emoji:'👹',minLevel:100,hp:3500,atk:190,def:70,xp:6000,desc:'Un fragmento del Rey de las Maldiciones. Poder incomprensible.',tags:['ESPECIAL','REY','SUKUNA'],innate:'Técnica del Desmembramiento',domain:{name:'Mundo de Matanza',power:380,statusEffect:'bleed',desc:'Ataques inevitables. Cortes infinitos en un instante.'},skills:[es('Desmembramiento',200,'bleed','¡El corte inevitable del Rey!'),es('Fuego Fantasma',185,null,'¡Llamas del Rey de las Maldiciones!'),es('Flecha Divina',195,'bleed','¡La flecha del Rey no falla!')],sa:['bleed'],inversa:true},
+  ],
+};
+
 let activeRaid=null;
 let raidCombatActive=false;
 
+let raidsTab='global';
 function renderRaids(){
+  const el=document.getElementById('raidList');
+  el.innerHTML=
+    '<div class="stabs" style="margin-bottom:14px">'+
+      '<div class="stab '+(raidsTab==='global'?'active':'')+'" onclick="raidsTab=\'global\';renderRaids()">🌊 Raids Globales</div>'+
+      '<div class="stab '+(raidsTab==='city'?'active':'')+'" onclick="raidsTab=\'city\';renderRaids()">🏯 Raids de Ciudad</div>'+
+      '<div class="stab '+(raidsTab==='bosses'?'active':'')+'" onclick="raidsTab=\'bosses\';renderRaids()">💀 Jefes de Ciudad</div>'+
+    '</div>'+
+    (raidsTab==='global'?renderGlobalRaids():raidsTab==='city'?renderCityRaidsHTML():renderCityBossesHTML());
+}
+
+function renderGlobalRaids(){
   const go=[5,4,3,2,'sg1',1,'semi','special'];
   const ci=go.indexOf(S.player.grade);
-  document.getElementById('raidList').innerHTML=RAIDS_DATA.map(r=>{
+  return '<div class="raid-grid">'+RAIDS_DATA.map(r=>{
     const city=CITIES[r.cityId];
     const locked=ci<go.indexOf(r.minGrade);
-    const isActive=activeRaid?.id===r.id;
+    const isActive=activeRaid?.id===r.id&&!activeRaid.isCityRaid;
     const gradeInfo=GRADES.find(g=>g.id===r.minGrade)||GRADES[0];
     return '<div class="raid-c '+(locked?'lk':'')+(isActive?' accepted':'')+'">'+
       '<div class="rn">'+r.name+'</div>'+
@@ -3256,15 +3670,103 @@ function renderRaids(){
         '<span class="rtag">💀 '+r.boss+'</span>'+
         '<span class="rtag" style="color:'+gradeInfo.color+'">'+gradeInfo.short+'+</span>'+
         '<span class="rtag">⭐ +'+r.reward.xp+' XP</span>'+
-        '<span class="rtag">⚡ +'+r.reward.em+' EM</span>'+
+        '<span class="rtag c-muted">🌀 Maestría</span>'+
         (city?'<span class="rtag">📍'+city.name+'</span>':'')+
       '</div>'+
       (locked?'<div class="t-xs mono c-muted">🔒 Requiere '+gradeInfo.label+'</div>':
-       isActive?'<button class="btn btn-p btn-sm" onclick="nav(\'raid-combat\')">▶ Continuar Raid</button>':
+       isActive?'<button class="btn btn-p btn-sm" onclick="nav(\'raid-combat\')">▶ Continuar</button>':
+       activeRaid&&!activeRaid.isCityRaid?'<div class="t-xs c-muted">Termina la raid activa primero</div>':
        '<button class="btn btn-d btn-sm" onclick="startRaid(\''+r.id+'\')">⚔️ Iniciar Raid</button>')+
     '</div>';
-  }).join('');
+  }).join('')+'</div>';
 }
+
+function renderCityRaidsHTML(){
+  const lvl=S.player.level;
+  let html='';
+  Object.entries(CITY_RAIDS).forEach(([cityId,raids])=>{
+    const city=CITIES[cityId];if(!city)return;
+    const gradeOrder=[5,4,3,2,'sg1',1,'semi','special'];
+    if(!isGradeGte(S.player.grade,city.unlockGrade))return;
+    html+='<div style="margin-bottom:18px"><div style="font-family:var(--fd);font-size:12px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">'+city.emoji+' '+city.name+'</div>'+
+      '<div class="raid-grid">'+raids.map(r=>{
+        const locked=lvl<r.minLevel;
+        const grLbl={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[r.enemyGrade]||'?';
+        const isActive=activeRaid?.id===r.id&&activeRaid.isCityRaid;
+        return '<div class="raid-c '+(locked?'lk':'')+(isActive?' accepted':'')+'">'+
+          '<div class="rn">'+r.name+'</div>'+
+          '<div class="rd">'+r.desc+'</div>'+
+          '<div class="rm">'+
+            '<span class="rtag">🌊 '+r.waves+' oleadas</span>'+
+            '<span class="rtag">💀 '+r.bossName+'</span>'+
+            '<span class="rtag">⚔️ Enemigos '+grLbl+'</span>'+
+            '<span class="rtag">⭐ +'+r.reward.xp+' XP</span>'+
+          '</div>'+
+          (locked?'<div class="t-xs mono c-muted">🔒 Nivel '+r.minLevel+' requerido</div>':
+           isActive?'<button class="btn btn-p btn-sm" onclick="nav(\'raid-combat\')">▶ Continuar</button>':
+           activeRaid?'<div class="t-xs c-muted">Termina la raid activa primero</div>':
+           '<button class="btn btn-d btn-sm" onclick="startCityRaid(\''+cityId+'\',\''+r.id+'\')">⚔️ Iniciar</button>')+
+        '</div>';
+      }).join('')+'</div></div>';
+  });
+  return html||'<div class="c-muted t-sm">Desbloquea ciudades para ver sus raids.</div>';
+}
+
+function renderCityBossesHTML(){
+  const lvl=S.player.level;
+  let html='';
+  Object.entries(CITY_BOSSES).forEach(([cityId,bosses])=>{
+    const city=CITIES[cityId];if(!city)return;
+    if(!isGradeGte(S.player.grade,city.unlockGrade))return;
+    html+='<div style="margin-bottom:18px"><div style="font-family:var(--fd);font-size:12px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">'+city.emoji+' '+city.name+'</div>'+
+      '<div class="raid-grid">'+bosses.map(b=>{
+        const locked=lvl<b.minLevel;
+        return '<div class="raid-c '+(locked?'lk':'')+'">'+
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+
+            '<span style="font-size:26px">'+b.emoji+'</span>'+
+            '<div><div class="rn">'+b.name+'</div>'+
+            '<div class="t-xs mono c-muted">'+b.tags.join(' · ')+'</div></div>'+
+          '</div>'+
+          '<div class="rd">'+b.desc+'</div>'+
+          '<div class="rm">'+
+            '<span class="rtag">❤️ '+b.hp+' HP</span>'+
+            '<span class="rtag">⚔️ '+b.atk+' ATK</span>'+
+            (b.innate?'<span class="rtag" style="color:var(--purple)">⚡ '+b.innate+'</span>':'')+
+            (b.domain?'<span class="rtag" style="color:var(--gold)">⬡ Dominio</span>':'')+
+            '<span class="rtag">⭐ +'+b.xp+' XP</span>'+
+          '</div>'+
+          (locked?'<div class="t-xs mono c-muted">🔒 Nivel '+b.minLevel+' requerido</div>':
+           '<button class="btn btn-d" onclick="fightCityBoss(\''+cityId+'\',\''+b.id+'\')" style="width:100%">⚔️ Combatir (80 EM)</button>')+
+        '</div>';
+      }).join('')+'</div></div>';
+  });
+  return html||'<div class="c-muted t-sm">Desbloquea ciudades para ver sus jefes.</div>';
+}
+
+function startCityRaid(cityId,raidId){
+  if(activeRaid)return toast('Ya hay una raid activa. Termínala primero.','error');
+  const raids=CITY_RAIDS[cityId];if(!raids)return;
+  const r=raids.find(x=>x.id===raidId);if(!r)return;
+  if(S.player.level<r.minLevel)return toast('Nivel '+r.minLevel+' requerido','error');
+  activeRaid={...r,cityId,currentWave:1,paused:false,completedWaves:0,isCityRaid:true};
+  saveS();toast('🌊 Raid iniciada: '+r.name,'em');
+  nav('raid-combat');
+}
+
+function fightCityBoss(cityId,bossId){
+  const bosses=CITY_BOSSES[cityId];if(!bosses)return;
+  const b=bosses.find(x=>x.id===bossId);if(!b)return;
+  if(S.player.level<b.minLevel)return toast('Nivel '+b.minLevel+' requerido','error');
+  if(!useEM(80))return toast('80 EM requeridos','error');
+  const enemy=JSON.parse(JSON.stringify(b));
+  enemy.maxHp=enemy.hp;
+  enemy._cityBossId=bossId;
+  // City bosses are NOT scaled to player level — they have fixed difficulty
+  startBossCombat(enemy,bossId);
+  toast('💀 ¡Jefe de Ciudad: '+b.name+'!','error');
+}
+
+
 
 function startRaid(id){
   if(activeRaid)return toast('Ya hay una raid activa. Termínala primero.','error');
@@ -3293,8 +3795,8 @@ function renderActiveRaid(){
   }).join('');
 
   const waveDesc=isBossWave
-    ?'⚠️ Último combate: <strong>'+r.boss+'</strong>'
-    :'Oleada '+r.currentWave+'/'+r.waves+' — maldiciones de '+( CITIES[r.cityId]?.name||r.cityId);
+    ?'⚠️ Último combate: <strong>'+(r.isCityRaid?r.bossName:r.boss)+'</strong>'
+    :'Oleada '+r.currentWave+'/'+r.waves+(r.isCityRaid?' — '+CITIES[r.cityId]?.name:' — maldiciones de '+(CITIES[r.cityId]?.name||r.cityId));
 
   const lowEM=S.player.em<30;
   document.getElementById('raidActive').innerHTML=
@@ -3327,39 +3829,60 @@ function fightRaidWave(){
   if(!useEM(30))return toast('Sin EM para combatir — pausa la raid o genera más','error');
 
   const isBossWave=r.currentWave>r.waves;
-  // Build the enemy for this wave
   let enemy;
-  if(isBossWave){
-    // Boss enemy
-    const bossStats=BOSSES.find(b=>b.name===r.boss)||BOSSES[0];
-    const lvScale=S.player.level;
-    enemy={
-      name:r.boss,
-      hp:Math.round(bossStats.hp*(0.4+lvScale*0.02)),
-      maxHp:Math.round(bossStats.hp*(0.4+lvScale*0.02)),
-      atk:Math.round(bossStats.atk*(0.4+lvScale*0.02)),
-      def:16+lvScale,
-      xp:Math.round(bossStats.xp*0.6),
-      em:Math.round(bossStats.em*0.5),
-      emoji:'👾',
-      tags:['JEFE','RAID'],
-      sa:['bleed','poison'],
-      isBoss:true,
-    };
+
+  if(r.isCityRaid){
+    // City raid: fixed difficulty, NOT player-scaled
+    if(isBossWave){
+      // City raid boss — use defined stats directly
+      enemy={
+        name:r.bossName,emoji:r.emoji||'👾',
+        hp:r.bossHp,maxHp:r.bossHp,atk:r.bossAtk,def:Math.round(r.bossAtk*0.2),
+        xp:Math.round(r.reward.xp*0.5),
+        tags:['JEFE','RAID LOCAL'],
+        skills:[
+          es(r.bossName+': Golpe',Math.round(r.bossAtk*1.1),'bleed','¡El jefe descarga un golpe brutal!'),
+          es('Rugido',0,'paralyze','¡El rugido paraliza!'),
+          es('Embestida',Math.round(r.bossAtk*1.2),null,'¡Embestida imparable!'),
+        ],
+        sa:['bleed','paralyze'],isBoss:true,
+      };
+    } else {
+      // City raid wave: pick from catalog at defined grade, no scaling
+      enemy=pickEnemyForZone(r.enemyGrade);
+      // Light wave progression — only +8% per wave, no level scaling
+      const scale=1+(r.currentWave-1)*0.08;
+      enemy.hp=Math.round(enemy.hp*scale);enemy.maxHp=enemy.hp;
+      enemy.atk=Math.round(enemy.atk*scale);
+      enemy.xp=Math.round(enemy.xp*scale);
+    }
   } else {
-    // Regular wave — pick from CURSE_CATALOG by raid's minGrade
-    enemy=pickEnemyForZone(r.minGrade);
-    // Scale to wave number
-    const scale=1+(r.currentWave-1)*0.12;
-    enemy.hp=Math.round(enemy.hp*scale);enemy.maxHp=enemy.hp;
-    enemy.atk=Math.round(enemy.atk*scale);
-    enemy.xp=Math.round(enemy.xp*scale);enemy.em=Math.round(enemy.em*scale);
+    // Global raid: existing logic
+    if(isBossWave){
+      const bossStats=BOSSES.find(b=>b.name===r.boss)||BOSSES[0];
+      const lvScale=S.player.level;
+      enemy={
+        name:r.boss,
+        hp:Math.round(bossStats.hp*(0.4+lvScale*0.02)),
+        maxHp:Math.round(bossStats.hp*(0.4+lvScale*0.02)),
+        atk:Math.round(bossStats.atk*(0.4+lvScale*0.02)),
+        def:16+lvScale,
+        xp:Math.round(bossStats.xp*0.6),
+        emoji:'👾',tags:['JEFE','RAID'],sa:['bleed','poison'],isBoss:true,
+      };
+    } else {
+      enemy=pickEnemyForZone(r.minGrade);
+      const scale=1+(r.currentWave-1)*0.12;
+      enemy.hp=Math.round(enemy.hp*scale);enemy.maxHp=enemy.hp;
+      enemy.atk=Math.round(enemy.atk*scale);
+      enemy.xp=Math.round(enemy.xp*scale);
+    }
   }
 
   // Store raid context and start combat in raid mode
   raidCombatActive=true;
   const p=S.player;
-  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false};
+  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns()};
 
   // Show combat in the raids page by injecting combat UI
   const raEl=document.getElementById('raidActive');
@@ -3440,8 +3963,16 @@ function startRaidTimer(){
 function buildRaidActions(){
   const el=document.getElementById('rbActGrid');if(!el)return;
   const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
-  let btns='<button class="ba-btn basic" onclick="raidAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--ok)">GRATIS · '+(10+Math.round(p.stats.fuerza*1.5))+'</div></button>';
-  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{const af=sk.cost===0||p.em>=sk.cost;const ms=p.skillMastery[sk.id]||0;btns+='<button class="ba-btn '+(sk.type==='domain'?'domain-btn':'')+' '+(af?'':'disabled')+'" '+(af?'':'disabled')+' onclick="raidAction(\'skill\',\''+sk.id+'\')"><div class="bbn">'+sk.icon+' '+sk.name+'</div><div class="bbc">'+(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':'')+'</div></button>';});}
+  let btns='<button class="ba-btn basic" onclick="raidAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--warn)">5 EM · '+(10+Math.round(p.stats.fuerza*1.5))+'</div></button>';
+  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{
+    const af=sk.cost===0||p.em>=sk.cost;
+    const ms=p.skillMastery[sk.id]||0;
+    const cd=getCD(sk.id);const onCd=cd>0;const disabled=!af||onCd;
+    btns+='<button class="ba-btn '+(sk.type==='domain'?'domain-btn':'')+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="raidAction(\'skill\',\''+sk.id+'\')">'+
+      '<div class="bbn">'+sk.icon+' '+sk.name+'</div>'+
+      '<div class="bbc">'+(onCd?'<span style="color:var(--warn)">CD: '+cd+'t</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
+    '</button>';
+  });}
   btns+='<button class="ba-btn flee" onclick="raidAction(\'flee\')"><div class="bbn">🏃 Huir / Pausar</div><div class="bbc" style="color:var(--warn)">Pausa la raid</div></button>';
   el.innerHTML=btns;
 }
@@ -3454,11 +3985,18 @@ function raidAction(type,skillId){
   if(isParalyzed(BD.playerStatus)){rbClog('⚡ Paralizado! Pierdes el turno.','cl-status');setTimeout(raidEnemyTurn,800);return;}
   const p=S.player,enemy=BD.enemy,tech=p.technique?TECHNIQUES[p.technique]:null;
   let dmg=0,heal=0;
-  if(type==='basic'){dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);}
+  if(type==='basic'){
+    if(p.em<5){toast('Sin EM para atacar (mínimo 5)','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
+    useEM(5);
+    dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);
+  }
   else if(type==='skill'&&tech){
     const sk=tech.skills.find(s=>s.id===skillId);if(!sk)return;
+    if(getCD(sk.id)>0){toast('Habilidad en cooldown ('+getCD(sk.id)+' turnos)','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
     if(sk.cost>0&&p.em<sk.cost){toast('EM insuficiente','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
     if(sk.cost>0)useEM(sk.cost);
+    const cdVal=getSkillCooldown(sk);
+    if(cdVal>0&&BD.skillCooldowns)BD.skillCooldowns[sk.id]=cdVal;
     const mb=getMasteryBonus(sk.id);
     if(sk.type==='attack'||sk.type==='domain'){dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);}if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
     else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
@@ -3490,26 +4028,25 @@ function raidEnemyTurn(){
   updateRaidCombat();
   if(BD.playerHP<=0){raidWaveDefeat();return;}
   if(BD.enemy.hp<=0){setTimeout(raidWaveVictory,500);return;}
-  BD.turn='player';setTimeout(()=>{if(!BD.ended){document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);buildRaidActions();startRaidTimer();}},400);
+  BD.turn='player';tickCooldowns();setTimeout(()=>{if(!BD.ended){document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);buildRaidActions();startRaidTimer();}},400);
 }
 
 function raidWaveVictory(){
   if(BD.ended)return;BD.ended=true;clearInterval(raidTimerInt);
   const r=activeRaid;const isBoss=BD.isBossWave;
   const xpGain=isBoss?r.reward.xp:Math.round(r.reward.xp/r.waves);
-  const emGain=isBoss?r.reward.em:Math.round(r.reward.em/r.waves);
-  addXP(xpGain);addEM(emGain,(isBoss?'Jefe Raid: '+r.boss:'Raid oleada '+r.currentWave));
+  addXP(xpGain);gainMastery(null,isBoss?20:3);
   S.player.hp=BD.playerHP;saveS();
   const o=document.getElementById('rbResOverlay');
   if(isBoss){
     // Raid completed!
-    o.innerHTML='<div class="bres"><div class="bres-title win">🏆 RAID COMPLETADA</div><div class="bres-rwds"><div><div class="t-xs c-muted">XP Total</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+r.reward.xp+'</div></div><div><div class="t-xs c-muted">EM Total</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+r.reward.em+'</div></div></div><button class="btn btn-gold" onclick="finishRaid()">✅ Finalizar Raid</button></div>';
+    o.innerHTML='<div class="bres"><div class="bres-title win">🏆 RAID COMPLETADA</div><div class="bres-rwds"><div><div class="t-xs c-muted">XP Total</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+r.reward.xp+'</div></div><div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+20</div></div></div><button class="btn btn-gold" onclick="finishRaid()">✅ Finalizar Raid</button></div>';
     toast('🏆 ¡Raid completada: '+r.name+'!','gold');log_('Raid completada: '+r.name);
     activeRaid=null;saveS();
   } else {
     r.currentWave++;r.completedWaves=(r.completedWaves||0)+1;saveS();
     const nextIsBoss=r.currentWave>r.waves;
-    o.innerHTML='<div class="bres"><div class="bres-title win">✓ OLEADA '+(r.currentWave-1)+' SUPERADA</div><div class="bres-rwds"><div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xpGain+'</div></div><div><div class="t-xs c-muted">EM</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+emGain+'</div></div></div><div class="t-xs mono c-muted">Siguiente: '+(nextIsBoss?'⚠️ JEFE: '+r.boss:'Oleada '+r.currentWave+'/'+r.waves)+'</div>'+(S.player.em>=30?'<button class="btn btn-d" onclick="continueRaidWave()">⚔️ Continuar</button>':'<div class="t-xs c-red">Sin EM para continuar</div>')+'<button class="btn btn-g" onclick="pauseRaidFromResult()">⏸ Pausar por ahora</button></div>';
+    o.innerHTML='<div class="bres"><div class="bres-title win">✓ OLEADA '+(r.currentWave-1)+' SUPERADA</div><div class="bres-rwds"><div><div class="t-xs c-muted">XP</div><div style="font-size:15px;font-weight:700;color:var(--emb)">+'+xpGain+'</div></div><div><div class="t-xs c-muted">Maestría</div><div style="font-size:15px;font-weight:700;color:var(--purple)">+3</div></div></div><div class="t-xs mono c-muted">Siguiente: '+(nextIsBoss?'⚠️ JEFE: '+(r.isCityRaid?r.bossName:r.boss):'Oleada '+r.currentWave+'/'+r.waves)+'</div>'+(S.player.em>=30?'<button class="btn btn-d" onclick="continueRaidWave()">⚔️ Continuar</button>':'<div class="t-xs c-red">Sin EM para continuar</div>')+'<button class="btn btn-g" onclick="pauseRaidFromResult()">⏸ Pausar por ahora</button></div>';
     if(S.player.em<30){r.paused=true;saveS();toast('⏸ Sin EM. Raid pausada.','em');}
   }
 }
@@ -3613,12 +4150,12 @@ function startBossCombat(enemy,bossId){
   BD={
     isBossFight:true,bossId:bossId,
     enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
-    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),
     // Fake mission for zone progress display
     mission:{id:'boss_'+bossId,title:'⚔️ Jefe: '+enemy.name,type:'kill',target:1,progress:0,zoneId:'boss',cityName:'Jefe',zoneName:enemy.name,reward:{xp:enemy.xp,em:0}}
   };
   activeMissionId='boss_'+bossId;
-  updateCombat();buildBActions();clearCLog();
+  if(hasTreeNode('em_p3')&&S.player.em<50){S.player.em=50;saveS();}updateCombat();buildBActions();clearCLog();
   clog('💀 ¡COMBATE DE JEFE: '+enemy.name+'!','cl-domain');
   clog('⚠️ Enemigo con técnica innata y dominio expandido.','cl-info');
   if(enemy.domain)clog('⬡ Dominio disponible: '+enemy.domain.name,'cl-info');
@@ -3694,7 +4231,6 @@ function openHabitModal(id=null){
     document.getElementById('hbPri').value=h.priority||'media';
     document.getElementById('hbDif').value=h.difficulty||'normal';
     document.getElementById('hbFreq').value=h.freq;
-    document.getElementById('hbEM').value=h.emReward;
     document.getElementById('hbS').value=h.startDate||today;
     document.getElementById('hbE').value=h.endDate||'';
     document.getElementById('habitMo').dataset.editId=id;
@@ -3703,7 +4239,6 @@ function openHabitModal(id=null){
     document.getElementById('hbPri').value='media';
     document.getElementById('hbDif').value='normal';
     document.getElementById('hbFreq').value='daily';
-    document.getElementById('hbEM').value=20;
     document.getElementById('hbS').value=today;
     document.getElementById('hbE').value='';
     delete document.getElementById('habitMo').dataset.editId;
@@ -3713,12 +4248,14 @@ function openHabitModal(id=null){
 function saveHabit(){
   const n=document.getElementById('hbName').value.trim();if(!n)return toast('Nombre obligatorio','error');
   const editId=document.getElementById('habitMo').dataset.editId;
+  const pri=document.getElementById('hbPri').value;
+  const dif=document.getElementById('hbDif').value;
   const h={
     id:editId||'h_'+Date.now(),name:n,
-    priority:document.getElementById('hbPri').value,
-    difficulty:document.getElementById('hbDif').value,
+    priority:pri,
+    difficulty:dif,
     freq:document.getElementById('hbFreq').value,
-    emReward:parseInt(document.getElementById('hbEM').value)||20,
+    emReward:Math.round((EM_PRI[pri]||50)*(DIFF_MULT[dif]||1)),
     startDate:document.getElementById('hbS').value,
     endDate:document.getElementById('hbE').value||null,
     streak:0,lastDone:null
@@ -3741,7 +4278,7 @@ function renderHabitList(){
         '<div class="tn">'+h.name+'</div>'+
         '<div class="tm-">'+
           '<span class="badge" style="background:'+priC+'22;color:'+priC+';border-color:'+priC+'44">'+h.priority+'</span>'+
-          '<span class="td-">'+(h.freq==='daily'?'Diario':'Semanal')+' · '+h.emReward+' EM</span>'+
+          '<span class="td-">'+(h.freq==='daily'?'Diario':'Semanal')+' · ⚡'+calcEM(h)+' EM</span>'+
           (h.endDate?'<span class="td- '+(od?'ov':'')+'">⏰ '+h.endDate+'</span>':'')+
         '</div>'+
       '</div>'+
@@ -3753,7 +4290,7 @@ function renderHabitList(){
     '</div>';
   }).join('');
 }
-function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);if(h.lastDone===today)return;h.lastDone=today;h.streak++;addEM(h.emReward,'Hábito: "'+h.name+'"');addXP(10);toast('✅ +'+h.emReward+' EM — Hábito','success');saveS();renderHabitList();}
+function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);if(h.lastDone===today)return;h.lastDone=today;h.streak++;const em=calcEM(h);addEM(em,'Hábito: "'+h.name+'"');addXP(calcXP(h));toast('✅ +'+em+' EM — Hábito','success');saveS();renderHabitList();}
 function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);saveS();renderHabitList();}
 function openGoalModal(id=null){
   const today=new Date().toISOString().slice(0,10);
@@ -4189,18 +4726,31 @@ function testUnlockTechs(){
   toast('🔓 Todas las técnicas disponibles','gold');
 }
 function testUnlockStatTree(){
+  if(!S.player.statNodePts)S.player.statNodePts={};
+  if(!S.player.statTreeNodes)S.player.statTreeNodes=[];
   Object.values(STAT_TREE).forEach(pillar=>{
     pillar.nodes.forEach(node=>{
-      if(!S.player.statTreeNodes.includes(node.id)){
-        S.player.statTreeNodes.push(node.id);
-        const e=node.effect;
-        if(e.maxHp){S.player.maxHp+=e.maxHp;S.player.hp=Math.min(S.player.hp+e.maxHp,S.player.maxHp);}
-        if(e.maxEm)S.player.maxEm+=e.maxEm;
-        if(e.fuerza)S.player.stats.fuerza+=e.fuerza;
-        if(e.maldicion)S.player.stats.maldicion+=e.maldicion;
-        if(e.dominio)S.player.stats.dominio+=e.dominio;
-        if(e.inteligencia)S.player.stats.inteligencia+=e.inteligencia;
-        if(e.allStats)Object.keys(S.player.stats).forEach(k=>S.player.stats[k]+=e.allStats);
+      if(node.type==='stat'){
+        const prev=S.player.statNodePts[node.id]||0;
+        const max=node.maxPts||10;
+        if(prev<max){
+          // Apply all remaining per-3 bonuses
+          for(let i=prev+1;i<=max;i++){
+            if(i%3===0&&node.per3){
+              const e=node.per3;
+              if(e.maxHp){S.player.maxHp+=e.maxHp;S.player.hp=Math.min(S.player.hp+e.maxHp,S.player.maxHp);}
+              if(e.maxEm)S.player.maxEm+=e.maxEm;
+              if(e.fuerza)S.player.stats.fuerza+=e.fuerza;
+              if(e.maldicion)S.player.stats.maldicion+=e.maldicion;
+              if(e.dominio)S.player.stats.dominio+=e.dominio;
+            }
+          }
+          S.player.statNodePts[node.id]=max;
+        }
+      } else {
+        if(!S.player.statTreeNodes.includes(node.id)){
+          S.player.statTreeNodes.push(node.id);
+        }
       }
     });
   });
