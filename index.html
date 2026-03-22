@@ -627,8 +627,6 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
     <div id="cityMenuGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px"></div>
   </div>
   <div id="cityDetailPanel"></div>
-  <!-- hidden stubs so legacy JS refs don't crash -->
-  <div style="display:none"><svg id="japanMapSVG"><defs></defs></svg></div>
 </div>
 <!-- BATTLE -->
 <div class="page" id="page-battle">
@@ -1635,7 +1633,7 @@ function isGradeGte(a,b){return gradeOrder(a)>=gradeOrder(b);}
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════
 const DFLT={
-  player:{name:'Hechicero',avatar:null,playerSprite:null,level:1,xp:0,xpNext:100,
+  player:{name:'Hechicero',avatar:null,playerSprite:null,level:1,xp:0,xpNext:120,
     grade:5,hp:100,maxHp:100,em:0,maxEm:500,statPoints:0,
     stats:{fuerza:5,defensa:5,velocidad:5,inteligencia:5,maldicion:5,dominio:5},
     technique:null,unlockedSkills:[],skillMastery:{},
@@ -1669,7 +1667,7 @@ function saveS(){
       uploadedSprites:(S.uploadedSprites||[]).map(s=>({name:s.name,data:'__sprite__'})),
       player:{...S.player,avatar:S.player.avatar?'__sprite__':null,playerSprite:S.player.playerSprite?'__sprite__':null},
     };
-    localStorage.setItem('jjk_v4',JSON.stringify(forSave));
+    localStorage.setItem('jjk_v5',JSON.stringify(forSave));
 
     // Sprites in separate key
     const sprData={
@@ -1679,11 +1677,11 @@ function saveS(){
       avatar:S.player.avatar||null,
       playerSprite:S.player.playerSprite||null,
     };
-    try{localStorage.setItem('jjk_v4_sprites',JSON.stringify(sprData));}
+    try{localStorage.setItem('jjk_v5_sprites',JSON.stringify(sprData));}
     catch(sprErr){
       // If sprites still too big, save without uploaded pool (keep assignments)
       sprData.uploadedSprites=[];
-      try{localStorage.setItem('jjk_v4_sprites',JSON.stringify(sprData));}
+      try{localStorage.setItem('jjk_v5_sprites',JSON.stringify(sprData));}
       catch(e2){console.warn('Sprites too large even without pool, skipping sprite save');}
     }
   }catch(e){
@@ -1694,7 +1692,8 @@ function saveS(){
 
 function loadS(){
   try{
-    const raw=localStorage.getItem('jjk_v4');
+    // Try jjk_v5 first, fall back to jjk_v4 for existing saves
+    const raw=localStorage.getItem('jjk_v5')||localStorage.getItem('jjk_v4');
     if(raw){
       const d=JSON.parse(raw);
       // Migrations
@@ -1703,6 +1702,10 @@ function loadS(){
       if(d.player.techMasteryXP===undefined)d.player.techMasteryXP=0;
       if(!d.player.statTreeNodes)d.player.statTreeNodes=[];
       if(!d.player.statNodePts)d.player.statNodePts={};
+      // Migrate xpNext to new polynomial curve (old saves used exponential)
+      const correctXpNext=Math.round(120*Math.pow(d.player.level||1,1.6));
+      if(!d.player.xpNext||d.player.xpNext>correctXpNext*3||d.player.xpNext<50)
+        d.player.xpNext=correctXpNext;
       if(!d.activeMissions)d.activeMissions=[];
       if(!d.completedMissions)d.completedMissions=[];
       if(!d.generatedMissions)d.generatedMissions=[];
@@ -1718,7 +1721,7 @@ function loadS(){
 
       // Restore sprites from separate key
       try{
-        const sprRaw=localStorage.getItem('jjk_v4_sprites');
+        const sprRaw=localStorage.getItem('jjk_v5_sprites')||localStorage.getItem('jjk_v4_sprites');
         if(sprRaw){
           const sprData=JSON.parse(sprRaw);
           // Restore sprites objects
@@ -1762,6 +1765,24 @@ function isZoneUnlocked(zone,city){
 // CORE SYSTEMS
 // ═══════════════════════════════════════════════════════
 const EM_PRI={alta:80,media:50,baja:25};
+// ── Centralized combat constants ──────────────────────
+// Change these to rebalance the whole game in one place.
+const CC={
+  LV_MULT:0.007,          // enemy stat scaling per player level (1.7x at lv100)
+  LV_HP_BONUS:15,         // HP gained per level
+  LV_EM_BONUS:35,         // EM gained per level
+  LV_STAT_POINTS:3,       // stat points gained per level
+  BASIC_ATK_EM_COST:5,    // EM cost of basic attack
+  MASTERY_BONUS_PER_LV:0.02, // +2% skill power per mastery level
+  RAID_WAVE_SCALE:0.12,   // enemy stat scale per raid wave
+  DOMAIN_DMG_MULT:1.4,    // domain attack damage multiplier
+  CRIT_DMG_MULT:2.0,      // critical hit damage multiplier
+  ENEMY_BASIC_DEF_MULT:0.4, // how much def reduces enemy damage
+  PLAYER_DOM_DEF_MULT:0.8,  // how much player dominio reduces incoming damage
+};
+// XP needed to go from level lv to lv+1 — polynomial so it scales predictably
+function xpForNextLevel(lv){return Math.round(120*Math.pow(lv,1.6));}
+
 const DIFF_MULT={facil:1.0,normal:1.2,dificil:1.5};
 const XP_PRI={alta:60,media:35,baja:15};
 function calcEM(t){return Math.round((EM_PRI[t.priority]||50)*(DIFF_MULT[t.difficulty]||1));}
@@ -1774,12 +1795,11 @@ function addXP(amt){
   S.player.xp+=amt;
   while(S.player.xp>=S.player.xpNext){
     S.player.xp-=S.player.xpNext;S.player.level++;
-    // Gentler XP curve: ×1.18+40 instead of ×1.35+60
-    S.player.xpNext=Math.round(S.player.xpNext*1.18+40);
-    S.player.statPoints+=3;S.player.maxHp+=15;
-    S.player.hp=Math.min(S.player.hp+15,S.player.maxHp);
-    S.player.maxEm+=35;
-    toast('🎉 ¡Nivel '+S.player.level+'! +3 pts · +15 HP · +35 EM máx','gold');
+    S.player.xpNext=xpForNextLevel(S.player.level);
+    S.player.statPoints+=CC.LV_STAT_POINTS;S.player.maxHp+=CC.LV_HP_BONUS;
+    S.player.hp=Math.min(S.player.hp+CC.LV_HP_BONUS,S.player.maxHp);
+    S.player.maxEm+=CC.LV_EM_BONUS;
+    toast('🎉 ¡Nivel '+S.player.level+'! +'+CC.LV_STAT_POINTS+' pts · +'+CC.LV_HP_BONUS+' HP · +'+CC.LV_EM_BONUS+' EM máx','gold');
     checkGrade();checkSkillUnlocks();
   }
   uiAll();saveS();
@@ -1866,7 +1886,7 @@ function isTechEvolvable(){
 
 function getMasteryBonus(){
   const lv=Math.min(getTechMasteryLevel(S.player.techMasteryXP||0),getTechMaxMastery());
-  return 1+(lv*0.02); // +2% per level
+  return 1+(lv*CC.MASTERY_BONUS_PER_LV); // +MASTERY_BONUS_PER_LV per level
 }
 function gainMastery(skillId,amt=2){gainTechMastery(amt);saveS();}
 function log_(txt){S.log.unshift({text:txt,time:Date.now()});if(S.log.length>60)S.log.pop();}
@@ -2204,7 +2224,7 @@ function startCleaningCombat(mId){
 
   // Scale stats: level mult + difficulty mult
   const diffStatMult={facil:1.0,normal:1.15,dificil:1.4,extreme:1.75};
-  const lvMult=1+Math.max(0,(S.player.level-1)*0.015);
+  const lvMult=1+Math.max(0,(S.player.level-1)*CC.LV_MULT);
   const dm=(diffStatMult[m.diff]||1)*lvMult;
   enemy.hp=Math.round(enemy.hp*dm);enemy.maxHp=enemy.hp;
   enemy.atk=Math.round(enemy.atk*dm);
@@ -2217,7 +2237,7 @@ function startCleaningCombat(mId){
     missionId:mId,
     mission:{...m,id:mId,target:1,progress:0}, // each fight = 1 kill
     enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
-    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),emSpentThisCombat:0,lastStandUsed:false,resonanceStack:0,
     isCleaningMission:true,cleaningZoneId:zoneId,
   };
   document.getElementById('missionBoardSel').style.display='none';
@@ -2608,13 +2628,13 @@ const STAT_TREE={
   tecnica:{label:'Técnica',icon:'✨',color:'#6050e0',
     nodes:[
       {id:'tec_1',name:'Tec I',  icon:'✨',type:'stat',maxPts:10,req:[],
-        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Percepción Maldita.'},
+        per3:{techPowerPct:2,maldicion:2},desc:'Cada 3 pts: +2% potencia innata, +2 Maldición. Al completar desbloquea Percepción Maldita.'},
       {id:'tec_2',name:'Tec II', icon:'✨',type:'stat',maxPts:10,req:['tec_1'],
-        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Eficiencia Técnica.'},
+        per3:{techPowerPct:2,maldicion:2},desc:'Cada 3 pts: +2% potencia innata, +2 Maldición. Al completar desbloquea Eficiencia Técnica.'},
       {id:'tec_3',name:'Tec III',icon:'✨',type:'stat',maxPts:10,req:['tec_2'],
-        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Dominio Simple y Resonancia Innata.'},
+        per3:{techPowerPct:2,maldicion:3},desc:'Cada 3 pts: +2% potencia innata, +3 Maldición. Al completar desbloquea Dominio Simple y Resonancia.'},
       {id:'tec_4',name:'Tec IV', icon:'✨',type:'stat',maxPts:10,req:['tec_3'],
-        per3:{techPowerPct:2},desc:'Cada 3 pts: +2% potencia innata. Al completar desbloquea Dominio Expandido.'},
+        per3:{techPowerPct:2,maldicion:3},desc:'Cada 3 pts: +2% potencia innata, +3 Maldición. Al completar desbloquea Dominio Expandido.'},
       {id:'tec_p1',name:'Percepción Maldita', icon:'🔍',type:'passive',cost:10,req:['tec_1'],
         desc:'Ves los stats completos del enemigo al inicio del combate.',effect:{enemyStats:true}},
       {id:'tec_p2',name:'Eficiencia Técnica', icon:'💫',type:'passive',cost:15,req:['tec_2'],
@@ -2630,13 +2650,13 @@ const STAT_TREE={
   energia:{label:'Energía Maldita',icon:'⚡',color:'#3b7cf4',
     nodes:[
       {id:'em_1',name:'EM I',  icon:'⚡',type:'stat',maxPts:10,req:[],
-        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Flujo Constante.'},
+        per3:{maxEm:20,dominio:1},desc:'Cada 3 pts: +20 EM máx, +1 Dominio. Al completar desbloquea Flujo Constante.'},
       {id:'em_2',name:'EM II', icon:'⚡',type:'stat',maxPts:10,req:['em_1'],
-        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Técnica Inversa.'},
+        per3:{maxEm:20,dominio:1},desc:'Cada 3 pts: +20 EM máx, +1 Dominio. Al completar desbloquea Técnica Inversa.'},
       {id:'em_3',name:'EM III',icon:'⚡',type:'stat',maxPts:10,req:['em_2'],
-        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Absorción Maldita.'},
+        per3:{maxEm:20,dominio:2},desc:'Cada 3 pts: +20 EM máx, +2 Dominio. Al completar desbloquea Absorción Maldita.'},
       {id:'em_4',name:'EM IV', icon:'⚡',type:'stat',maxPts:10,req:['em_3'],
-        per3:{maxEm:20},desc:'Cada 3 pts: +20 EM máx. Al completar desbloquea Control Absoluto y Explosión de EM.'},
+        per3:{maxEm:20,dominio:2},desc:'Cada 3 pts: +20 EM máx, +2 Dominio. Al completar desbloquea Control Absoluto y Explosión de EM.'},
       {id:'em_p1',name:'Flujo Constante',   icon:'🔄',type:'passive',cost:15,req:['em_1'],
         desc:'Regenera 8 EM al inicio de cada turno en combate.',effect:{emRegen:8}},
       {id:'em_a1',name:'Técnica Inversa',   icon:'💚',type:'active', cost:25,req:['em_2'],
@@ -2749,9 +2769,8 @@ function getCritChance(){
   ['atq_1','atq_2','atq_3','atq_4'].forEach(id=>{pct+=Math.floor(getNodePts(id)/3);});
   return pct;
 }
-// Legacy compat for testUnlockStatTree
+// isStatNodeUnlocked: checks if a stat node is complete OR a branch is unlocked
 function isStatNodeUnlocked(id){return isStatNodeComplete(id)||isBranchUnlocked(id);}
-function canUnlockStatNode(node){return false;} // replaced by new system
 
 
 
@@ -3206,13 +3225,13 @@ function startMissionCombat(mId){
   }
 
   // Scale enemy slightly to player level
-  const lvMult=1+Math.max(0,(S.player.level-1)*0.015);
-  enemy.hp=Math.max(enemy.hp,Math.round(enemy.hp*lvMult));
+  const lvMult=1+Math.max(0,(S.player.level-1)*CC.LV_MULT);
+  enemy.hp=Math.round(enemy.hp*lvMult);
   enemy.maxHp=enemy.hp;
   enemy.atk=Math.round(enemy.atk*lvMult);
 
   const p=S.player;
-  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns()};
+  BD={missionId:mId,mission:m,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),emSpentThisCombat:0,lastStandUsed:false,resonanceStack:0};
   if(hasTreeNode('em_p3')&&S.player.em<50){S.player.em=50;saveS();}updateCombat();buildBActions();clearCLog();
   // Show enemy info in log
   const gradeLabel={5:'G-5',4:'G-4',3:'G-3',2:'G-2','sg1':'SG-1',1:'G-1','semi':'SGE','special':'ESP'}[enemy.grade]||'';
@@ -3356,8 +3375,8 @@ function bAction(type,skillId){
 
   if(type==='flee'){if(Math.random()<.6){clog('🏃 ¡Huiste!','cl-info');setTimeout(()=>endCombat(false),700);}else{clog('❌ No pudiste huir.','cl-dmg');setTimeout(enemyTurn,700);}return;}
   if(type==='basic'){
-    if(p.em<5){toast('Sin EM para atacar (mínimo 5)','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
-    useEM(5);
+    if(p.em<CC.BASIC_ATK_EM_COST){toast('Sin EM para atacar (mínimo '+CC.BASIC_ATK_EM_COST+')','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
+    useEM(CC.BASIC_ATK_EM_COST);
     dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);
     BD.resonanceStack=0; // basic attack resets resonance
   }
@@ -3369,7 +3388,6 @@ function bAction(type,skillId){
     if(discountedCost>0&&p.em<discountedCost){toast('EM insuficiente','error');document.querySelectorAll('.ba-btn').forEach(b=>b.disabled=false);startTimer();return;}
     if(discountedCost>0)useEM(discountedCost);
     // Track EM spent this combat for Absorción Maldita
-    if(!BD.emSpentThisCombat)BD.emSpentThisCombat=0;
     BD.emSpentThisCombat+=discountedCost;
     // Set cooldown after use (seconds-based)
     const cdSecs=getSkillCooldownSecs(sk);
@@ -3379,7 +3397,7 @@ function bAction(type,skillId){
     const resonanceMult=hasTreeNode('tec_p3')?1+Math.min(resonanceBonus,2)*0.1:1;
     if(sk.type==='attack'||sk.type==='domain'){
       dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb*resonanceMult);
-      if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);clog('⬡ DOMINIO: '+sk.name,'cl-domain');}
+      if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*CC.DOMAIN_DMG_MULT);clog('⬡ DOMINIO: '+sk.name,'cl-domain');}
       if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);clog(sd.icon+' '+sd.label+' al '+enemy.name,'cl-status');}}
       // Resonance Innata: accumulate stack
       if(hasTreeNode('tec_p3')){BD.resonanceStack=Math.min((BD.resonanceStack||0)+1,3);if(BD.resonanceStack>1)clog('🌀 Resonancia ×'+BD.resonanceStack,'cl-info');}
@@ -3397,10 +3415,10 @@ function bAction(type,skillId){
   }
   // ── Passive: Crit chance from ATQ nodes ──
   const crit=getCritChance();
-  if(dmg>0&&crit>0&&Math.random()*100<crit){dmg=Math.round(dmg*2);clog('💥 ¡CRÍTICO! ×2','cl-special');}
+  if(dmg>0&&crit>0&&Math.random()*100<crit){dmg=Math.round(dmg*CC.CRIT_DMG_MULT);clog('💥 ¡CRÍTICO! ×'+CC.CRIT_DMG_MULT,'cl-special');}
 
   const boost=BD.playerStatus.find(s=>s.type==='boost');if(boost&&dmg>0)dmg=Math.round(dmg*(STATUS_DEFS.boost.dmgMult||1.3));
-  if(dmg>0){const fd=Math.max(1,dmg-Math.round((enemy.def||0)*.4));enemy.hp-=fd;clog('💥 '+fd+' HP al '+enemy.name,'cl-hit');floatDmg(fd,'ed');aniSprite('bPlayerSprite','atk');aniSprite('bEnemySprite','shaking');}
+  if(dmg>0){const fd=Math.max(1,dmg-Math.round((enemy.def||0)*CC.ENEMY_BASIC_DEF_MULT));enemy.hp-=fd;clog('💥 '+fd+' HP al '+enemy.name,'cl-hit');floatDmg(fd,'ed');aniSprite('bPlayerSprite','atk');aniSprite('bEnemySprite','shaking');}
   if(heal>0){BD.playerHP=Math.min(BD.playerHP+heal,BD.playerMaxHP);clog('💚 +'+heal+' HP','cl-hit');}
   const stkDmg=processStatus(BD.playerStatus,'Tú');if(stkDmg>0)BD.playerHP=Math.max(0,BD.playerHP-stkDmg);
   updateCombat();buildBActions();
@@ -3518,9 +3536,9 @@ function enemyTurn(){
     // ── Passive: Cuerpo Templado — flat −5 dmg ──
     if(hasTreeNode('salud_p2')){dmg=Math.max(0,dmg-5);}
     // ── Passive: Límite Roto — double defense when HP < 30% ──
-    let defVal=Math.round(p.stats.dominio*0.8);
+    let defVal=Math.round(p.stats.dominio*CC.PLAYER_DOM_DEF_MULT);
     if(hasTreeNode('salud_p3')&&BD.playerHP/BD.playerMaxHP<0.3)defVal*=2;
-    dmg=Math.max(1,dmg-defVal);
+    dmg=Math.max(1,dmg-defVal); // defVal uses CC.PLAYER_DOM_DEF_MULT
     if(Math.random()<0.06){clog('✨ MISS — '+enemy.name,'cl-info');floatDmg('MISS','ms');}
     else{
       const newHP=Math.max(0,BD.playerHP-dmg);
@@ -3636,10 +3654,8 @@ function endCombat(success){
     nav('bosses');
   } else {
     document.getElementById('missionBoardSel').style.display='block';
-    const wasClean=BD.isCleaningMission;
     BD={};activeMissionId=null;
-    if(wasClean){renderBattlePage();}
-    else{renderBattlePage();}
+    renderBattlePage();
   }
   uiAll();
 }
@@ -4048,7 +4064,7 @@ function fightRaidWave(){
       };
     } else {
       enemy=pickEnemyForZone(r.minGrade);
-      const scale=1+(r.currentWave-1)*0.12;
+      const scale=1+(r.currentWave-1)*CC.RAID_WAVE_SCALE;
       enemy.hp=Math.round(enemy.hp*scale);enemy.maxHp=enemy.hp;
       enemy.atk=Math.round(enemy.atk*scale);
       enemy.xp=Math.round(enemy.xp*scale);
@@ -4058,7 +4074,7 @@ function fightRaidWave(){
   // Store raid context and start combat in raid mode
   raidCombatActive=true;
   const p=S.player;
-  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns()};
+  BD={raidMode:true,raidId:r.id,isBossWave,enemy,playerHP:p.hp,playerMaxHP:p.maxHp,turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),emSpentThisCombat:0,lastStandUsed:false,resonanceStack:0};
 
   // Show combat in the raids page by injecting combat UI
   const raEl=document.getElementById('raidActive');
@@ -4163,8 +4179,8 @@ function raidAction(type,skillId){
   const p=S.player,enemy=BD.enemy,tech=p.technique?TECHNIQUES[p.technique]:null;
   let dmg=0,heal=0;
   if(type==='basic'){
-    if(p.em<5){toast('Sin EM para atacar (mínimo 5)','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
-    useEM(5);
+    if(p.em<CC.BASIC_ATK_EM_COST){toast('Sin EM para atacar (mínimo '+CC.BASIC_ATK_EM_COST+')','error');document.querySelectorAll('#rbActGrid .ba-btn').forEach(b=>b.disabled=false);startRaidTimer();return;}
+    useEM(CC.BASIC_ATK_EM_COST);
     dmg=10+Math.round(p.stats.fuerza*1.5)+Math.round(Math.random()*6);
   }
   else if(type==='skill'&&tech){
@@ -4174,7 +4190,7 @@ function raidAction(type,skillId){
     if(sk.cost>0)useEM(sk.cost);
     const cdSecs2=getSkillCooldownSecs(sk);if(cdSecs2>0)setCD(sk.id,cdSecs2);
     const mb=getMasteryBonus(sk.id);
-    if(sk.type==='attack'||sk.type==='domain'){dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*1.4);}if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
+    if(sk.type==='attack'||sk.type==='domain'){dmg=Math.round((sk.power+p.stats.maldicion*2.2+Math.random()*12)*mb);if(sk.type==='domain'){triggerDomainAnim(tech.name+' — '+sk.name);dmg=Math.round(dmg*CC.DOMAIN_DMG_MULT);}if(sk.statusEffect&&!['boost','barrier'].includes(sk.statusEffect)){const sd=STATUS_DEFS[sk.statusEffect];if(sd&&Math.random()<.65){applyStatus(BD.enemyStatus,sk.statusEffect,sd.turns);}}}
     else if(sk.type==='heal'){heal=Math.round((sk.power+p.stats.dominio*1.5)*mb);}
     else if(sk.type==='defense'){applyStatus(BD.playerStatus,'barrier',1);}
     else if(sk.type==='buff'){if(sk.statusEffect)applyStatus(BD.playerStatus,sk.statusEffect,2);}
@@ -4182,7 +4198,7 @@ function raidAction(type,skillId){
     
   }
   const boost=BD.playerStatus.find(s=>s.type==='boost');if(boost&&dmg>0)dmg=Math.round(dmg*(STATUS_DEFS.boost.dmgMult||1.3));
-  if(dmg>0){const fd=Math.max(1,dmg-Math.round((enemy.def||0)*.4));enemy.hp=Math.max(0,enemy.hp-fd);rbClog('💥 '+fd+' HP al '+enemy.name,'cl-hit');}
+  if(dmg>0){const fd=Math.max(1,dmg-Math.round((enemy.def||0)*CC.ENEMY_BASIC_DEF_MULT));enemy.hp=Math.max(0,enemy.hp-fd);rbClog('💥 '+fd+' HP al '+enemy.name,'cl-hit');}
   if(heal>0){BD.playerHP=Math.min(BD.playerHP+heal,BD.playerMaxHP);rbClog('💚 +'+heal+' HP','cl-hit');}
   const stkDmg=processStatus(BD.playerStatus,'Tú');if(stkDmg>0)BD.playerHP=Math.max(0,BD.playerHP-stkDmg);
   updateRaidCombat();
@@ -4197,7 +4213,7 @@ function raidEnemyTurn(){
   let dmg=(enemy.atk||12)+Math.round(Math.random()*6);
   const barrier=BD.playerStatus.find(s=>s.type==='barrier');
   if(barrier){dmg=Math.round(dmg*.3);BD.playerStatus.splice(BD.playerStatus.indexOf(barrier),1);}
-  dmg=Math.max(1,dmg-Math.round(p.stats.dominio*0.8));
+  dmg=Math.max(1,dmg-Math.round(p.stats.dominio*CC.PLAYER_DOM_DEF_MULT));
   BD.playerHP=Math.max(0,BD.playerHP-dmg);
   rbClog('🔴 '+enemy.name+': −'+dmg+' HP','cl-dmg');
   const eStDmg=processStatus(BD.enemyStatus,enemy.name);if(eStDmg>0)BD.enemy.hp=Math.max(0,BD.enemy.hp-eStDmg);
@@ -4284,7 +4300,7 @@ function fightBoss(id){
   const catalogMatch=Object.values(CURSE_CATALOG).flat().find(e=>e.id==='csp_'+id||e.id==='css_'+id);
   let enemy=catalogMatch?JSON.parse(JSON.stringify(catalogMatch)):buildBossEnemy(bd);
   // Scale to player level
-  const lvMult=1+Math.max(0,(S.player.level-1)*0.018);
+  const lvMult=1+Math.max(0,(S.player.level-1)*CC.LV_MULT);
   enemy.hp=Math.round(enemy.hp*lvMult);enemy.maxHp=enemy.hp;
   enemy.atk=Math.round(enemy.atk*lvMult);
   // Store boss id and which activeBoss entry this fight is for
@@ -4326,7 +4342,7 @@ function startBossCombat(enemy,bossId){
   BD={
     isBossFight:true,bossId:bossId,
     enemy,playerHP:p.hp,playerMaxHP:p.maxHp,
-    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),
+    turn:'player',ended:false,playerStatus:[],enemyStatus:[],domainUsed:false,skillCooldowns:initSkillCooldowns(),emSpentThisCombat:0,lastStandUsed:false,resonanceStack:0,
     // Fake mission for zone progress display
     mission:{id:'boss_'+bossId,title:'⚔️ Jefe: '+enemy.name,type:'kill',target:1,progress:0,zoneId:'boss',cityName:'Jefe',zoneName:enemy.name,reward:{xp:enemy.xp,em:0}}
   };
@@ -4802,21 +4818,17 @@ function testSetLevel(){
   const newLv=Math.max(1,Math.min(200,parseInt(input.value)||1));
   const p=S.player;
   p.level=newLv;
-  // Recalculate XP curve
   p.xp=0;
-  p.xpNext=Math.round(100*Math.pow(1.35,newLv-1));
-  // Recalculate HP and EM based on level
-  const baseHp=100;const hpPerLv=12;
-  p.maxHp=baseHp+hpPerLv*(newLv-1);
+  p.xpNext=xpForNextLevel(newLv);
+  // Recalculate HP and EM using CC constants
+  p.maxHp=100+CC.LV_HP_BONUS*(newLv-1);
   p.hp=Math.min(p.hp,p.maxHp);
-  const baseEm=500;const emPerLv=30;
-  p.maxEm=baseEm+emPerLv*(newLv-1);
+  p.maxEm=500+CC.LV_EM_BONUS*(newLv-1);
   // Recalculate grade
   for(let i=GRADES.length-1;i>=0;i--){
     if(newLv>=GRADES[i].lvReq){p.grade=GRADES[i].id;break;}
   }
-  // Add stat points proportional to level
-  p.statPoints=Math.max(p.statPoints,newLv*3);
+  p.statPoints=Math.max(p.statPoints,newLv*CC.LV_STAT_POINTS);
   saveS();uiAll();
   document.getElementById('cfgCurLv').textContent=newLv;
   toast('✓ Nivel cambiado a '+newLv+' · Grado: '+gd(p.grade).label,'gold');
@@ -4868,7 +4880,7 @@ function exportData(){
   const exp=JSON.parse(JSON.stringify(S));
   const b=new Blob([JSON.stringify(exp,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='jjk_v4_'+S.player.name+'_'+Date.now()+'.json';a.click();
+  a.download='jjk_v5_'+S.player.name+'_'+Date.now()+'.json';a.click();
   toast('📤 Exportado (incluye sprites)','success');
 }
 function importTrigger(){document.getElementById('impInput').click();}
@@ -4946,8 +4958,8 @@ function removeBlackBgFromAllSprites(done){
 }
 function resetAll(){
   if(confirm('¿Resetear TODO el progreso y sprites?')){
-    localStorage.removeItem('jjk_v4');
-    localStorage.removeItem('jjk_v4_sprites');
+    localStorage.removeItem('jjk_v5');
+    localStorage.removeItem('jjk_v5_sprites');
     S=JSON.parse(JSON.stringify(DFLT));
     saveS();uiAll();nav('dashboard');toast('Reseteado','em');
   }
@@ -4960,8 +4972,13 @@ function testUnlockAll(){
   S.player.em=S.player.maxEm=9999;
   S.player.statPoints=999;
   S.player.level=Math.max(S.player.level,50);
-  S.player.xp=0;S.player.xpNext=99999;
-  saveS();uiAll();toast('⚡ EM ilimitada + puntos de stat maximos','gold');
+  S.player.xp=0;S.player.xpNext=xpForNextLevel(S.player.level);
+  // Set combat-relevant stats to reasonable test values so skills actually hit hard
+  S.player.stats.maldicion=Math.max(S.player.stats.maldicion,80);
+  S.player.stats.fuerza=Math.max(S.player.stats.fuerza,60);
+  S.player.stats.dominio=Math.max(S.player.stats.dominio,60);
+  S.player.stats.inteligencia=Math.max(S.player.stats.inteligencia,40);
+  saveS();uiAll();toast('⚡ EM ilimitada + stats de combate listos para test','gold');
 }
 function testMaxMastery(){
   const tech=TECHNIQUES[S.player.technique];if(!tech)return toast('Elige técnica primero','error');
