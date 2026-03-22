@@ -349,13 +349,13 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .ba-hp-bar{height:6px;background:var(--bdr);border-radius:3px;overflow:hidden}
 .ba-hp-fill{height:100%;border-radius:3px;transition:width .5s;background:var(--ok)}
 .ba-hp-fill.low{background:var(--warn)}.ba-hp-fill.crit{background:var(--red)}
-.ba-enemy-sprite{position:absolute;right:20px;top:12px;width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:46px}
-.ba-enemy-sprite img{width:100%;height:100%;object-fit:contain}
+.ba-enemy-sprite{position:absolute;right:16px;top:8px;width:110px;height:110px;display:flex;align-items:center;justify-content:center;font-size:54px}
+.ba-enemy-sprite img{width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;background:transparent}
 .ba-enemy-sprite.shaking{animation:shake .4s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
-.ba-player-side{padding:0 16px 12px;position:relative;min-height:90px;display:flex;align-items:flex-end;justify-content:flex-end}
-.ba-player-sprite{position:absolute;left:20px;bottom:7px;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:40px}
-.ba-player-sprite img{width:100%;height:100%;object-fit:contain}
+.ba-player-side{padding:0 16px 12px;position:relative;min-height:100px;display:flex;align-items:flex-end;justify-content:flex-end}
+.ba-player-sprite{position:absolute;left:16px;bottom:6px;width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:46px}
+.ba-player-sprite img{width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;background:transparent}
 .ba-player-sprite.atk{animation:atkA .5s ease}
 @keyframes atkA{0%,100%{transform:translateX(0)}40%{transform:translateX(22px)}}
 .ba-player-sprite.hurt{animation:shake .4s ease}
@@ -432,7 +432,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .cfg-sec h3{font-family:var(--fd);font-size:12px;letter-spacing:.1em;margin-bottom:12px}
 .spr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
 .spr-slot{aspect-ratio:1;background:var(--bg-el);border:1px dashed var(--bdr);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);font-size:10px;color:var(--tm);gap:3px;padding:5px;text-align:center;overflow:hidden}
-.spr-slot:hover{border-color:var(--em)}.spr-slot img{width:100%;height:78%;object-fit:contain}
+.spr-slot:hover{border-color:var(--em)}.spr-slot img{width:100%;height:78%;object-fit:contain;mix-blend-mode:screen}
 /* ─── SPRITE SYSTEM ─── */
 .spr-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px;background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);min-height:64px;align-items:flex-start;align-content:flex-start}
 .spr-pool-empty{color:var(--tm);font-size:12px;font-family:var(--fm)}
@@ -3267,11 +3267,11 @@ function updateCombat(){
   document.getElementById('bPromptName').textContent=p.name;
   renderStatusRow('playerStatusRow',bd.playerStatus||[]);
   const ps=document.getElementById('bPlayerSprite');
-  if(p.playerSprite)ps.innerHTML='<img src="'+p.playerSprite+'" alt="">';else ps.textContent='🧑';
+  if(p.playerSprite)ps.innerHTML='<img src="'+p.playerSprite+'" alt="" style="mix-blend-mode:screen">';else ps.textContent='🧑';
   const es=document.getElementById('bEnemySprite');
   const spKey=bd.enemy.isBoss?'boss_mahito':bd.enemy.isCurseUser?'curse_high':'curse_mid';
   const enemySpr=bd.enemy.id?S.enemySprites[bd.enemy.id]:null;
-  if(enemySpr)es.innerHTML='<img src="'+enemySpr+'" alt="" style="width:100%;height:100%;object-fit:contain">';
+  if(enemySpr)es.innerHTML='<img src="'+enemySpr+'" alt="" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:screen">';
   else if(S.sprites[spKey])es.innerHTML='<img src="'+S.sprites[spKey]+'" alt="">';
   else es.textContent=bd.enemy.emoji;
 }
@@ -4086,7 +4086,7 @@ function renderRaidCombat(){
           '<div class="ba-enemy-sprite" id="rbEnemySprite">'+bd.enemy.emoji+'</div>'+
         '</div>'+
         '<div class="ba-player-side">'+
-          '<div class="ba-player-sprite" id="rbPlayerSprite">'+(S.player.playerSprite?'<img src="'+S.player.playerSprite+'" alt="">':'🧑')+'</div>'+
+          '<div class="ba-player-sprite" id="rbPlayerSprite">'+(S.player.playerSprite?'<img src="'+S.player.playerSprite+'" alt="" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:screen">':'🧑')+'</div>'+
           '<div class="ba-player-panel">'+
             '<div class="ba-pp-name">'+S.player.name+'</div>'+
             '<div class="ba-hp-lbl"><span>HP</span><span id="rbPlayerHPTxt">'+bd.playerHP+'/'+bd.playerMaxHP+'</span></div>'+
@@ -4586,8 +4586,9 @@ function renderConfig(){
 function triggerBulkSpriteUpload(){document.getElementById('bulkSprInput').click();}
 
 // ─── IMAGE COMPRESSION ───
-// Resizes to max 256px on longest side, converts to JPEG quality 0.55
-// Keeps base64 size under ~30KB per image
+// Resizes image preserving transparency if present.
+// PNGs with alpha → image/webp (transparency preserved, good compression)
+// Opaque images → image/jpeg (smaller size)
 function compressImage(dataUrl, maxPx, quality, cb){
   const img=new Image();
   img.onload=()=>{
@@ -4597,7 +4598,25 @@ function compressImage(dataUrl, maxPx, quality, cb){
       else{w=Math.round(w*maxPx/h);h=maxPx;}
     }
     const c=document.createElement('canvas');c.width=w;c.height=h;
-    c.getContext('2d').drawImage(img,0,0,w,h);
+    const ctx=c.getContext('2d');
+    // Check if source has transparency (PNG with alpha)
+    const hasAlpha=dataUrl.startsWith('data:image/png')||dataUrl.startsWith('data:image/webp')||dataUrl.startsWith('data:image/gif');
+    if(hasAlpha){
+      // Keep background transparent — don't fill
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      // Verify actual alpha pixels exist
+      const pixels=ctx.getImageData(0,0,w,h).data;
+      let foundAlpha=false;
+      for(let i=3;i<pixels.length;i+=4){if(pixels[i]<255){foundAlpha=true;break;}}
+      if(foundAlpha){
+        // Use webp with alpha for best compression+transparency
+        cb(c.toDataURL('image/webp',quality));
+        return;
+      }
+    }
+    // No transparency — use JPEG
+    ctx.drawImage(img,0,0,w,h);
     cb(c.toDataURL('image/jpeg',quality));
   };
   img.src=dataUrl;
@@ -4611,7 +4630,7 @@ function handleBulkSprites(e){
   files.forEach(file=>{
     const r=new FileReader();
     r.onload=ev=>{
-      compressImage(ev.target.result,256,0.55,compressed=>{
+      compressImage(ev.target.result,400,0.88,compressed=>{
         if(!S.uploadedSprites.find(s=>s.name===file.name)){
           S.uploadedSprites.push({name:file.name,data:compressed});
         }
@@ -4859,10 +4878,69 @@ function importData(e){
       const d=JSON.parse(ev.target.result);
       Object.assign(S,d);
       saveS();uiAll();nav('dashboard');
-      toast('📥 Importado correctamente','success');
+      toast('📥 Importado. Procesando sprites...','em');
+      // Post-process all sprites to remove black background (JPEG→WebP with transparency)
+      removeBlackBgFromAllSprites(()=>{
+        saveS();uiAll();
+        toast('✅ Sprites procesados sin fondo negro','success');
+      });
     }catch{toast('Error al importar','error');}
   };
   r.readAsText(f);
+}
+
+// Removes black background from a base64 image by converting to WebP with alpha.
+// Works by sampling each pixel: if it's very dark (close to the bg-card color #0b0e18),
+// it sets the alpha to 0. Works best when fondo is pure/near-pure black.
+function removeBlackBg(dataUrl, cb){
+  if(!dataUrl||dataUrl==='__sprite__'){cb(dataUrl);return;}
+  const img=new Image();
+  img.onload=()=>{
+    const c=document.createElement('canvas');
+    c.width=img.width;c.height=img.height;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0);
+    const id=ctx.getImageData(0,0,c.width,c.height);
+    const px=id.data;
+    // Threshold: consider a pixel "background" if R<30, G<30, B<30 (very dark/black)
+    for(let i=0;i<px.length;i+=4){
+      const r2=px[i],g=px[i+1],b=px[i+2];
+      if(r2<30&&g<30&&b<30){px[i+3]=0;}// make transparent
+      else if(r2<55&&g<55&&b<55){
+        // Semi-dark pixels — fade proportionally for smooth edges
+        const darkness=Math.max(r2,g,b);
+        px[i+3]=Math.round((darkness/55)*255);
+      }
+    }
+    ctx.putImageData(id,0,0);
+    cb(c.toDataURL('image/webp',0.88));
+  };
+  img.onerror=()=>cb(dataUrl); // if fails, keep original
+  img.src=dataUrl;
+}
+
+function removeBlackBgFromAllSprites(done){
+  // Collect all sprite data URLs to process
+  const tasks=[];
+  // Enemy sprites
+  const es=S.enemySprites||{};
+  Object.keys(es).forEach(k=>{if(es[k]&&es[k]!=='__sprite__')tasks.push({obj:es,key:k});});
+  // Uploaded sprites pool
+  const up=S.uploadedSprites||[];
+  up.forEach((s,i)=>{if(s.data&&s.data!=='__sprite__')tasks.push({obj:up[i],key:'data'});});
+  // Player sprite
+  if(S.player.playerSprite&&S.player.playerSprite!=='__sprite__')
+    tasks.push({obj:S.player,key:'playerSprite'});
+
+  if(!tasks.length){done();return;}
+  let completed=0;
+  tasks.forEach(t=>{
+    removeBlackBg(t.obj[t.key],result=>{
+      t.obj[t.key]=result;
+      completed++;
+      if(completed===tasks.length)done();
+    });
+  });
 }
 function resetAll(){
   if(confirm('¿Resetear TODO el progreso y sprites?')){
