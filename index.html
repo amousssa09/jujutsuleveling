@@ -268,6 +268,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 /* Task cards */
 .tcard{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:9px;transition:var(--tr);margin-bottom:7px}
 .tcard:hover{border-color:var(--bdr-g)}.tcard.overdue{border-color:rgba(224,48,48,.28);background:rgba(224,48,48,.03)}
+.tcard.grace-task{border-color:rgba(240,160,32,.4);background:rgba(240,160,32,.04)}
 .tcard.done-t{opacity:.45}.tcard.done-t .tn{text-decoration:line-through}
 .tck{width:18px;height:18px;border-radius:4px;border:2px solid var(--bdr);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:transparent;font-size:10px;flex-shrink:0}
 .tck:hover{border-color:var(--ok)}.tck.done{background:var(--ok);border-color:var(--ok);color:#fff}
@@ -453,11 +454,28 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .forg-btn:hover{border-color:var(--em)}.forg-btn.par:hover{border-color:var(--ok)}.forg-btn.pen:hover{border-color:var(--red)}
 /* Calendar */
 .cal-nav{display:flex;align-items:center;gap:9px;margin-bottom:14px}
-.cal-dl{font-family:var(--fd);font-size:14px;letter-spacing:.05em;flex:1;text-align:center}
+.cal-dl{font-family:var(--fd);font-size:14px;letter-spacing:.05em;flex:1;text-align:center;text-transform:capitalize}
 .cal-grid{display:grid;grid-template-columns:50px 1fr;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
-.cal-hr{height:48px;display:flex;align-items:flex-start;padding:3px 5px;font-size:10px;color:var(--tm);font-family:var(--fm);border-bottom:1px solid var(--bdr)}
-.cal-hl{height:48px;border-bottom:1px solid var(--bdr)}
-.cal-ev{position:absolute;left:3px;right:3px;border-radius:4px;padding:3px 5px;font-size:11px;font-weight:500;overflow:hidden;cursor:pointer}
+.cal-wrap{display:grid;grid-template-columns:52px 1fr;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;max-height:78vh;overflow-y:auto}
+.cal-hr{height:60px;display:flex;align-items:flex-start;padding:4px 6px;font-size:10px;color:var(--tm);font-family:var(--fm);border-bottom:1px solid var(--bdr);flex-shrink:0;user-select:none}
+.cal-hl{height:60px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.cal-col{position:relative;min-height:960px}
+.cal-ev{position:absolute;border-radius:5px;padding:4px 7px;font-size:11px;font-weight:600;overflow:hidden;cursor:pointer;transition:filter .15s;z-index:2;box-sizing:border-box}
+.cal-ev:hover{filter:brightness(1.15);z-index:10}
+.cal-ev .cev-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-ev .cev-time{font-size:9px;font-family:var(--fm);opacity:.75;margin-top:1px}
+.cal-ev-habit{border-style:dashed!important;border-width:2px}
+.cal-ev-note{border-left-color:#9060d0!important}
+.cal-ctx{position:fixed;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:4px 0;z-index:9999;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.cal-ctx-item{padding:8px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:var(--tr)}
+.cal-ctx-item:hover{background:var(--bg-el)}
+.cal-ctx-sep{height:1px;background:var(--bdr);margin:3px 0}
+.cal-now{position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:5;pointer-events:none}
+.cal-now::before{content:'';position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+.auto-card{background:var(--bg-el);border:1px solid var(--bdr);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.auto-days{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.auto-day{width:28px;height:28px;border-radius:5px;font-size:10px;font-family:var(--fm);font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--bdr);color:var(--tm);transition:var(--tr)}
+.auto-day.on{background:var(--em);border-color:var(--em);color:#fff}
 /* Eval */
 .perf-grade{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-el);border-radius:var(--r);margin-bottom:12px}
 .pg-letter{font-family:var(--fd);font-size:44px;font-weight:900;line-height:1;min-width:50px;text-align:center}
@@ -721,8 +739,13 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
     <div class="cal-dl" id="calLbl"></div>
     <button class="btn btn-g btn-sm" onclick="calNext()">Siguiente →</button>
   </div>
-  <div class="cal-grid"><div id="calTime"></div><div style="position:relative" id="calEv"></div></div>
+  <div class="cal-wrap" id="calWrap">
+    <div id="calTime"></div>
+    <div class="cal-col" id="calEv" oncontextmenu="calContextMenu(event)"></div>
+  </div>
 </div>
+<!-- Calendar context menu -->
+<div class="cal-ctx" id="calCtxMenu" style="display:none"></div>
 
 <!-- CONFIG -->
 <div class="page" id="page-config">
@@ -794,6 +817,14 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
     </div>
   </div>
 
+  <!-- AUTOMATIONS -->
+  <div class="cfg-sec">
+    <h3>⚙️ Automatizaciones</h3>
+    <p class="t-sm c-muted mb3">Crea tareas y hábitos automáticamente según un horario. Se generarán solos cada día sin intervención.</p>
+    <button class="btn btn-p" onclick="openAutoModal()">+ Nueva Automatización</button>
+    <div id="autoList" style="margin-top:12px"></div>
+  </div>
+
   <!-- DATA -->
   <div class="cfg-sec">
     <h3>💾 Datos</h3>
@@ -814,7 +845,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div class="mh"><div class="modal-title" id="taskMoT">Nueva Tarea</div><div class="mc" onclick="cm('taskMo')">✕</div></div>
   <div class="fg"><label>Nombre *</label><input class="fi" id="tkName" placeholder="¿Qué tienes que hacer?"></div>
   <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="tkPri"><option value="alta">🔴 Alta (+80 EM)</option><option value="media" selected>🟡 Media (+50 EM)</option><option value="baja">🟢 Baja (+25 EM)</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="tkDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
-  <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="tkS"></div><div class="fg"><label>Deadline *</label><input type="date" class="fi" id="tkE"></div></div>
+  <div class="g2"><div class="fg"><label>Hora *</label><input type="time" class="fi" id="tkTime" required></div><div class="fg"><label>Duración (min)</label><select class="fs" id="tkDur"><option value="30">30 min</option><option value="60" selected>1 hora</option><option value="90">1h 30min</option><option value="120">2 horas</option><option value="180">3 horas</option><option value="240">4 horas</option></select></div></div>
   <div class="fg"><label>Notas</label><textarea class="fta" id="tkN"></textarea></div>
   <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('taskMo')">Cancelar</button><button class="btn btn-p" onclick="saveTask()">✓ Guardar</button></div>
 </div></div>
@@ -824,7 +855,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div class="fg"><label>Nombre *</label><input class="fi" id="hbName"></div>
   <div class="g2"><div class="fg"><label>Prioridad</label><select class="fs" id="hbPri"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div><div class="fg"><label>Dificultad</label><select class="fs" id="hbDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div></div>
   <div class="fg"><label>Frecuencia</label><select class="fs" id="hbFreq"><option value="daily">Diario</option><option value="weekly">Semanal</option></select></div>
-  <div class="g2"><div class="fg"><label>Inicio</label><input type="date" class="fi" id="hbS"></div><div class="fg"><label>Fin (opcional)</label><input type="date" class="fi" id="hbE"></div></div>
+  <div class="g2"><div class="fg"><label>Hora *</label><input type="time" class="fi" id="hbTime" required></div><div class="fg"><label>Duración (min)</label><select class="fs" id="hbDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hora</option><option value="90">1h 30min</option><option value="120">2 horas</option></select></div></div>
   <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('habitMo')">Cancelar</button><button class="btn btn-p" onclick="saveHabit()">✓ Guardar</button></div>
 </div></div>
 
@@ -840,10 +871,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 
 <div class="mo" id="forgiveMo"><div class="md">
   <div class="mh"><div class="modal-title">⚖️ Sistema de Perdón</div><div class="mc" onclick="cm('forgiveMo')">✕</div></div>
-  <p class="t-sm mb3" style="color:var(--ts);line-height:1.7">No completaste <strong id="fgName">"..."</strong> antes del deadline.<br>¿Tienes una razón válida?</p>
-  <div class="fg"><label>Motivo</label><textarea class="fta" id="fgReason"></textarea></div>
-  <button class="forg-btn par" onclick="forgive(true)">✅ Razón válida — Sin penalización</button>
-  <button class="forg-btn pen" onclick="forgive(false)">❌ Excusa — Sin EM, registrar fallo</button>
+  <div id="fgBody"></div>
 </div></div>
 
 <div class="mo" id="techPickMo"><div class="md wide">
@@ -860,6 +888,78 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 <div class="mo" id="skInfoMo"><div class="md">
   <div class="mh"><div class="modal-title" id="skInfoT">Habilidad</div><div class="mc" onclick="cm('skInfoMo')">✕</div></div>
   <div id="skInfoBody"></div>
+</div></div>
+
+<div class="mo" id="noteMo"><div class="md">
+  <div class="mh"><div class="modal-title" id="noteMoT">Nuevo Bloque</div><div class="mc" onclick="cm('noteMo')">✕</div></div>
+  <div class="fg"><label>Título *</label><input class="fi" id="noteTitle" placeholder="Ej: Reunión, Evento, Descanso..."></div>
+  <div class="fg"><label>Descripción (opcional)</label><input class="fi" id="noteDesc" placeholder="Información adicional"></div>
+  <div class="g2">
+    <div class="fg"><label>Color</label>
+      <select class="fs" id="noteColor">
+        <option value="#9060d0">🟣 Morado</option>
+        <option value="#3b7cf4">🔵 Azul</option>
+        <option value="#30a0c0">🔷 Cian</option>
+        <option value="#e07030">🟠 Naranja</option>
+        <option value="#e03030">🔴 Rojo</option>
+        <option value="#3ec86a">🟢 Verde</option>
+        <option value="#f0c030">🟡 Amarillo</option>
+      </select>
+    </div>
+    <div class="fg"><label>Duración (min)</label>
+      <select class="fs" id="noteDur">
+        <option value="15">15 min</option>
+        <option value="30" selected>30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">1 hora</option>
+        <option value="90">1h 30min</option>
+        <option value="120">2 horas</option>
+        <option value="180">3 horas</option>
+      </select>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="fg"><label>Hora</label><input type="time" class="fi" id="noteTime" value="09:00"></div>
+    <div class="fg"><label>Fecha</label><input type="date" class="fi" id="noteDate"></div>
+  </div>
+  <div class="flex jb mt3 g3_">
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-g" onclick="cm('noteMo')">Cancelar</button>
+      <button class="btn btn-d btn-sm" id="noteDelBtn" style="display:none" onclick="delNoteBlock(document.getElementById('noteMo').dataset.editId)">🗑 Eliminar</button>
+    </div>
+    <button class="btn btn-p" style="background:linear-gradient(135deg,#9060d0,#6040a0)" onclick="saveNoteBlock()">✓ Guardar Bloque</button>
+  </div>
+</div></div>
+
+<div class="mo" id="autoMo"><div class="md">
+  <div class="mh"><div class="modal-title" id="autoMoT">Nueva Automatización</div><div class="mc" onclick="cm('autoMo')">✕</div></div>
+  <div class="fg"><label>Nombre *</label><input class="fi" id="autoName" placeholder="Nombre de la tarea/hábito/bloque"></div>
+  <div class="fg"><label>Tipo</label><select class="fs" id="autoType" onchange="autoTypeChange(this.value)"><option value="task">📋 Tarea</option><option value="habit">🔄 Hábito</option><option value="note">📌 Bloque informativo</option></select></div>
+  <div class="fg" id="autoPriRow"><label>Prioridad</label><select class="fs" id="autoPri"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select></div>
+  <div class="fg" id="autoDifRow"><label>Dificultad</label><select class="fs" id="autoDif"><option value="facil">Fácil</option><option value="normal" selected>Normal</option><option value="dificil">Difícil</option></select></div>
+  <div class="fg" id="autoColorRow" style="display:none"><label>Color del bloque</label><select class="fs" id="autoColor"><option value="#9060d0">🟣 Morado</option><option value="#3b7cf4">🔵 Azul</option><option value="#30a0c0">🔷 Cian</option><option value="#e07030">🟠 Naranja</option><option value="#e03030">🔴 Rojo</option><option value="#3ec86a">🟢 Verde</option><option value="#f0c030">🟡 Amarillo</option></select></div>
+  <div class="fg" id="autoDescRow" style="display:none"><label>Descripción</label><input class="fi" id="autoDesc" placeholder="Info adicional del bloque"></div>
+  <div class="g2">
+    <div class="fg"><label>Hora</label><input type="time" class="fi" id="autoTime" value="09:00"></div>
+    <div class="fg"><label>Duración (min)</label><select class="fs" id="autoDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hora</option><option value="90">1h 30min</option><option value="120">2 horas</option></select></div>
+  </div>
+  <div class="g2">
+    <div class="fg"><label>Fecha inicio</label><input type="date" class="fi" id="autoStart"></div>
+    <div class="fg"><label>Fecha fin</label><input type="date" class="fi" id="autoEnd"></div>
+  </div>
+  <div class="fg">
+    <label>Días de la semana</label>
+    <div class="auto-days" id="autoDaysRow">
+      <div class="auto-day on" data-d="1" onclick="toggleAutoDay(this)">L</div>
+      <div class="auto-day on" data-d="2" onclick="toggleAutoDay(this)">M</div>
+      <div class="auto-day on" data-d="3" onclick="toggleAutoDay(this)">X</div>
+      <div class="auto-day on" data-d="4" onclick="toggleAutoDay(this)">J</div>
+      <div class="auto-day on" data-d="5" onclick="toggleAutoDay(this)">V</div>
+      <div class="auto-day" data-d="6" onclick="toggleAutoDay(this)">S</div>
+      <div class="auto-day" data-d="0" onclick="toggleAutoDay(this)">D</div>
+    </div>
+  </div>
+  <div class="flex jb mt3 g3_"><button class="btn btn-g" onclick="cm('autoMo')">Cancelar</button><button class="btn btn-p" onclick="saveAutomation()">✓ Guardar</button></div>
 </div></div>
 
 <script>
@@ -1652,6 +1752,8 @@ const DFLT={
   generatedMissions:[],
   cleaningMissions:{},   // zoneId -> {missions[], progress, total, completedAt, claimed}
   cleaningCooldowns:{},  // zoneId -> expiry timestamp
+  automations:[],        // automation rules for auto-creating tasks/habits
+  calBlocks:[],          // free-form calendar note blocks
   dynamicEvents:[],lastEventTick:0,
   calDate:new Date().toISOString().slice(0,10),
 };
@@ -1711,6 +1813,8 @@ function loadS(){
       if(!d.generatedMissions)d.generatedMissions=[];
       if(!d.cleaningMissions)d.cleaningMissions={};
       if(!d.cleaningCooldowns)d.cleaningCooldowns={};
+      if(!d.automations)d.automations=[];
+      if(!d.calBlocks)d.calBlocks=[];
       if(!d.dynamicEvents)d.dynamicEvents=[];
       if(!d.zoneStatus)d.zoneStatus={};
       if(!d.player.missionsCompleted)d.player.missionsCompleted=0;
@@ -2282,6 +2386,8 @@ function nav(page){
   const nm={dashboard:0,player:1,missions:2,map:3,battle:3,raids:3,'raid-combat':3,bosses:3,calendar:3,config:4};
   document.querySelectorAll('.ni')[nm[page]]?.classList.add('active');
   ({dashboard:renderDash,player:renderPlayer,missions:renderMissions,map:renderMap,battle:renderBattlePage,raids:renderRaids,'raid-combat':renderRaidCombatPage,bosses:renderBosses,calendar:renderCalendar,config:renderConfig}[page]||(() =>{}))();
+  if(page==='missions'||page==='calendar')runAutomations();
+  if(page==='missions')checkOverduePenalties();
 }
 function cm(id){document.getElementById(id)?.classList.remove('open');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -4363,115 +4469,244 @@ function startBossCombat(enemy,bossId){
 // ═══════════════════════════════════════════════════════
 let editTkId=null,tFilter='todas',forgPendId=null;
 function openTaskModal(id=null){
-  editTkId=id;const today=new Date().toISOString().slice(0,10);
+  editTkId=id;
+  const now=new Date();const defTime=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   document.getElementById('taskMoT').textContent=id?'Editar Tarea':'Nueva Tarea';
-  if(id){const t=S.tasks.find(t=>t.id===id);document.getElementById('tkName').value=t.name;document.getElementById('tkPri').value=t.priority;document.getElementById('tkDif').value=t.difficulty;document.getElementById('tkS').value=t.startDate||today;document.getElementById('tkE').value=t.endDate||today;document.getElementById('tkN').value=t.notes||'';}
-  else{['tkName','tkN'].forEach(i=>document.getElementById(i).value='');['tkPri','tkDif'].forEach(i=>{document.getElementById(i).selectedIndex=1;});document.getElementById('tkS').value=today;document.getElementById('tkE').value=today;}
+  if(id){
+    const t=S.tasks.find(t=>t.id===id);
+    document.getElementById('tkName').value=t.name;
+    document.getElementById('tkPri').value=t.priority;
+    document.getElementById('tkDif').value=t.difficulty;
+    document.getElementById('tkTime').value=t.time||defTime;
+    document.getElementById('tkDur').value=t.duration||60;
+    document.getElementById('tkN').value=t.notes||'';
+  } else {
+    ['tkName','tkN'].forEach(i=>document.getElementById(i).value='');
+    ['tkPri','tkDif'].forEach(i=>document.getElementById(i).selectedIndex=1);
+    document.getElementById('tkTime').value=_ctxPendingTime||defTime;
+    document.getElementById('tkDur').value=60;
+  }
   document.getElementById('taskMo').classList.add('open');
 }
 function saveTask(){
   const name=document.getElementById('tkName').value.trim();if(!name)return toast('Nombre obligatorio','error');
-  const end=document.getElementById('tkE').value;if(!end)return toast('Deadline obligatorio','error');
-  const t={id:editTkId||'tk_'+Date.now(),name,priority:document.getElementById('tkPri').value,difficulty:document.getElementById('tkDif').value,startDate:document.getElementById('tkS').value,endDate:end,notes:document.getElementById('tkN').value,completed:false,createdAt:Date.now()};
+  const time=document.getElementById('tkTime').value;if(!time)return toast('Hora obligatoria','error');
+  const today=localDateStr(new Date());
+  const t={
+    id:editTkId||'tk_'+Date.now(),name,
+    priority:document.getElementById('tkPri').value,
+    difficulty:document.getElementById('tkDif').value,
+    startDate:today, endDate:today,
+    time, duration:parseInt(document.getElementById('tkDur').value)||60,
+    notes:document.getElementById('tkN').value,
+    completed:false,createdAt:Date.now()
+  };
   if(editTkId){const i=S.tasks.findIndex(x=>x.id===editTkId);if(i>=0)S.tasks[i]={...S.tasks[i],...t,id:editTkId};}
   else S.tasks.push(t);
   saveS();cm('taskMo');renderMissions();renderDash();
+  if(document.getElementById('page-calendar').classList.contains('active'))renderCalendar();
 }
-function isOD(t){return t.endDate&&new Date(t.endDate)<new Date(new Date().toISOString().slice(0,10))&&!t.completed;}
+const GRACE_HOURS=6;
+
+function getTaskState(t){
+  if(t.completed)return t.pardoned?'pardoned':'completed';
+  if(t.failed)return 'failed';
+  if(!t.time)return 'pending';
+  const now=new Date();
+  const taskDate=t.startDate||localDateStr(now);
+  const taskEnd=new Date(taskDate+'T'+t.time);
+  taskEnd.setMinutes(taskEnd.getMinutes()+(t.duration||60));
+  const graceEnd=new Date(taskEnd.getTime()+GRACE_HOURS*3600000);
+  if(now<taskEnd)return 'pending';
+  if(now<graceEnd)return 'grace';
+  return 'overdue';
+}
+function graceMinutesLeft(t){
+  if(!t.time)return null;
+  const taskDate=t.startDate||localDateStr(new Date());
+  const taskEnd=new Date(taskDate+'T'+t.time);
+  taskEnd.setMinutes(taskEnd.getMinutes()+(t.duration||60));
+  const graceEnd=new Date(taskEnd.getTime()+GRACE_HOURS*3600000);
+  return Math.round((graceEnd-Date.now())/60000);
+}
+function isOD(t){return getTaskState(t)==='overdue';}
+function calcPenalty(t){return calcEM(t);}
+
 function filterT(f,el){tFilter=f;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));el?.classList.add('active');renderTaskList();}
 function renderTaskList(){
   let tasks=[...S.tasks];
-  if(tFilter==='activas')tasks=tasks.filter(t=>!t.completed&&!isOD(t));
-  else if(tFilter==='completadas')tasks=tasks.filter(t=>t.completed);
-  else if(tFilter==='vencidas')tasks=tasks.filter(t=>isOD(t));
+  if(tFilter==='activas')tasks=tasks.filter(t=>['pending','grace'].includes(getTaskState(t)));
+  else if(tFilter==='completadas')tasks=tasks.filter(t=>['completed','pardoned'].includes(getTaskState(t)));
+  else if(tFilter==='vencidas')tasks=tasks.filter(t=>['overdue','failed'].includes(getTaskState(t)));
   const el=document.getElementById('taskList');
   if(!tasks.length){el.innerHTML='<div class="c-muted t-sm" style="padding:14px 0">Sin tareas.</div>';return;}
-  el.innerHTML=tasks.map(t=>{const od=isOD(t);return '<div class="tcard '+(od?'overdue':'')+(t.completed?' done-t':'')+'"><button class="tck '+(t.completed?'done':'')+'" onclick="toggleTask(\''+t.id+'\')">✓</button><div class="tb"><div class="tn">'+t.name+'</div><div class="tm-"><span class="badge '+(t.priority==='alta'?'b-alta':t.priority==='media'?'b-media':'b-baja')+'">'+t.priority+'</span><span class="td- '+(od?'ov':'')+'">'+(t.endDate?'⏰ '+t.endDate:'')+'</span>'+(t.completed?'':'<span class="ter">⚡'+calcEM(t)+'</span>')+'</div></div><div class="ta-">'+(od&&!t.completed?'<button class="tab-" onclick="openForgive(\''+t.id+'\')">⚖️</button>':'')+'<button class="tab-" onclick="openTaskModal(\''+t.id+'\')">✏️</button><button class="tab- del" onclick="delTask(\''+t.id+'\')">🗑</button></div></div>';}).join('');
+  el.innerHTML=tasks.map(t=>{
+    const state=getTaskState(t);
+    const isGrace=state==='grace';
+    const isOver=state==='overdue';
+    const isFailed=state==='failed';
+    const isPardoned=state==='pardoned';
+    const graceLeft=isGrace?graceMinutesLeft(t):null;
+    const graceHrs=graceLeft?Math.floor(graceLeft/60):0;
+    const graceMins=graceLeft?graceLeft%60:0;
+    const penalty=calcPenalty(t);
+    return '<div class="tcard'+(isOver||isFailed?' overdue':'')+(isGrace?' grace-task':'')+(t.completed||isPardoned?' done-t':'')+'">'+
+      '<button class="tck '+(t.completed||isPardoned?'done':'')+'" onclick="toggleTask(\''+t.id+'\')" '+(isFailed||isOver?'disabled':'')+'>\u2713</button>'+
+      '<div class="tb">'+
+        '<div class="tn">'+t.name+'</div>'+
+        '<div class="tm-">'+
+          '<span class="badge '+(t.priority==='alta'?'b-alta':t.priority==='media'?'b-media':'b-baja')+'">'+t.priority+'</span>'+
+          (t.time?'<span class="td-">\ud83d\udd50 '+t.time+(t.duration?' \u00b7 '+t.duration+'min':'')+'</span>':'')+
+          (isGrace?'<span class="td-" style="color:var(--warn)">\u23f3 '+(graceHrs>0?graceHrs+'h ':'')+graceMins+'min gracia</span>':'')+
+          (isOver?'<span class="td- ov">\u23f0 vencida \u00b7 \u2212'+penalty+' EM</span>':'')+
+          (isFailed?'<span class="td-" style="color:var(--red)">\u274c fallada</span>':'')+
+          (isPardoned?'<span class="td-" style="color:var(--ok)">\u2696\ufe0f perdonada</span>':'')+
+          (state==='pending'?'<span class="ter">\u26a1'+calcEM(t)+'</span>':'')+
+          (isGrace?'<span class="ter" style="color:var(--warn)">\u26a1'+calcEM(t)+'</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<div class="ta-">'+
+        ((isOver||isGrace)&&!isFailed?'<button class="tab-" style="color:var(--warn)" onclick="openForgive(\''+t.id+'\')">\u2696\ufe0f</button>':'')+
+        '<button class="tab-" onclick="openTaskModal(\''+t.id+'\')">\u270f\ufe0f</button>'+
+        '<button class="tab- del" onclick="delTask(\''+t.id+'\')">\ud83d\uddd1</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
 }
 function toggleTask(id){
   const t=S.tasks.find(t=>t.id===id);if(!t)return;
-  if(t.completed){
-    // Uncomplete — just toggle state, never refund/re-grant EM
-    t.completed=false;saveS();renderMissions();return;
-  }
-  if(t.emClaimed){
-    // Already claimed EM once — just mark done without reward
-    t.completed=true;saveS();renderMissions();return;
-  }
+  const state=getTaskState(t);
+  if(state==='overdue'||state==='failed')return;
+  if(t.completed||state==='pardoned'){t.completed=false;t.pardoned=false;saveS();renderMissions();return;}
+  if(t.emClaimed){t.completed=true;saveS();renderMissions();return;}
   t.completed=true;t.emClaimed=true;S.player.failStreak=0;
   const em=calcEM(t),xp=calcXP(t);
-  addEM(em,'Tarea: "'+t.name+'"');addXP(xp);
-  toast('✅ +'+em+' EM +'+xp+' XP','success');
+  const mult=state==='grace'?0.5:1;
+  const fEm=Math.round(em*mult),fXp=Math.round(xp*mult);
+  addEM(fEm,'Tarea: "'+t.name+'"');addXP(fXp);
+  toast('\u2705 +'+fEm+' EM +'+fXp+' XP'+(state==='grace'?' (gracia 50%)':''),'success');
   log_('Tarea: "'+t.name+'"');
   saveS();renderMissions();renderDash();
 }
 function qComplete(id){toggleTask(id);}
 function delTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);saveS();renderMissions();renderDash();}
-function openForgive(id){forgPendId=id;const t=S.tasks.find(t=>t.id===id);document.getElementById('fgName').textContent=t.name;document.getElementById('fgReason').value='';document.getElementById('forgiveMo').classList.add('open');}
+function openForgive(id){
+  forgPendId=id;
+  const t=S.tasks.find(t=>t.id===id);if(!t)return;
+  const state=getTaskState(t);
+  const penalty=calcPenalty(t);
+  const isGrace=state==='grace';
+  const graceLeft=isGrace?graceMinutesLeft(t):null;
+  const body=document.getElementById('fgBody');
+  body.innerHTML=
+    '<div style="background:var(--bg-el);border-radius:var(--r);padding:10px 14px;margin-bottom:14px">'+
+      '<div style="font-size:13px;font-weight:700;margin-bottom:4px">'+t.name+'</div>'+
+      '<div class="t-xs mono c-muted">'+t.time+(t.duration?' \u00b7 '+t.duration+'min':'')+' \u00b7 '+t.priority+'</div>'+
+      (isGrace&&graceLeft?'<div class="t-xs" style="color:var(--warn);margin-top:4px">\u23f3 Gracia: '+Math.floor(graceLeft/60)+'h '+graceLeft%60+'min restantes</div>':
+               '<div class="t-xs" style="color:var(--red);margin-top:4px">\u274c Gr\u00e1cia expirada</div>')+
+    '</div>'+
+    '<p class="t-sm mb2" style="color:var(--ts);line-height:1.6">'+
+      (isGrace?'A\u00fan en per\u00edodo de gracia. Si solicitas perd\u00f3n, escribe una raz\u00f3n v\u00e1lida.':
+               'Tarea vencida. Castigo: <strong style="color:var(--red)">-'+penalty+' EM</strong>. Escribe una raz\u00f3n para solicitar perd\u00f3n.')+
+    '</p>'+
+    '<div class="fg"><label>Motivo *</label><textarea class="fta" id="fgReason" placeholder="Explica por qu\u00e9 no pudiste completarla..."></textarea></div>'+
+    '<button class="forg-btn par" onclick="forgive(true)">\u2696\ufe0f Solicitar perd\u00f3n \u2014 Sin penalizaci\u00f3n</button>'+
+    '<button class="forg-btn pen" onclick="forgive(false)">\u274c Aceptar fallo \u2014 \u2212'+penalty+' EM</button>';
+  document.getElementById('forgiveMo').classList.add('open');
+}
 function forgive(pardon){
   const t=S.tasks.find(t=>t.id===forgPendId);if(!t)return;
-  if(pardon){t.completed=true;t.pardoned=true;S.player.failStreak=0;toast('⚖️ Perdonada.','em');}
-  else{t.failed=true;S.player.failStreak=(S.player.failStreak||0)+1;const sk=S.player.failStreak;if(sk>=3){const pen=sk*12;S.player.em=Math.max(0,S.player.em-pen);toast('❌ Fallo #'+sk+'. −'+pen+' EM','error');}else toast('❌ Fallo #'+sk,'error');}
+  const reason=document.getElementById('fgReason').value.trim();
+  if(pardon){
+    if(!reason)return toast('Escribe un motivo para el perd\u00f3n','error');
+    t.completed=true;t.pardoned=true;t.pardonReason=reason;
+    S.player.failStreak=Math.max(0,(S.player.failStreak||0)-1);
+    toast('\u2696\ufe0f Perdonada. El esfuerzo cuenta.','em');
+    log_('Tarea perdonada: "'+t.name+'" \u2014 '+reason);
+  } else {
+    const penalty=calcPenalty(t);
+    t.failed=true;t.failReason=reason||'Sin motivo';
+    S.player.failStreak=(S.player.failStreak||0)+1;
+    S.player.em=Math.max(0,S.player.em-penalty);
+    uiAll();
+    toast('\u274c Fallo registrado. \u2212'+penalty+' EM','error');
+    log_('Tarea fallada: "'+t.name+'"');
+  }
   saveS();cm('forgiveMo');renderMissions();
 }
+function checkOverduePenalties(){
+  let changed=false;
+  (S.tasks||[]).forEach(t=>{
+    if(t.completed||t.pardoned||t.failed||t.penaltyApplied||t.autoId)return;
+    if(getTaskState(t)==='overdue'){
+      const penalty=calcPenalty(t);
+      t.failed=true;t.penaltyApplied=true;t.failReason='Autom\u00e1tico (gracia expirada)';
+      S.player.em=Math.max(0,S.player.em-penalty);
+      S.player.failStreak=(S.player.failStreak||0)+1;
+      toast('\u23f0 "'+t.name+'" venci\u00f3. \u2212'+penalty+' EM','error');
+      changed=true;
+    }
+  });
+  if(changed){saveS();uiAll();renderMissions();}
+}
+
 function openHabitModal(id=null){
-  const today=new Date().toISOString().slice(0,10);
+  const now=new Date();const defTime=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   document.getElementById('habitMoT').textContent=id?'Editar Hábito':'Nuevo Hábito';
   if(id){
     const h=S.habits.find(h=>h.id===id);
     document.getElementById('hbName').value=h.name;
     document.getElementById('hbPri').value=h.priority||'media';
     document.getElementById('hbDif').value=h.difficulty||'normal';
-    document.getElementById('hbFreq').value=h.freq;
-    document.getElementById('hbS').value=h.startDate||today;
-    document.getElementById('hbE').value=h.endDate||'';
+    document.getElementById('hbFreq').value=h.freq||'daily';
+    document.getElementById('hbTime').value=h.time||defTime;
+    document.getElementById('hbDur').value=h.duration||30;
     document.getElementById('habitMo').dataset.editId=id;
   } else {
-    ['hbName'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('hbName').value='';
     document.getElementById('hbPri').value='media';
     document.getElementById('hbDif').value='normal';
     document.getElementById('hbFreq').value='daily';
-    document.getElementById('hbS').value=today;
-    document.getElementById('hbE').value='';
+    document.getElementById('hbTime').value=_ctxPendingTime||defTime;
+    document.getElementById('hbDur').value=30;
     delete document.getElementById('habitMo').dataset.editId;
   }
   document.getElementById('habitMo').classList.add('open');
 }
 function saveHabit(){
   const n=document.getElementById('hbName').value.trim();if(!n)return toast('Nombre obligatorio','error');
+  const time=document.getElementById('hbTime').value;if(!time)return toast('Hora obligatoria','error');
   const editId=document.getElementById('habitMo').dataset.editId;
   const pri=document.getElementById('hbPri').value;
   const dif=document.getElementById('hbDif').value;
   const h={
     id:editId||'h_'+Date.now(),name:n,
-    priority:pri,
-    difficulty:dif,
+    priority:pri, difficulty:dif,
     freq:document.getElementById('hbFreq').value,
+    time, duration:parseInt(document.getElementById('hbDur').value)||30,
     emReward:Math.round((EM_PRI[pri]||50)*(DIFF_MULT[dif]||1)),
-    startDate:document.getElementById('hbS').value,
-    endDate:document.getElementById('hbE').value||null,
+    startDate:localDateStr(new Date()), endDate:null,
     streak:0,lastDone:null
   };
   if(editId){const i=S.habits.findIndex(x=>x.id===editId);if(i>=0)S.habits[i]={...S.habits[i],...h,id:editId,streak:S.habits[i].streak,lastDone:S.habits[i].lastDone};}
   else S.habits.push(h);
   saveS();cm('habitMo');renderMissions();toast(editId?'Hábito actualizado':'Hábito creado','success');
+  if(document.getElementById('page-calendar').classList.contains('active'))renderCalendar();
 }
 function renderHabitList(){
   const el=document.getElementById('habitList');if(!el)return;
   if(!S.habits.length){el.innerHTML='<div class="c-muted t-sm">Sin hábitos.</div>';return;}
-  const today=new Date().toISOString().slice(0,10);
+  const today=localDateStr(new Date());
   el.innerHTML=S.habits.map(h=>{
     const dt=h.lastDone===today;
-    const od=h.endDate&&h.endDate<today&&!dt;
     const priC={alta:'var(--red)',media:'var(--warn)',baja:'var(--ok)'}[h.priority||'media'];
-    return '<div class="tcard '+(od?'overdue':'')+'">'+
+    return '<div class="tcard">'+
       '<button class="tck '+(dt?'done':'')+'" onclick="checkHabit(\''+h.id+'\')" '+(dt?'disabled':'')+'>✓</button>'+
       '<div class="tb">'+
         '<div class="tn">'+h.name+'</div>'+
         '<div class="tm-">'+
           '<span class="badge" style="background:'+priC+'22;color:'+priC+';border-color:'+priC+'44">'+h.priority+'</span>'+
-          '<span class="td-">'+(h.freq==='daily'?'Diario':'Semanal')+' · ⚡'+calcEM(h)+' EM</span>'+
-          (h.endDate?'<span class="td- '+(od?'ov':'')+'">⏰ '+h.endDate+'</span>':'')+
+          '<span class="td-">'+(h.freq==='daily'?'Diario':'Semanal')+(h.time?' · 🕐 '+h.time:'')+(h.duration?' · '+h.duration+'min':'')+' · ⚡'+calcEM(h)+' EM</span>'+
         '</div>'+
       '</div>'+
       '<div class="mono t-xs" style="color:var(--warn)">🔥 '+h.streak+'</div>'+
@@ -4482,7 +4717,7 @@ function renderHabitList(){
     '</div>';
   }).join('');
 }
-function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);if(h.lastDone===today)return;h.lastDone=today;h.streak++;const em=calcEM(h);addEM(em,'Hábito: "'+h.name+'"');addXP(calcXP(h));toast('✅ +'+em+' EM — Hábito','success');saveS();renderHabitList();}
+function checkHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;const today=localDateStr(new Date());if(h.lastDone===today)return;h.lastDone=today;h.streak++;const em=calcEM(h);addEM(em,'Hábito: "'+h.name+'"');addXP(calcXP(h));toast('✅ +'+em+' EM — Hábito','success');saveS();renderHabitList();}
 function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);saveS();renderHabitList();}
 function openGoalModal(id=null){
   const today=new Date().toISOString().slice(0,10);
@@ -4560,32 +4795,488 @@ function switchMTab(t,el){document.querySelectorAll('[id^=mtab-]').forEach(e=>e.
 // CALENDAR
 // ═══════════════════════════════════════════════════════
 let calDate=new Date();
-function renderCalendar(){
-  document.getElementById('calLbl').textContent=calDate.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const hours=Array.from({length:17},(_,i)=>i+7);
-  document.getElementById('calTime').innerHTML=hours.map(h=>'<div class="cal-hr">'+h.toString().padStart(2,'0')+':00</div>').join('');
-  const ec=document.getElementById('calEv');ec.innerHTML=hours.map(()=>'<div class="cal-hl"></div>').join('');
-  const ds=calDate.toISOString().slice(0,10);
-  const cols={alta:'#e03030',media:'#f0a020',baja:'#3ec86a'};
-  S.tasks.filter(t=>{const s=t.startDate||t.endDate,e=t.endDate||t.startDate;return s&&e&&s<=ds&&ds<=e;}).forEach((t,i)=>{
-    const b=document.createElement('div');b.className='cal-ev';
-    const h=8+(i%9);b.style.top=(h-7)*48+3+'px';b.style.height='42px';
-    const c=cols[t.priority]||'#3b7cf4';b.style.background=c+'25';b.style.borderLeft='3px solid '+c;
-    b.innerHTML='<div style="font-size:11px;font-weight:700;color:'+c+'">'+t.name+'</div>';
-    ec.appendChild(b);
-  });
+const CAL_START=0;   // 00:00
+const CAL_END=24;    // 24:00
+const CAL_PX=60;     // px per hour
+
+// Get local YYYY-MM-DD string for any date (avoids UTC timezone shift)
+function localDateStr(d){
+  return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
 }
+
+function renderCalendar(){
+  const ds=localDateStr(calDate);
+  const dayOfWeek=calDate.getDay(); // 0=Sun..6=Sat — local time, no timezone issue
+
+  document.getElementById('calLbl').textContent=calDate.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const priColor={alta:'#e03030',media:'#f0a020',baja:'#3ec86a'};
+  const events=[];
+
+  // ── Tasks (show today's tasks) ─────────────────────────
+  S.tasks.filter(t=>t.time&&(t.startDate===ds||t.createdAt&&localDateStr(new Date(t.createdAt))===ds)).forEach(t=>{
+    events.push({
+      id:t.id,name:t.name,time:t.time,duration:t.duration||60,
+      color:priColor[t.priority]||'#3b7cf4',type:'task',
+      completed:t.completed,autoId:t.autoId||null,
+      onclick:"openTaskModal('"+t.id+"')"
+    });
+  });
+
+  // ── Habits ─────────────────────────────────────────────
+  S.habits.filter(h=>{
+    if(!h.time)return false;
+    if(h.startDate&&h.startDate>ds)return false;
+    if(h.endDate&&h.endDate<ds)return false;
+    if(h.autoId)return false; // auto-habits shown via automation block below
+    return true;
+  }).forEach(h=>{
+    const done=h.lastDone===ds;
+    events.push({
+      id:h.id,name:h.name,time:h.time,duration:h.duration||30,
+      color:priColor[h.priority]||'#a070f0',type:'habit',
+      completed:done,autoId:null,
+      onclick:"openHabitModal('"+h.id+"')"
+    });
+  });
+
+  // ── Automation ghost blocks (future + today + past in range) ──
+  // Show for every matching day regardless of whether runAutomations has fired
+  (S.automations||[]).forEach(a=>{
+    if(a.startDate>ds)return;
+    if(a.endDate&&a.endDate<ds)return;
+    if(!a.days.includes(dayOfWeek))return;
+
+    if(a.type==='task'){
+      // If auto-task was already created today, it shows via tasks loop above — skip ghost
+      const alreadyCreated=S.tasks.some(t=>t.autoId===a.id&&t.startDate===ds);
+      if(alreadyCreated)return;
+      events.push({
+        id:'ag_'+a.id,name:a.name,time:a.time,duration:a.duration||60,
+        color:priColor[a.priority]||'#3b7cf4',type:'task',
+        completed:false,autoId:a.id,isGhost:true,
+        onclick:"null"
+      });
+    } else if(a.type==='habit'){
+      const autoHabit=S.habits.find(h=>h.autoId===a.id);
+      const done=autoHabit&&autoHabit.lastDone===ds;
+      events.push({
+        id:'ag_'+a.id,name:a.name,time:a.time,duration:a.duration||30,
+        color:priColor[a.priority]||'#a070f0',type:'habit',
+        completed:done,autoId:a.id,isGhost:!autoHabit,
+        onclick:autoHabit?"openHabitModal('"+autoHabit.id+"')":'null'
+      });
+    } else if(a.type==='note'){
+      events.push({
+        id:'ag_'+a.id,name:a.name,time:a.time,duration:a.duration||30,
+        color:a.color||'#9060d0',type:'note',
+        desc:a.desc||'',autoId:a.id,
+        onclick:"null"
+      });
+    }
+  });
+
+  // ── Manual cal note blocks ─────────────────────────────
+  (S.calBlocks||[]).filter(b=>b.date===ds).forEach(b=>{
+    events.push({
+      id:b.id,name:b.title,time:b.time,duration:b.duration||30,
+      color:b.color||'#9060d0',type:'note',desc:b.desc||'',
+      onclick:"openNoteBlock('"+b.id+"')"
+    });
+  });
+
+  // ── Build calendar HTML ────────────────────────────────
+  const hours=Array.from({length:CAL_END-CAL_START},(_,i)=>i+CAL_START);
+  const totalH=(CAL_END-CAL_START)*CAL_PX;
+
+  document.getElementById('calTime').innerHTML=
+    hours.map(h=>'<div class="cal-hr">'+h.toString().padStart(2,'0')+'</div>').join('');
+
+  const col=document.getElementById('calEv');
+  col.style.minHeight=totalH+'px';
+
+  let html=hours.map(()=>'<div class="cal-hl"></div>').join('');
+
+  // Current time indicator
+  const now=new Date();
+  if(ds===localDateStr(now)){
+    const mins=(now.getHours()-CAL_START)*60+now.getMinutes();
+    html+='<div class="cal-now" style="top:'+Math.round(mins/60*CAL_PX)+'px"></div>';
+  }
+
+  // Sort and place with overlap resolution
+  events.sort((a,b)=>a.time.localeCompare(b.time));
+  const placed=placeCalEvents(events);
+
+  placed.forEach(({ev,col:evCol,totalCols})=>{
+    const [hh,mm]=ev.time.split(':').map(Number);
+    const startMin=(hh-CAL_START)*60+mm;
+    if(startMin<0||startMin>=(CAL_END-CAL_START)*60)return;
+    const topPx=Math.round(startMin/60*CAL_PX);
+    const heightPx=Math.max(24,Math.round(ev.duration/60*CAL_PX)-3);
+    const colW=100/totalCols;
+    const leftPct=evCol*colW;
+    const c=ev.color;
+    const opacity=(ev.completed?0.5:1)*(ev.isGhost?0.65:1);
+    const typeClass=ev.type==='habit'?' cal-ev-habit':ev.type==='note'?' cal-ev-note':'';
+    const icon=ev.type==='habit'?'🔄 ':ev.type==='note'?'📌 ':ev.autoId&&ev.isGhost?'⚙️ ':'';
+    const clickable=ev.onclick&&ev.onclick!=='null';
+    html+=
+      '<div class="cal-ev'+typeClass+'" '+
+        'style="top:'+topPx+'px;height:'+heightPx+'px;'+
+        'left:calc('+leftPct+'% + 2px);width:calc('+colW+'% - 4px);'+
+        'background:'+c+'20;border-left:3px solid '+c+';opacity:'+opacity+'"'+
+        (clickable?' onclick="'+ev.onclick+'"':'')+
+        ' title="'+ev.name+(ev.desc?' — '+ev.desc:'')+' | '+ev.time+' ('+ev.duration+'min)'+(ev.autoId?' · Auto':'')+'">'+
+        '<div class="cev-name" style="color:'+c+'">'+icon+ev.name+'</div>'+
+        '<div class="cev-time">'+ev.time+' · '+ev.duration+'min'+(ev.isGhost?' · pendiente':ev.completed?' · ✓':'')+'</div>'+
+        (ev.desc&&heightPx>50?'<div style="font-size:9px;opacity:.7;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+ev.desc+'</div>':'')+
+      '</div>';
+  });
+
+  col.innerHTML=html;
+
+  // Scroll to current hour on today
+  if(ds===localDateStr(new Date())){
+    const wrap=document.getElementById('calWrap');
+    const scrollTo=Math.max(0,(new Date().getHours()-2)*CAL_PX);
+    setTimeout(()=>wrap.scrollTop=scrollTo,50);
+  }
+}
+
+function placeCalEvents(events){
+  // Group overlapping events and assign sub-columns
+  const result=[];
+  const active=[];
+
+  events.forEach(ev=>{
+    const [hh,mm]=ev.time.split(':').map(Number);
+    const start=hh*60+mm;
+    const end=start+(ev.duration||60);
+    // Remove from active if they ended before this one starts
+    for(let i=active.length-1;i>=0;i--){
+      if(active[i].endMin<=start)active.splice(i,1);
+    }
+    // Find first free column slot
+    const usedCols=active.map(a=>a.col);
+    let col=0;
+    while(usedCols.includes(col))col++;
+    active.push({ev,col,endMin:end});
+    result.push({ev,col,endMin:end,start});
+  });
+
+  // Second pass: determine totalCols for each overlap group
+  const placed=result.map(r=>{
+    // Find all events that overlap with this one
+    const overlapping=result.filter(r2=>{
+      const s1=r.start,e1=r.endMin,s2=r2.start,e2=r2.endMin;
+      return s1<e2&&s2<e1;
+    });
+    const totalCols=Math.max(...overlapping.map(o=>o.col))+1;
+    return {ev:r.ev,col:r.col,totalCols};
+  });
+  return placed;
+}
+
 function calPrev(){calDate.setDate(calDate.getDate()-1);renderCalendar();}
 function calNext(){calDate.setDate(calDate.getDate()+1);renderCalendar();}
 
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
+// ── Context menu & note blocks ──────────────────────────
+let _ctxPendingTime=null;
+
+function calContextMenu(e){
+  e.preventDefault();
+  // Calculate which time slot was clicked
+  const col=document.getElementById('calEv');
+  const rect=col.getBoundingClientRect();
+  const yOffset=e.clientY-rect.top+col.parentElement.scrollTop;
+  const totalMins=Math.round(yOffset/CAL_PX*60);
+  const hh=Math.min(23,Math.floor(totalMins/60));
+  const mm=Math.floor((totalMins%60)/30)*30; // snap to :00 or :30
+  _ctxPendingTime=hh.toString().padStart(2,'0')+':'+mm.toString().padStart(2,'0');
+  _ctxPendingDate=localDateStr(calDate);
+
+  const menu=document.getElementById('calCtxMenu');
+  menu.innerHTML=
+    '<div class="cal-ctx-item" onclick="calCtxNewTask()">📋 Nueva Tarea</div>'+
+    '<div class="cal-ctx-item" onclick="calCtxNewHabit()">🔄 Nuevo Hábito</div>'+
+    '<div class="cal-ctx-sep"></div>'+
+    '<div class="cal-ctx-item" onclick="calCtxNewNote()">📌 Bloque informativo</div>';
+  menu.style.display='block';
+  menu.style.left=Math.min(e.clientX,window.innerWidth-170)+'px';
+  menu.style.top=Math.min(e.clientY,window.innerHeight-120)+'px';
+  setTimeout(()=>document.addEventListener('click',closeCalCtx,{once:true}),0);
+}
+function closeCalCtx(){document.getElementById('calCtxMenu').style.display='none';}
+function calCtxNewTask(){
+  closeCalCtx();
+  openTaskModal();
+  setTimeout(()=>{
+    document.getElementById('tkTime').value=_ctxPendingTime;
+  },50);
+}
+function calCtxNewHabit(){
+  closeCalCtx();
+  openHabitModal();
+  setTimeout(()=>{document.getElementById('hbTime').value=_ctxPendingTime;},50);
+}
+function calCtxNewNote(){
+  closeCalCtx();
+  openNoteBlock();
+}
+let _ctxPendingDate=null;
+
+function openNoteBlock(id=null){
+  const today=localDateStr(new Date());
+  document.getElementById('noteMoT').textContent=id?'Editar Bloque':'Nuevo Bloque';
+  document.getElementById('noteMo').dataset.editId=id||'';
+  if(id){
+    const b=S.calBlocks.find(x=>x.id===id);if(!b)return;
+    document.getElementById('noteTitle').value=b.title;
+    document.getElementById('noteDesc').value=b.desc||'';
+    document.getElementById('noteColor').value=b.color||'#9060d0';
+    document.getElementById('noteDur').value=b.duration||30;
+    document.getElementById('noteTime').value=b.time;
+    document.getElementById('noteDate').value=b.date;
+  } else {
+    document.getElementById('noteTitle').value='';
+    document.getElementById('noteDesc').value='';
+    document.getElementById('noteColor').value='#9060d0';
+    document.getElementById('noteDur').value=30;
+    document.getElementById('noteTime').value=_ctxPendingTime||'09:00';
+    document.getElementById('noteDate').value=_ctxPendingDate||today;
+  }
+  document.getElementById('noteMo').classList.add('open');
+  document.getElementById('noteDelBtn').style.display=id?'':'none';
+}
+function saveNoteBlock(){
+  const title=document.getElementById('noteTitle').value.trim();
+  if(!title)return toast('Título obligatorio','error');
+  const editId=document.getElementById('noteMo').dataset.editId;
+  const b={
+    id:editId||'nb_'+Date.now(),
+    title,
+    desc:document.getElementById('noteDesc').value.trim(),
+    color:document.getElementById('noteColor').value,
+    duration:parseInt(document.getElementById('noteDur').value)||30,
+    time:document.getElementById('noteTime').value,
+    date:document.getElementById('noteDate').value||localDateStr(new Date())
+  };
+  if(!S.calBlocks)S.calBlocks=[];
+  if(editId){const i=S.calBlocks.findIndex(x=>x.id===editId);if(i>=0)S.calBlocks[i]=b;else S.calBlocks.push(b);}
+  else S.calBlocks.push(b);
+  saveS();cm('noteMo');renderCalendar();toast('📌 Bloque guardado','success');
+}
+function delNoteBlock(id){
+  S.calBlocks=(S.calBlocks||[]).filter(x=>x.id!==id);
+  saveS();cm('noteMo');renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTOMATIONS
+// ═══════════════════════════════════════════════════════
+function autoTypeChange(val){
+  const isPriDif=val==='task'||val==='habit';
+  document.getElementById('autoPriRow').style.display=isPriDif?'':'none';
+  document.getElementById('autoDifRow').style.display=isPriDif?'':'none';
+  document.getElementById('autoColorRow').style.display=val==='note'?'':'none';
+  document.getElementById('autoDescRow').style.display=val==='note'?'':'none';
+}
+function toggleAutoDay(el){el.classList.toggle('on');}
+
+function openAutoModal(id=null){
+  const today=localDateStr(new Date());
+  document.getElementById('autoMoT').textContent=id?'Editar Automatización':'Nueva Automatización';
+  document.getElementById('autoMo').dataset.editId=id||'';
+  if(id){
+    const a=S.automations.find(x=>x.id===id);if(!a)return;
+    document.getElementById('autoName').value=a.name;
+    document.getElementById('autoType').value=a.type;
+    document.getElementById('autoPri').value=a.priority||'media';
+    document.getElementById('autoDif').value=a.difficulty||'normal';
+    document.getElementById('autoColor').value=a.color||'#9060d0';
+    document.getElementById('autoDesc').value=a.desc||'';
+    document.getElementById('autoTime').value=a.time;
+    document.getElementById('autoDur').value=a.duration;
+    document.getElementById('autoStart').value=a.startDate;
+    document.getElementById('autoEnd').value=a.endDate||'';
+    document.querySelectorAll('#autoMo .auto-day').forEach(d=>{
+      d.classList.toggle('on',a.days.includes(parseInt(d.dataset.d)));
+    });
+    autoTypeChange(a.type);
+  } else {
+    document.getElementById('autoName').value='';
+    document.getElementById('autoType').value='task';
+    document.getElementById('autoPri').value='media';
+    document.getElementById('autoDif').value='normal';
+    document.getElementById('autoColor').value='#9060d0';
+    document.getElementById('autoDesc').value='';
+    document.getElementById('autoTime').value='09:00';
+    document.getElementById('autoDur').value=30;
+    document.getElementById('autoStart').value=today;
+    document.getElementById('autoEnd').value='';
+    document.querySelectorAll('#autoMo .auto-day').forEach(d=>{
+      const dv=parseInt(d.dataset.d);
+      d.classList.toggle('on',dv>=1&&dv<=5);
+    });
+    autoTypeChange('task');
+  }
+  document.getElementById('autoMo').classList.add('open');
+}
+
+function saveAutomation(){
+  const name=document.getElementById('autoName').value.trim();
+  if(!name)return toast('Nombre obligatorio','error');
+  const startDate=document.getElementById('autoStart').value;
+  if(!startDate)return toast('Fecha de inicio obligatoria','error');
+  const days=Array.from(document.querySelectorAll('#autoMo .auto-day.on')).map(d=>parseInt(d.dataset.d));
+  if(!days.length)return toast('Selecciona al menos un día','error');
+  const editId=document.getElementById('autoMo').dataset.editId;
+  const type=document.getElementById('autoType').value;
+  const a={
+    id:editId||'auto_'+Date.now(),
+    name, type,
+    priority:type!=='note'?document.getElementById('autoPri').value:null,
+    difficulty:type!=='note'?document.getElementById('autoDif').value:null,
+    color:type==='note'?document.getElementById('autoColor').value:null,
+    desc:type==='note'?document.getElementById('autoDesc').value:'',
+    time:document.getElementById('autoTime').value,
+    duration:parseInt(document.getElementById('autoDur').value)||30,
+    startDate,
+    endDate:document.getElementById('autoEnd').value||null,
+    days,
+    lastRun:null
+  };
+  if(editId){
+    const i=S.automations.findIndex(x=>x.id===editId);
+    if(i>=0)S.automations[i]=a; else S.automations.push(a);
+  } else {
+    S.automations.push(a);
+  }
+  saveS();cm('autoMo');renderConfig();
+  runAutomations();
+  toast('✅ Automatización guardada','success');
+  if(document.getElementById('page-calendar').classList.contains('active'))renderCalendar();
+}
+
+function delAutomation(id){
+  S.automations=S.automations.filter(a=>a.id!==id);
+  saveS();renderConfig();toast('Automatización eliminada','em');
+}
+
+function renderAutoList(){
+  const el=document.getElementById('autoList');if(!el)return;
+  if(!S.automations||!S.automations.length){
+    el.innerHTML='<div class="c-muted t-sm">Sin automatizaciones. Crea una para empezar.</div>';
+    return;
+  }
+  const dayNames=['D','L','M','X','J','V','S'];
+  el.innerHTML=S.automations.map(a=>{
+    const typeIcon=a.type==='task'?'📋':a.type==='habit'?'🔄':'📌';
+    const isNote=a.type==='note';
+    const accentColor=isNote?(a.color||'#9060d0'):{alta:'var(--red)',media:'var(--warn)',baja:'var(--ok)'}[a.priority]||'var(--em)';
+    const daysHtml=a.days.map(d=>'<span class="auto-day on" style="cursor:default;background:'+accentColor+';border-color:'+accentColor+'">'+dayNames[d]+'</span>').join('');
+    const meta=isNote
+      ? (a.desc?'<div class="t-xs mono c-muted">'+a.desc+'</div>':'')
+      : '<div class="t-xs mono c-muted">'+a.difficulty+' · '+a.priority+'</div>';
+    return '<div class="auto-card" style="border-left:3px solid '+accentColor+'">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+
+          '<span>'+typeIcon+'</span>'+
+          '<span style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.name+'</span>'+
+        '</div>'+
+        meta+
+        '<div class="t-xs mono c-muted">🕐 '+a.time+' · '+a.duration+'min · 📅 '+a.startDate+(a.endDate?' → '+a.endDate:' (sin fin)')+'</div>'+
+        '<div class="auto-days" style="margin-top:5px">'+daysHtml+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;margin-left:8px;flex-shrink:0">'+
+        '<button class="btn btn-g btn-sm" onclick="openAutoModal(\''+a.id+'\')">✏️</button>'+
+        '<button class="btn btn-d btn-sm" onclick="delAutomation(\''+a.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Auto-creation engine ─────────────────────────────
+// Called on init and on nav to calendar/missions.
+// Creates tasks/habits for today based on automation rules.
+function runAutomations(){
+  if(!S.automations||!S.automations.length)return;
+  const todayDate=new Date();
+  const today=localDateStr(todayDate);
+  const todayDay=todayDate.getDay(); // 0=Sun..6=Sat — local time
+  let created=0;
+
+  S.automations.forEach(a=>{
+    // Check date range
+    if(a.startDate>today)return;
+    if(a.endDate&&a.endDate<today)return;
+    // Check day of week
+    if(!a.days.includes(todayDay))return;
+    // Check if already created today
+    if(a.lastRun===today)return;
+
+    if(a.type==='task'){
+      // Check if a task from this automation already exists for today
+      const exists=S.tasks.some(t=>t.autoId===a.id&&t.startDate===today);
+      if(!exists){
+        S.tasks.push({
+          id:'tk_auto_'+a.id+'_'+today.replace(/-/g,''),
+          autoId:a.id,
+          name:a.name,
+          priority:a.priority,
+          difficulty:a.difficulty,
+          startDate:today,
+          endDate:today,
+          time:a.time,
+          duration:a.duration,
+          notes:'Creada automáticamente',
+          completed:false,
+          createdAt:Date.now()
+        });
+        created++;
+      }
+    } else if(a.type==='habit'){
+      // Check if habit from this automation already exists
+      const exists=S.habits.some(h=>h.autoId===a.id);
+      if(!exists){
+        S.habits.push({
+          id:'h_auto_'+a.id,
+          autoId:a.id,
+          name:a.name,
+          priority:a.priority,
+          difficulty:a.difficulty,
+          freq:'daily',
+          time:a.time,
+          duration:a.duration,
+          emReward:Math.round((EM_PRI[a.priority]||50)*(DIFF_MULT[a.difficulty]||1)),
+          startDate:a.startDate,
+          endDate:a.endDate||null,
+          streak:0,lastDone:null
+        });
+        created++;
+      }
+    }
+    // Mark this automation as run today
+    a.lastRun=today;
+  });
+
+  if(created>0){
+    saveS();
+    toast('⚙️ '+created+' elemento'+(created>1?'s':'')+' creado'+(created>1?'s':'')+' automáticamente','em');
+    renderMissions();
+  }
+}
+
 function renderConfig(){
   document.getElementById('cfgName').value=S.player.name;
   document.getElementById('cfgCurLv').textContent=S.player.level;
   document.getElementById('testLvInput').value=S.player.level;
   document.getElementById('pSpritePrev').textContent=S.player.playerSprite?'✓ Sprite subido':'Sin sprite';
+  renderAutoList();
 
   // Generic fallback sprites grid
   const skeys=['curse_low','curse_mid','curse_high','boss_mahito','boss_hanami','boss_jogo','boss_sukuna'];
@@ -5065,6 +5756,8 @@ function init(){
   }
   uiAll();renderDash();calDate=new Date();
   genDynamicEvents();
+  runAutomations();
+  checkOverduePenalties();
 }
 init();
 </script>
