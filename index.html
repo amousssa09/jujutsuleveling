@@ -428,10 +428,7 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
 .sp-barrier{background:rgba(62,200,106,.18);color:var(--ok);border:1px solid rgba(62,200,106,.4)}
 .ba-actions{border-top:2px solid var(--bdr);padding:12px 14px;background:var(--bg-el)}
 .ba-act-prompt{font-family:var(--fd);font-size:12px;color:var(--ts);margin-bottom:9px;letter-spacing:.04em}
-.ba-act-cats{display:flex;flex-direction:column;gap:8px}
-.ba-cat-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--tm);font-family:var(--fm);margin-bottom:4px;padding:0 2px}
-.ba-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:5px}
-.ba-act-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ba-act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}
 .ba-btn{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:var(--tr);font-family:var(--fb);text-align:left;position:relative;overflow:hidden}
 .ba-btn:hover:not(:disabled){border-color:var(--em);background:rgba(59,124,244,.06);transform:translateY(-1px)}
 .ba-btn:disabled{opacity:.28;cursor:not-allowed}
@@ -1064,12 +1061,12 @@ body{font-family:var(--fb);background:var(--bg-deep);color:var(--tp);min-height:
   <div class="fg" id="autoColorRow" style="display:none"><label>Color del bloque</label><select class="fs" id="autoColor"><option value="#9060d0">🟣 Morado</option><option value="#3b7cf4">🔵 Azul</option><option value="#30a0c0">🔷 Cian</option><option value="#e07030">🟠 Naranja</option><option value="#e03030">🔴 Rojo</option><option value="#3ec86a">🟢 Verde</option><option value="#f0c030">🟡 Amarillo</option></select></div>
   <div class="fg" id="autoDescRow" style="display:none"><label>Descripción</label><input class="fi" id="autoDesc" placeholder="Info adicional del bloque"></div>
   <div class="g2">
-    <div class="fg"><label>Hora</label><input type="time" class="fi" id="autoTime" value="09:00"></div>
-    <div class="fg"><label>Duración (min)</label><select class="fs" id="autoDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 hora</option><option value="90">1h 30min</option><option value="120">2 horas</option></select></div>
+    <div class="fg"><label>Hora inicio *</label><input type="time" class="fi" id="autoTime" value="09:00"></div>
+    <div class="fg"><label>Hora fin</label><input type="time" class="fi" id="autoEndTime"></div>
   </div>
   <div class="g2">
-    <div class="fg"><label>Fecha inicio</label><input type="date" class="fi" id="autoStart"></div>
-    <div class="fg"><label>Fecha fin</label><input type="date" class="fi" id="autoEnd"></div>
+    <div class="fg"><label>Fecha inicio *</label><input type="date" class="fi" id="autoStart"></div>
+    <div class="fg"><label>Fecha fin actividad</label><input type="date" class="fi" id="autoEnd"></div>
   </div>
   <div class="fg">
     <label>Días de la semana</label>
@@ -3623,60 +3620,29 @@ function isParalyzed(statuses){return statuses.some(s=>{const d=STATUS_DEFS[s.ty
 function buildBActions(){
   const el=document.getElementById('bActGrid');
   const p=S.player,tech=p.technique?TECHNIQUES[p.technique]:null;
-  
-  // Categorize skills
-  const attacks=[],defenses=[],skills_other=[];
-  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{
-    if(['attack','domain'].includes(sk.type)) attacks.push(sk);
-    else if(['defense','heal'].includes(sk.type)) defenses.push(sk);
-    else skills_other.push(sk);
-  });}
+  const btns=[];
 
-  function skillBtn(sk,extraClass=''){
+  // Basic attack
+  btns.push('<button class="ba-btn basic" onclick="bAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--warn)">5 EM · '+(10+Math.round(p.stats.fuerza*1.5))+'</div><div class="bbt">Físico</div></button>');
+
+  // Technique skills
+  if(tech){tech.skills.filter(sk=>p.unlockedSkills.includes(sk.id)).forEach(sk=>{
     const af=sk.cost===0||p.em>=sk.cost;
     const ms=p.skillMastery[sk.id]||0;
     const dom=sk.type==='domain';
     const cd=getCD(sk.id);const onCd=cd>0;const disabled=!af||onCd;
-    return '<button class="ba-btn '+(dom?'domain-btn':'cat-'+sk.type)+' '+(disabled?'disabled':'')+' '+(extraClass)+'" '+(disabled?'disabled':'')+' onclick="bAction(\'skill\',\''+sk.id+'\')" id="skbtn_'+sk.id+'">'+
+    const cls=dom?'domain-btn':['defense','heal'].includes(sk.type)?'cat-defense':sk.type==='buff'?'cat-buff':sk.type==='debuff'?'cat-debuff':'';
+    btns.push('<button class="ba-btn '+cls+' '+(disabled?'disabled':'')+'" '+(disabled?'disabled':'')+' onclick="bAction(\'skill\',\''+sk.id+'\')" id="skbtn_'+sk.id+'">'+
       '<div class="bbn">'+sk.icon+' '+sk.name+'</div>'+
       '<div class="bbc">'+(onCd?'<span style="color:var(--warn)">⏱ '+cd+'s</span>':(sk.cost===0?'GRATIS':sk.cost+' EM')+(sk.power?' · '+sk.power:'')+(ms>0?' <span style="color:var(--purple)">('+ms+'%)</span>':''))+'</div>'+
       '<div class="bbt">'+sk.type+(sk.statusEffect?' · '+sk.statusEffect:'')+(getSkillCooldownSecs(sk)>0?' · CD'+getSkillCooldownSecs(sk)+'s':'')+'</div>'+
-    '</button>';
-  }
-
-  let html='<div class="ba-act-cats">';
-  
-  // Row 1: Basic attack + attacks
-  html+='<div>';
-  html+='<div class="ba-cat-label">⚔️ Ataque</div>';
-  html+='<div class="ba-cat-grid">';
-  html+='<button class="ba-btn basic" onclick="bAction(\'basic\')"><div class="bbn">👊 Golpe Básico</div><div class="bbc" style="color:var(--warn)">5 EM · '+(10+Math.round(p.stats.fuerza*1.5))+'</div><div class="bbt">Físico</div></button>';
-  attacks.forEach(sk=>{ html+=skillBtn(sk); });
-  html+='</div></div>';
-  
-  // Row 2: Defense + Heal (from skill tree + innate)
-  if(defenses.length>0){
-    html+='<div>';
-    html+='<div class="ba-cat-label">🛡 Defensa & Curación</div>';
-    html+='<div class="ba-cat-grid">';
-    defenses.forEach(sk=>{ html+=skillBtn(sk); });
-    html+='</div></div>';
-  }
-
-  // Row 3: Other skills (buff/debuff/domain if not in attacks)
-  if(skills_other.length>0){
-    html+='<div>';
-    html+='<div class="ba-cat-label">✨ Habilidades</div>';
-    html+='<div class="ba-cat-grid">';
-    skills_other.forEach(sk=>{ html+=skillBtn(sk); });
-    html+='</div></div>';
-  }
+    '</button>');
+  });}
 
   // Flee
-  html+='<div><div class="ba-cat-grid"><button class="ba-btn flee" onclick="bAction(\'flee\')"><div class="bbn">🏃 Huir</div><div class="bbc" style="color:var(--warn)">60%</div><div class="bbt">Escapar</div></button></div></div>';
+  btns.push('<button class="ba-btn flee" onclick="bAction(\'flee\')"><div class="bbn">🏃 Huir</div><div class="bbc" style="color:var(--warn)">60%</div><div class="bbt">Escapar</div></button>');
 
-  html+='</div>';
-  el.innerHTML=html;
+  el.innerHTML=btns.join('');
   scheduleCDRefresh();
 }
 
@@ -5467,7 +5433,7 @@ function openAutoModal(id=null){
     document.getElementById('autoColor').value=a.color||'#9060d0';
     document.getElementById('autoDesc').value=a.desc||'';
     document.getElementById('autoTime').value=a.time;
-    document.getElementById('autoDur').value=a.duration;
+    document.getElementById('autoEndTime').value=a.endTime||'';
     document.getElementById('autoStart').value=a.startDate;
     document.getElementById('autoEnd').value=a.endDate||'';
     document.querySelectorAll('#autoMo .auto-day').forEach(d=>{
@@ -5483,7 +5449,7 @@ function openAutoModal(id=null){
     document.getElementById('autoColor').value='#9060d0';
     document.getElementById('autoDesc').value='';
     document.getElementById('autoTime').value='09:00';
-    document.getElementById('autoDur').value=30;
+    document.getElementById('autoEndTime').value='';
     document.getElementById('autoStart').value=today;
     document.getElementById('autoEnd').value='';
     document.querySelectorAll('#autoMo .auto-day').forEach(d=>{
@@ -5513,7 +5479,8 @@ function saveAutomation(){
     color:type==='note'?document.getElementById('autoColor').value:null,
     desc:type==='note'?document.getElementById('autoDesc').value:'',
     time:document.getElementById('autoTime').value,
-    duration:parseInt(document.getElementById('autoDur').value)||30,
+    endTime:document.getElementById('autoEndTime').value||null,
+    duration:(()=>{const s=document.getElementById('autoTime').value,e=document.getElementById('autoEndTime').value;if(s&&e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number),d=(eh*60+em)-(sh*60+sm);if(d>0)return d;}return 60;})(),
     startDate,
     endDate:document.getElementById('autoEnd').value||null,
     days,
